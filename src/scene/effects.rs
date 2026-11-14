@@ -152,6 +152,13 @@ pub fn at(run: &RunResult, tuning: Option<&EventTuning>, playback: f64) -> Vec<E
     all(run, tuning).into_iter().filter(|e| e.active_at(playback)).collect()
 }
 
+/// Whether the playback should cross Random Event days slowly (`advance`): only while the 3D scene shows their
+/// effects, and not for a player who asked for reduced motion (no animated effects to wait for; the Run keeps its
+/// ordinary pace, and the event log and any question still hold the playback as before).
+pub fn slows_event_days(scene_live: bool, reduced_motion: bool) -> bool {
+    scene_live && !reduced_motion
+}
+
 /// The next playback position for the playback driver: `step` days on ordinary days, but a day with a Random
 /// Event is entered exactly at its start and crossed in steps of `event_step`, so its effects are seen (and its
 /// Cue heard) at any speed. Never goes past the end of the Run.

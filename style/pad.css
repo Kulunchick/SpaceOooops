@@ -58,3 +58,53 @@
 .scene-layer[data-scene="fallback"] ~ .app .screen.launch-review { max-width: 960px; margin: 0 auto; }
 /* Without WebGL the review keeps the veil it had when it was a plain page. */
 body:has(.screen.launch-review) .scene-layer[data-scene="fallback"]::after { opacity: 0.9; }
+
+/* The review's inner cards and buttons in the same faceted skin as the other panels (they were flat dashboard
+   boxes). Same markup as before; only the look changes. */
+.screen.launch-review .panel {
+  background: var(--lp-panel-solid);
+  color: var(--lp-text);
+  font-family: var(--lp-font-body);
+  border: 0;
+  border-top: 3px solid var(--lp-panel-edge);
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: var(--lp-facet);
+  padding: 1rem 1.25rem;
+}
+@supports ((backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px))) {
+  .screen.launch-review .panel {
+    background: var(--lp-panel);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+}
+.screen.launch-review .panel h3 { font-family: var(--lp-font-display); font-weight: 400; letter-spacing: 0.03em; }
+.screen.launch-review .actions .btn {
+  font-family: var(--lp-font-display);
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lp-text);
+  background: #1c2c4c;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  padding: 0.7rem 2rem;
+  cursor: pointer;
+}
+.screen.launch-review .actions .btn:hover:not(:disabled),
+.screen.launch-review .actions .btn:focus-visible { background: #27406d; filter: none; }
+.screen.launch-review .actions .btn:focus-visible { outline: none; box-shadow: inset 0 0 0 3px var(--lp-accent); }
+.screen.launch-review .actions .btn-primary { background: var(--lp-accent); color: var(--lp-accent-ink); }
+.screen.launch-review .actions .btn-primary:hover:not(:disabled),
+.screen.launch-review .actions .btn-primary:focus-visible { background: #ffc566; }
+.screen.launch-review .actions .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+/* The gauge cards at the top of the review: faceted like the panels below them. */
+.screen.launch-review .gauge {
+  --lp-cut: 10px;
+  clip-path: var(--lp-facet);
+  border-radius: 0;
+  background: var(--lp-panel-solid);
+}

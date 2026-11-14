@@ -2,9 +2,9 @@
 //! between visits in local storage (same style as the run history store). Later settings (the quality
 //! level) add a row inside `.settings-panel`.
 use leptos::prelude::*;
-use spaceooops::settings::Settings;
+use spaceooops::settings::{Quality, Settings};
 
-use super::{audio_bridge, storage};
+use super::{audio_bridge, scene_bridge, storage};
 
 const KEY: &str = "spaceooops.settings.v1";
 
@@ -16,6 +16,11 @@ fn save(settings: &Settings) {
     storage::write(KEY, &settings.to_text());
 }
 
+/// The quality level in force at start-up: the saved choice, else the device default (see `Quality::choose`).
+pub fn initial_quality() -> Quality {
+    Quality::choose(load().quality, &scene_bridge::device_hints())
+}
+
 fn percent(v: f64) -> u32 {
     (v * 100.0).round() as u32
 }
@@ -24,12 +29,33 @@ fn percent(v: f64) -> u32 {
 pub fn SettingsWidget() -> impl IntoView {
     let settings = RwSignal::new(load());
     let open = RwSignal::new(false);
+    // The level shown and drawn: the saved choice or the device default. Choosing one saves it.
+    let quality = RwSignal::new(initial_quality());
 
     Effect::new(move |_| {
         let s = settings.get();
         audio_bridge::audio_set_volumes(s.music, s.effects, s.muted);
         save(&s);
     });
+    Effect::new(move |_| scene_bridge::set_quality(quality.get()));
+
+    let quality_button = move |label: &'static str, id: &'static str, level: Quality| {
+        view! {
+            <button
+                id=id
+                type="button"
+                class="lp-btn settings-quality-option"
+                class:selected=move || quality.get() == level
+                aria-pressed=move || (quality.get() == level).to_string()
+                on:click=move |_| {
+                    quality.set(level);
+                    settings.update(|s| s.quality = Some(level));
+                }
+            >
+                {label}
+            </button>
+        }
+    };
 
     let slider = move |label: &'static str, id: &'static str, get: fn(&Settings) -> f64, set: fn(&mut Settings, f64)| {
         view! {
@@ -76,6 +102,13 @@ pub fn SettingsWidget() -> impl IntoView {
                         on:change=move |ev| settings.update(|s| s.muted = event_target_checked(&ev))
                     />
                 </label>
+                <div class="settings-row settings-quality" role="group" aria-label="Graphics quality">
+                    <span>"Quality"</span>
+                    <span class="settings-quality-options">
+                        {quality_button("Low", "settings-quality-low", Quality::Low)}
+                        {quality_button("High", "settings-quality-high", Quality::High)}
+                    </span>
+                </div>
             </div>
         </div>
     }

@@ -34,7 +34,10 @@ pub fn PlaybackDriver(speed: RwSignal<f64>) -> impl IntoView {
             let limit = super::decision_prompt::pause_at(&state).map_or(days, |at| at.min(days));
             if now < limit {
                 // With the 3D scene, a day with a Random Event plays slowly enough for its effect to be seen.
-                let next = if state.scene_live.get_untracked() {
+                let next = if scene::effects::slows_event_days(
+                    state.scene_live.get_untracked(),
+                    crate::ui::scene_bridge::reduced_motion(),
+                ) {
                     let event_step = speed.get_untracked() * TICK_MS as f64 / 1000.0 / EVENT_DAY_SECONDS;
                     run_result.with_untracked(|r| {
                         r.as_ref().map_or(now + step, |r| scene::effects::advance(r, now, step, event_step))

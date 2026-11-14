@@ -129,3 +129,16 @@
   .gauge-strip .gauges { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .gauge-strip .gauge-bar { display: none; }
 }
+
+/* Phones: a compact header so the Role panel keeps most of the height; the stage is a short strip. */
+@media (max-width: 560px) {
+  .hangar-layout .design-head { padding: 0.4rem 0.6rem; gap: 0.3rem 0.5rem; }
+  .hangar-layout .design-head h2 { font-size: 0.95rem; width: 100%; }
+  .hangar-layout .tab { padding: 0.3rem 0.55rem; font-size: 0.78rem; }
+  .hangar-layout .tabs { gap: 0.25rem; }
+  .hangar-layout .design-head .actions { margin: 0; gap: 0.3rem; width: 100%; }
+  .hangar-layout .design-head .btn { padding: 0.3rem 0.5rem; font-size: 0.7rem; letter-spacing: 0; }
+  .hangar-stage { flex-basis: 20vh; }
+  .role-panel { padding: 0.6rem 0.7rem; }
+  .gauge-strip .gauge { padding: 0.25rem 0.35rem; }
+}

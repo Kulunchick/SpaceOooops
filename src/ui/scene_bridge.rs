@@ -8,6 +8,7 @@
 use leptos::html::Canvas;
 use leptos::prelude::*;
 use spaceooops::scene::{self, SceneInputs};
+use spaceooops::settings::{DeviceHints, Quality};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 
@@ -17,11 +18,12 @@ use super::state::AppState;
 #[wasm_bindgen(inline_js = r#"
 let bridge = null;
 let latest = null;
+let wantedQuality = null;
 export async function scene_init(canvas, quality) {
     try {
         const url = new URL('js/bridge/index.js', document.baseURI).href;
         const mod = await import(url);
-        const ok = await mod.init(canvas, quality);
+        const ok = await mod.init(canvas, wantedQuality ?? quality);
         if (!ok) return false;
         bridge = mod;
         if (latest !== null) bridge.apply(JSON.parse(latest));
@@ -38,14 +40,55 @@ export function scene_apply(json) {
     latest = json;
     if (bridge) bridge.apply(JSON.parse(json));
 }
+export function scene_set_quality(q) {
+    wantedQuality = q;
+    if (bridge) bridge.setQuality(q);
+}
+export function scene_device_cores() { return Number(navigator.hardwareConcurrency) || 0; }
+export function scene_device_memory() { return Number(navigator.deviceMemory) || 0; }
+export function scene_device_renderer() {
+    try {
+        const probe = document.createElement('canvas');
+        const gl = probe.getContext('webgl2') || probe.getContext('webgl');
+        if (!gl) return '';
+        const info = gl.getExtension('WEBGL_debug_renderer_info');
+        const name = String(gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER) || '');
+        gl.getExtension('WEBGL_lose_context')?.loseContext();
+        return name;
+    } catch (e) {
+        return '';
+    }
+}
 "#)]
 extern "C" {
+    /// Changes the quality of a running scene (or the one about to start).
+    fn scene_set_quality(quality: &str);
+    fn scene_device_cores() -> f64;
+    fn scene_device_memory() -> f64;
+    fn scene_device_renderer() -> String;
     /// Loads the bridge and starts the renderer; resolves to `true` when the 3D scene is running.
     fn scene_init(canvas: &web_sys::HtmlCanvasElement, quality: &str) -> js_sys::Promise;
     /// Hands the bridge the latest Scene Spec as JSON (kept until the bridge is ready).
     fn scene_apply(json: &str);
     /// The player asked the browser for reduced motion.
     fn scene_reduced_motion() -> bool;
+}
+
+/// What this browser says about the machine, for the Low-quality default.
+pub fn device_hints() -> DeviceHints {
+    let cores = scene_device_cores();
+    let memory = scene_device_memory();
+    let renderer = scene_device_renderer();
+    DeviceHints {
+        cores: (cores > 0.0).then_some(cores as u32),
+        memory_gb: (memory > 0.0).then_some(memory),
+        renderer: (!renderer.is_empty()).then_some(renderer),
+    }
+}
+
+/// Switches the 3D scene's quality (safe before the scene has started).
+pub fn set_quality(quality: Quality) {
+    scene_set_quality(quality.name());
 }
 
 /// Reduced motion skips the launch sequence, as it cuts every camera move.
@@ -80,7 +123,7 @@ pub fn SceneLayer() -> impl IntoView {
 
     canvas.on_load(move |el| {
         leptos::task::spawn_local(async move {
-            let live = JsFuture::from(scene_init(&el, "high")).await.ok().and_then(|v| v.as_bool()).unwrap_or(false);
+            let live = JsFuture::from(scene_init(&el, super::settings_widget::initial_quality().name())).await.ok().and_then(|v| v.as_bool()).unwrap_or(false);
             state.scene_live.set(live);
             mode.set(if live { SceneMode::Live } else { SceneMode::Fallback });
         });

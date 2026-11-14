@@ -71,7 +71,7 @@
   transition: opacity 0.8s ease;
 }
 .scene-layer[data-scene="live"] .scene-canvas { opacity: 1; }
-.scene-layer[data-scene="live"] .scene-fallback { display: none; }
+/* The static backdrop stays under the canvas while it fades in, so nothing flashes empty. */
 .scene-layer[data-scene="fallback"] .scene-canvas { display: none; }
 /* Screens that still use the full-page document layout get a veil so their text stays readable. */
 .scene-layer::after {
@@ -124,3 +124,13 @@
 .lp-btn:focus-visible { outline: none; box-shadow: inset 0 0 0 3px var(--lp-accent); }
 .lp-btn-primary { background: var(--lp-accent); color: var(--lp-accent-ink); }
 .lp-btn-primary:hover, .lp-btn-primary:focus-visible { background: #ffc566; }
+
+/* Reduced motion: no animation or transition anywhere (state changes still show, they just do not move). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

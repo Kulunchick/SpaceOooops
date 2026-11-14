@@ -85,7 +85,8 @@ test('a click anywhere during the launch ends it', async ({ page }) => {
   await openLaunchReview(page);
   await page.getByRole('button', { name: 'Launch', exact: true }).click();
   await expect(canvas(page)).toHaveAttribute('data-pad-phase', 'countdown');
-  await page.waitForTimeout(600);
+  // The launch only takes a click once its own clock passes 0.3 s (the renderer says so); wait for that, not for time.
+  await expect(canvas(page)).toHaveAttribute('data-pad-armed', 'true');
   await page.mouse.click(640, 400);
   await expect(page.getByRole('heading', { name: 'Launch Review' })).toHaveCount(0, { timeout: 3000 });
 });

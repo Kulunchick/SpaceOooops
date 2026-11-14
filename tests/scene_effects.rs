@@ -339,6 +339,15 @@ fn at_four_times_speed_every_random_event_is_still_heard_on_its_day() {
 }
 
 #[test]
+fn event_days_are_slowed_only_with_the_live_scene_and_when_motion_is_allowed() {
+    // The slow crossing exists so an animated effect can be seen; reduced motion turns it off with the animations.
+    assert!(scene::effects::slows_event_days(true, false));
+    assert!(!scene::effects::slows_event_days(true, true), "reduced motion plays event days at the ordinary pace");
+    assert!(!scene::effects::slows_event_days(false, false), "without the scene the playback is as before");
+    assert!(!scene::effects::slows_event_days(false, true));
+}
+
+#[test]
 fn the_bridge_receives_effects_with_their_kind_target_start_and_length() {
     let c = load_catalog().unwrap();
     let d = crop_watch_known_good();

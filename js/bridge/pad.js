@@ -38,8 +38,8 @@ registerShot('pad', (_shot, seconds) => {
   const H = view.H;
   const climb = Math.min(view.lift / (3 * H), 1);
   const az = 0.5 + view.sway * Math.sin(seconds * 0.12);
-  const dist = H * (1.95 + 1.5 * climb) + 0.5;
-  const targetY = H * 0.46 + view.lift;
+  const dist = H * (1.7 + 1.5 * climb) + 0.5;
+  const targetY = H * 0.52 + view.lift;
   const camY = H * 0.28 + view.lift * 0.32;
   const target = new THREE.Vector3(0, targetY, 0).add(PAD_ORIGIN);
   const position = new THREE.Vector3(Math.sin(az) * dist, camY, Math.cos(az) * dist).add(PAD_ORIGIN);
@@ -166,8 +166,8 @@ function buildPad(H, rocketHalfWidth) {
     g.add(lamp);
   }
 
-  // Floodlight masts at the slab's edge.
-  for (const [x, z] of [[0.6 * H, 0.5 * H], [-0.55 * H, 0.62 * H]]) {
+  // Floodlight masts at the slab's edge, both on the side of the picture the review panel leaves free.
+  for (const [x, z] of [[0.6 * H, 0.5 * H], [0.95 * H, -0.3 * H]]) {
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.006 * H, 0.009 * H, 0.5 * H, 5), dark);
     pole.position.set(x, 0.27 * H, z);
     const lampHead = new THREE.Mesh(new THREE.BoxGeometry(0.06 * H, 0.025 * H, 0.03 * H), glow(0xfff1c0));
@@ -280,12 +280,12 @@ export function createPad({ scene, camera, canvas }) {
     place(lv);
   }
 
-  /** Puts the spacecraft on the adapter, scaled so it (wings included) fits inside the fairing. */
+  /** Puts the spacecraft on the adapter, scaled so its bus fits inside the fairing (the wings fold away when the fairing closes). */
   function place() {
     if (!stack) return;
     const { rocket, craftHolder, H, rr } = stack;
-    // Scaled so the spacecraft, wings included, fits inside the fairing and stays a modest part of the stack.
-    const s = Math.min((rr * 2 * 0.95) / craftBox.width, (H * 0.2) / craftBox.height);
+    // Scaled so the bus fits inside the fairing and stays a modest part of the stack.
+    const s = Math.min((rr * 2 * 0.95) / craftBox.width, (H * 0.24) / craftBox.height);
     craftHolder.scale.setScalar(s);
     craft.group.position.y = craftBox.height / 2 + 0.01;
     craftHolder.position.y = rocket.userData.payloadY + 0.03 * H;
@@ -307,6 +307,8 @@ export function createPad({ scene, camera, canvas }) {
 
   function resetLaunch() {
     launchT = null;
+    delete canvas.dataset.padArmed;
+    setWingsVisible(true);
     finished = false;
     lastTick = -1;
     fired.ignition = false;
@@ -335,7 +337,15 @@ export function createPad({ scene, camera, canvas }) {
       stack.fairing.visible = true;
       stack.fairing.position.y = 0.4 * stack.H;
     }
+    // The fairing closes over the spacecraft with its wings folded in.
+    setWingsVisible(false);
     if (reduced) finish();
+  }
+
+  function setWingsVisible(on) {
+    craft.group.traverse((o) => {
+      if (o.name === 'wing+' || o.name === 'wing-') o.visible = on;
+    });
   }
 
   // A click or key press anywhere ends the sequence at once (the Skip button does the same through the UI).
@@ -360,9 +370,9 @@ export function createPad({ scene, camera, canvas }) {
       craft.update(parts, reducedMotion);
       const bus = parts.find((p) => p.kind === 'bus');
       const size = bus ? bus.size : [0.1, 0.3, 0.1];
-      const wings = parts.find((p) => p.kind === 'solarWings');
-      const half = Math.max(size[0] / 2 + (wings ? wings.size[1] + 0.02 : 0.03), size[2] / 2 + 0.05);
-      craftBox = { width: half * 2, height: size[1] + 0.06 };
+      // Fit by the bus alone: the wings fold away when the fairing closes, so sizing by their full span
+      // would shrink the bus to a speck on the rocket (worst on a SmallSat with deployable wings).
+      craftBox = { width: Math.max(size[0], size[2]) + 0.04, height: size[1] + 0.06 };
     }
     const lv = pad.launchVehicle;
     const key = `${lv.class}:${lv.height}:${craftBox.width.toFixed(3)}:${craftBox.height.toFixed(3)}`;
@@ -423,6 +433,8 @@ export function createPad({ scene, camera, canvas }) {
     }
     launchT += dt;
     const t = launchT;
+    // Test hook: from here on a click anywhere ends the launch (see onPointerDown).
+    if (t > 0.3) canvas.dataset.padArmed = 'true';
     const { H, rr } = stack;
 
     // Countdown ticks, one per second.

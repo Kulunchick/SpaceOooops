@@ -28,6 +28,9 @@ let canvasEl = null;
 let markers = null;
 let sunLight = null;
 let skyLight = null;
+// A quality change that arrived while the launch sequence was playing waits for its end (rebuilding the world would restart it).
+let pendingQuality = null;
+const LAUNCH_PHASES = ['countdown', 'ignition', 'liftoff', 'ascent'];
 
 /** Whether this browser can create a WebGL context at all. */
 export function hasWebGL() {
@@ -81,7 +84,9 @@ function disposeWorld() {
 function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'low' ? 1 : 2));
+  // Low quality draws at a pixel ratio of 1; High at up to 2 (1.5 on a phone, where the screen is small and dense).
+  const cap = quality === 'low' ? 1 : w <= 600 ? 1.5 : 2;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, cap));
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
@@ -90,7 +95,16 @@ function resize() {
 
 const ORBIT_RADIUS = EARTH_RADIUS * 1.45;
 
+function launching() {
+  return LAUNCH_PHASES.includes(canvasEl?.dataset.padPhase);
+}
+
 function frame(dt, seconds) {
+  if (pendingQuality && !launching()) {
+    const next = pendingQuality;
+    pendingQuality = null;
+    setQuality(next);
+  }
   const t = reducedMotion ? 0 : seconds;
   // The title craft circles Earth once every ~24 s; clouds creep slowly.
   const angle = t * ((Math.PI * 2) / 24) + 1.2;
@@ -114,6 +128,7 @@ export async function init(canvas, initialQuality = 'high') {
   if (!hasWebGL()) return false;
   quality = initialQuality === 'low' ? 'low' : 'high';
   canvasEl = canvas;
+  canvas.dataset.quality = quality;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: quality === 'high', powerPreference: 'low-power' });
   } catch (e) {
@@ -121,7 +136,11 @@ export async function init(canvas, initialQuality = 'high') {
     renderer = null;
     return false;
   }
-  reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  const motionQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  reducedMotion = motionQuery?.matches ?? false;
+  canvas.dataset.reducedMotion = String(reducedMotion);
+  // The player can switch the system setting while the game is open.
+  motionQuery?.addEventListener?.('change', (e) => setReducedMotion(e.matches));
   scene = new THREE.Scene();
   scene.background = new THREE.Color(palette.space);
   camera = new THREE.PerspectiveCamera(40, 1, 0.05, 200);
@@ -161,9 +180,16 @@ export function setQuality(next) {
   const q = next === 'low' ? 'low' : 'high';
   if (q === quality || !renderer) {
     quality = q;
+    pendingQuality = null;
     return;
   }
+  if (launching()) {
+    pendingQuality = q;
+    return;
+  }
+  pendingQuality = null;
   quality = q;
+  canvasEl.dataset.quality = q;
   disposeWorld();
   world = buildWorld();
   resize();
@@ -171,6 +197,7 @@ export function setQuality(next) {
 
 export function setReducedMotion(on) {
   reducedMotion = Boolean(on);
+  if (canvasEl) canvasEl.dataset.reducedMotion = String(reducedMotion);
   rig?.cut();
   world?.hangar.setReducedMotion(reducedMotion);
   world?.run.setReducedMotion(reducedMotion);

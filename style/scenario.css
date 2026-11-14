@@ -36,6 +36,7 @@
 .brief .actions { margin: 1rem 0 0; }
 
 @media (max-width: 900px) {
+  .scenario-card .illustration-slot { aspect-ratio: auto; height: 7.5rem; }
   /* The globe fills the upper part of the screen; the column starts below it. */
   .scenario-screen, .brief { max-width: 100%; margin-left: 0; margin-top: 55vh; }
 }
