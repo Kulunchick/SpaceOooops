@@ -9,8 +9,8 @@ Repo: https://github.com/Kulunchick/SpaceOooops. The expected Pages URL is https
 **Status:** ready-for-agent
 
 - [ ] The app builds locally with Trunk and serves a title screen: "SpaceOooops", a one-line tagline, and a "Start" button that leads to a placeholder screen
-- [ ] `sim` is a separate module with no web or UI dependencies; `cargo test` runs natively and passes at least one test through its public interface
+- [x] `sim` is a separate module with no web or UI dependencies; `cargo test` runs natively and passes at least one test through its public interface
 - [ ] A GitHub Actions workflow builds the wasm app and deploys it to GitHub Pages on push to the default branch
 - [ ] Assets and wasm load correctly under the repo sub-path, with no 404s for the JS, wasm or CSS
-- [ ] The README explains how to run locally, test and deploy
-- [ ] A dark mission-control base stylesheet exists (background, fonts, colour tokens) for later tickets to build on
+- [x] The README explains how to run locally, test and deploy
+- [x] A dark mission-control base stylesheet exists (background, fonts, colour tokens) for later tickets to build on
