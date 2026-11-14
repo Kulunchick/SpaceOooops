@@ -20,7 +20,7 @@ pub fn open_link_from_url(state: AppState) {
             state.screen.set(Screen::Design);
         }
         Err(e) => state.notice.set(Some(format!(
-            "That share link could not be opened: {e}. Pick a Scenario below to start a new Design."
+            "That share link could not be opened: {e}. Press Start to choose a Scenario and begin a new Design."
         ))),
     }
     storage::clear_url_fragment();

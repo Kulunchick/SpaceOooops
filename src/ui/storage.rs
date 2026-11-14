@@ -31,10 +31,10 @@ pub fn url_fragment() -> String {
 
 /// Removes the fragment from the address bar without reloading, so a reload does not re-open a share link.
 pub fn clear_url_fragment() {
-    if let Some(w) = web_sys::window() {
-        if let (Ok(path), Ok(history)) = (w.location().pathname(), w.history()) {
-            let _ = history.replace_state_with_url(&wasm_bindgen_null(), "", Some(&path));
-        }
+    if let Some(w) = web_sys::window()
+        && let (Ok(path), Ok(history)) = (w.location().pathname(), w.history())
+    {
+        let _ = history.replace_state_with_url(&wasm_bindgen_null(), "", Some(&path));
     }
 }
 
