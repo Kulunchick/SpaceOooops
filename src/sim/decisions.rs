@@ -107,6 +107,7 @@ pub(crate) fn outage_prompt(day: u32, tuning: &EventTuning, rules: &DecisionRule
         ),
     );
     if cost > left {
+        buy.consequence = format!("Would cost {} of Budget and keep Data coming down as usual.", money(cost));
         buy.available = false;
         buy.unavailable_reason = Some(format!(
             "Not enough Budget: station time costs {}, but only {} of the Budget is left.",
