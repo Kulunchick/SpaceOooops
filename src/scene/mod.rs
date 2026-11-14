@@ -5,6 +5,7 @@
 //!
 //! Each concern lives in its own file (see the low-poly overhaul architecture contract). Every field added
 //! to `SceneSpec` after the first version is optional or has a default, so an older renderer ignores it.
+mod cues;
 mod hangar;
 mod markers;
 pub mod orbit;
@@ -15,6 +16,7 @@ use serde::Serialize;
 
 use crate::sim::{Catalog, Design};
 
+pub use cues::{one_shots, Cue, Track};
 pub use hangar::{HangarPreview, OrbitPreview, RocketPreview};
 pub use markers::Marker;
 pub use orbit::OrbitView;
@@ -90,6 +92,8 @@ pub struct SceneSpec {
     /// The Run's orbit view: the Orbit, the spacecraft's place on it and Earth's shadow (Run screen only).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub orbit: Option<OrbitView>,
+    /// The music track that should be playing now (the bridge crossfades when it changes).
+    pub music: Track,
 }
 
 /// Builds the Scene Spec for the given inputs.
@@ -104,6 +108,7 @@ pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
         hangar: hangar::for_inputs(inputs),
         markers: markers::markers(inputs.screen, inputs.scenarios, inputs.chosen),
         orbit,
+        music: cues::track_for(inputs.screen),
     }
 }
 

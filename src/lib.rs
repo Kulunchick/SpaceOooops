@@ -2,4 +2,5 @@
 //! The UI lives in the binary (`main.rs`, `ui/`) and may use `sim`, never the reverse.
 pub mod credits;
 pub mod scene;
+pub mod settings;
 pub mod sim;

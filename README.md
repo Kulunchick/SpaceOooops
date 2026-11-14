@@ -67,6 +67,9 @@ entry to `data/credits.toml`, then update this list.
 - three.js r186 (0.186.1), by three.js authors (mrdoob and contributors). MIT (library). Source: https://www.npmjs.com/package/three/v/0.186.1
 - Russo One (display font), by Jovanny Lemonad. SIL Open Font License 1.1 (font). Source: https://fonts.google.com/specimen/Russo+One (via https://www.npmjs.com/package/@fontsource/russo-one 5.3.0)
 - Atkinson Hyperlegible (body font), by Braille Institute of America. SIL Open Font License 1.1 (font). Source: https://fonts.google.com/specimen/Atkinson+Hyperlegible (via https://www.npmjs.com/package/@fontsource/atkinson-hyperlegible 5.3.0)
+- Kenney UI SFX Set (click and snap sounds), by Kenney Vleugels (Kenney.nl). CC0 1.0 (sound). Source: https://kenney.nl/assets/ui-audio (click1.ogg, switch1.ogg)
+- Outer Space Loop (menu music), by wipics. CC0 1.0 (music). Source: https://opengameart.org/content/outer-space-loop
+- Space Flight (Run music), by wipics. CC0 1.0 (music). Source: https://opengameart.org/content/space-flight
 <!-- credits:end -->
 
 The static backdrop `assets/images/fallback-earth.svg` and the favicon are the team's own work.

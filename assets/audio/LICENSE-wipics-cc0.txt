@@ -1,0 +1,10 @@
+"Outer Space Loop" (music-menu.mp3, originally outer_space_2.mp3) and "Space Flight" (music-run.mp3, originally
+space_flight_0.mp3) by wipics, from OpenGameArt.org:
+
+  https://opengameart.org/content/outer-space-loop
+  https://opengameart.org/content/space-flight
+
+Both pages list the licence as CC0 (Creative Commons Zero 1.0 Universal, public domain dedication):
+  https://creativecommons.org/publicdomain/zero/1.0/
+
+The files are used unmodified.
