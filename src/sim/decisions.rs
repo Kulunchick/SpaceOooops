@@ -161,7 +161,7 @@ pub(crate) struct Taken {
 
 /// Plain-language note on one decision and its effect. `delivered_mb` and `lost_mb` are the Data sent down and
 /// lost over the outage window (only used for outage choices).
-pub(crate) fn note(t: &Taken, delivered_mb: f64, lost_mb: f64) -> String {
+pub(crate) fn note(t: &Taken, delivered_mb: f64, lost_mb: f64, rules: &DecisionRules) -> String {
     let who = if t.by_player { "you chose to" } else { "no answer was given, so by default the spacecraft chose to" };
     let failed = match t.failed_names.as_slice() {
         [] => None,
@@ -194,7 +194,7 @@ pub(crate) fn note(t: &Taken, delivered_mb: f64, lost_mb: f64) -> String {
             day_adjective(t.days)
         ),
         _ => {
-            let effect = if lost_mb > 0.5 {
+            let effect = if lost_mb > rules.negligible_lost_data_mb {
                 format!("{lost_mb:.0} MB of Data did not fit in storage and was lost")
             } else {
                 "everything fitted in storage until contact returned, so no Data was lost".to_string()

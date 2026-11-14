@@ -119,7 +119,10 @@ pub fn launch_review(catalog: &Catalog, design: &Design, scenario_id: &str) -> L
             thin,
             match capacity_kg {
                 Some(cap) => format!("{mass_kg:.1} / {cap:.1} kg"),
-                None => format!("{mass_kg:.1} kg / no capacity"),
+                None if design.launch_vehicle.is_none() || design.orbit.is_none() => {
+                    format!("{mass_kg:.1} kg / Launch Vehicle or Orbit not chosen yet")
+                }
+                None => format!("{mass_kg:.1} kg / this Launch Vehicle cannot reach this Orbit"),
             },
         ),
         power: ceiling_gauge(
@@ -127,24 +130,39 @@ pub fn launch_review(catalog: &Catalog, design: &Design, scenario_id: &str) -> L
             generation_w,
             "W",
             thin,
-            format!("{consumption_w:.1} W used / {generation_w:.1} W made (orbit average)"),
+            if design.solar.is_none() || design.orbit.is_none() {
+                format!("{consumption_w:.1} W used / solar panels or Orbit not chosen yet")
+            } else {
+                format!("{consumption_w:.1} W used / {generation_w:.1} W made (orbit average)")
+            },
         ),
         data: ceiling_gauge(
             data_mb_per_day,
             downlink_mb_per_day,
             "MB/day",
             thin,
-            format!("{} / {} MB per day", mb(data_mb_per_day), mb(downlink_mb_per_day)),
+            if design.comms.is_none() || design.orbit.is_none() {
+                format!("{} MB per day / comms or Orbit not chosen yet", mb(data_mb_per_day))
+            } else {
+                format!("{} / {} MB per day", mb(data_mb_per_day), mb(downlink_mb_per_day))
+            },
         ),
         lifetime: floor_gauge(
             lifetime_days,
             f64::from(min_lifetime_days),
             "days",
             thin,
-            format!(
-                "{lifetime_days:.0} days (about {:.0} months) / at least {min_lifetime_days} days",
-                lifetime_days / 30.4
-            ),
+            if [design.solar.is_none(), design.battery.is_none(), design.attitude.is_none(), design.comms.is_none()]
+                .contains(&true)
+                || design.orbit.is_none()
+            {
+                format!("Components or Orbit not chosen yet / at least {min_lifetime_days} days")
+            } else {
+                format!(
+                    "{lifetime_days:.0} days (about {:.0} months) / at least {min_lifetime_days} days",
+                    lifetime_days / 30.4
+                )
+            },
         ),
     };
 

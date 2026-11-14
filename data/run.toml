@@ -28,3 +28,5 @@ flare_ride_out_failure_multiplier = 10.0
 # source: commercial ground-station-as-a-service passes cost roughly US$100-1,000 each (e.g. AWS Ground Station,
 # KSAT Lite list prices); game-tuned for a few days of several passes a day plus setup.
 outage_station_time_cost_usd = 30000.0
+# The Debrief says "no Data was lost" over an outage when less than this many MB were lost (rounding noise).
+negligible_lost_data_mb = 0.5

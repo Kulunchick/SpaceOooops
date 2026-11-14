@@ -21,7 +21,9 @@ pub fn ScenarioSelectScreen() -> impl IntoView {
                             <article class="panel scenario-card">
                                 <header class="scenario-head">
                                     <h3>{s.name.clone()}</h3>
-                                    <span class="difficulty">{s.difficulty.clone()}</span>
+                                    <span class=format!("difficulty difficulty-{}", s.difficulty.to_lowercase())>
+                                        {s.difficulty.clone()}
+                                    </span>
                                 </header>
                                 <p>{s.objective.clone()}</p>
                                 <p class="muted">"Budget: " {money(s.budget_usd)}</p>

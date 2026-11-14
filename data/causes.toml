@@ -13,3 +13,6 @@ poor_coverage_below = 0.5
 poor_fit_below = 0.6
 # Below this altitude an Orbit's Lifetime limit comes from air drag; above it, from radiation wearing out parts.
 drag_altitude_below_km = 1000.0
+# When weighing what a poorly suited Instrument cost, the Orbit's coverage counts as at least this, so the
+# Instrument's cost still shows in an Orbit that covers almost nothing (that Orbit gets its own cause).
+min_coverage_for_fit_cost = 0.1

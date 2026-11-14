@@ -37,3 +37,4 @@
 .objective-result { display: grid; grid-template-columns: 1.5rem 1fr auto; gap: 0.6rem; align-items: start; }
 .objective-result.met .objective-mark, .objective-result.met .objective-points { color: var(--ok); }
 .objective-result.missed .objective-mark, .objective-result.missed .objective-points { color: var(--danger); }
+.objective-result.not-counted .objective-mark, .objective-result.not-counted .objective-points { color: var(--warn); }

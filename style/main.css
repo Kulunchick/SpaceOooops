@@ -48,7 +48,9 @@ html, body {
   color: var(--accent);
 }
 
-.tagline { color: var(--text-muted); font-size: 1.15rem; margin: 0 0 1rem; }
+.tagline { color: var(--text-muted); font-size: 1.15rem; margin: 0; }
+.title-intro { max-width: 40rem; margin: 0 0 1rem; line-height: 1.5; }
+.title-intro p { margin: 0.4rem 0; }
 .muted { color: var(--text-muted); }
 
 .panel {

@@ -547,7 +547,7 @@ fn poor_fit(f: &Facts, rules: &CauseRules) -> Vec<Weighed> {
                 format!("does nothing for {}: its Data earns no Science Value here.", f.scenario.name)
             };
             let text = format!("Your {} {suits} The {} suits it {}.", i.name, best.name, pct(fit(best, id)));
-            let impact = i.data_mb_per_day * (fit(best, id) - fit(i, id)) * f.coverage.max(0.1) * per_gb * f64::from(f.planned_days);
+            let impact = i.data_mb_per_day * (fit(best, id) - fit(i, id)) * f.coverage.max(rules.min_coverage_for_fit_cost) * per_gb * f64::from(f.planned_days);
             weighed(CauseKind::PoorInstrumentFit, text, None, impact)
         })
         .collect()

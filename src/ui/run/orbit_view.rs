@@ -25,6 +25,8 @@ const VISUAL_REVS: f64 = 14.0;
 const REFERENCE_PERIOD_MIN: f64 = 90.0;
 /// Earth's rotation period (sidereal day), minutes. Drives the ground marker on the globe.
 const EARTH_ROTATION_MIN: f64 = 1436.07;
+/// How long a Random Event's flash and caption stay on screen, whatever the playback speed.
+const FLASH_MS: u64 = 2000;
 
 /// Everything about the Orbit that is needed to draw it.
 #[derive(Clone, PartialEq)]
@@ -149,21 +151,43 @@ pub fn OrbitView() -> impl IntoView {
         (CX + r * phi.cos(), CY + r * squash * phi.sin(), phi.sin() >= 0.0)
     };
 
-    // Random Events of the day being shown: a ring flashes once on the spacecraft per such day.
-    let flash = Memo::new(move |_| {
-        day_snapshot.with(|d| {
-            let (day, _, events) = d.as_ref()?;
-            events.first().map(|e| (*day, e.kind))
-        })
+    // Random Events: the newest event among the days passed since the last tick is latched for a fixed
+    // wall-clock time, so the flash and its caption are seen at any speed and no event day is skipped over.
+    let latched: RwSignal<Option<(u32, String)>> = RwSignal::new(None);
+    let serial = StoredValue::new(0u32);
+    let last_index: StoredValue<Option<usize>> = StoredValue::new(None);
+    Effect::new(move |_| {
+        let Some(cur) = state.playback_index() else { return };
+        let from = match last_index.get_value() {
+            Some(prev) if prev < cur => prev + 1,
+            Some(prev) if prev == cur => return,
+            Some(_) => cur,
+            None => 0,
+        };
+        last_index.set_value(Some(cur));
+        let newest = state.run_result.with_untracked(|r| {
+            r.as_ref().and_then(|r| {
+                r.timeline.get(from..=cur)?.iter().rev().find_map(|d| {
+                    d.events.last().map(|e| format!("Day {}: {} {}", d.day, event_icon(e.kind), e.text))
+                })
+            })
+        });
+        if let Some(text) = newest {
+            let n = serial.get_value() + 1;
+            serial.set_value(n);
+            latched.set(Some((n, text)));
+            set_timeout(
+                move || {
+                    if latched.try_with_untracked(|l| l.as_ref().map(|l| l.0)) == Some(Some(n)) {
+                        latched.try_set(None);
+                    }
+                },
+                std::time::Duration::from_millis(FLASH_MS),
+            );
+        }
     });
-    let event_text = move || {
-        day_snapshot.with(|d| {
-            d.as_ref()
-                .and_then(|d| d.2.first())
-                .map(|e| format!("{} {}", event_icon(e.kind), e.text))
-                .unwrap_or_default()
-        })
-    };
+    let flash = move || latched.with(|l| l.as_ref().map(|l| l.0));
+    let event_text = move || latched.with(|l| l.as_ref().map(|l| l.1.clone()).unwrap_or_default());
 
     let (name, altitude, period_min, shadow) = (g.name.clone(), g.altitude_km, g.period_min, g.eclipse_fraction);
     let orbit_rx = g.rx;
@@ -210,7 +234,7 @@ pub fn OrbitView() -> impl IntoView {
                     opacity=move || if hidden_behind_earth() { "0" } else { "1" }>
                     <circle class="sc-halo" r="22" />
                     <g transform="scale(1.8)">
-                    {move || flash.get().map(|_| view! { <circle class="event-flash" r="10" /> })}
+                    {move || flash().map(|n| view! { <circle class="event-flash" r="10" data-event=n.to_string() /> })}
                     <rect class="sc-panel" x="-13" y="-2.5" width="9" height="5" />
                     <rect class="sc-panel" x="4" y="-2.5" width="9" height="5" />
                     <rect class="sc-body" x="-4" y="-4" width="8" height="8" rx="1.5" />
@@ -225,7 +249,7 @@ pub fn OrbitView() -> impl IntoView {
                 <span class="orbit-state" class:orbit-state-shadow=in_shadow>
                     {move || if in_shadow() { "\u{263E} In Earth's shadow" } else { "\u{2600} In sunlight" }}
                 </span>
-                <span class="orbit-event">{event_text}</span>
+                <span class="orbit-event" class:orbit-event-live=move || flash().is_some()>{event_text}</span>
             </div>
         </div>
     }

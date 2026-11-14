@@ -44,6 +44,9 @@ pub struct ObjectiveResult {
     pub description: String,
     /// Rule held AND the Run succeeded.
     pub met: bool,
+    /// The rule itself held, whether or not the Run succeeded (on a failed Run: "held, but not counted").
+    #[serde(default)]
+    pub held: bool,
     /// Score points on offer; added to the Score (as a `PersonalObjective` line) only when `met`.
     pub bonus: f64,
     /// Plain-language account with the actual numbers.
@@ -200,7 +203,7 @@ pub(crate) fn objectives(ctx: &DebriefContext) -> Vec<ObjectiveResult> {
             } else {
                 detail
             };
-            ObjectiveResult { role: spec.role, description: spec.description, met, bonus: spec.bonus, detail }
+            ObjectiveResult { role: spec.role, description: spec.description, met, held: holds, bonus: spec.bonus, detail }
         })
         .collect()
 }

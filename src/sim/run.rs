@@ -45,6 +45,15 @@ pub struct DaySnapshot {
     pub events: Vec<RandomEvent>,
 }
 
+/// Plain-language status of a day's `DaySnapshot::battery_state`, for the Run dashboards.
+pub fn battery_note(state: GaugeState) -> &'static str {
+    match state {
+        GaugeState::Ok => "\u{2714} Healthy",
+        GaugeState::Thin => "\u{26A0} Drained deep each eclipse: wearing fast",
+        GaugeState::Violated => "\u{2716} Cannot cover the eclipse: Instruments off part of each orbit",
+    }
+}
+
 /// Flies a Design through a Scenario. Same inputs and seed give an identical result.
 /// Never panics. A Design that fails Launch Review never flies: empty timeline, no Success, Score 0.
 /// Interactive Random Events take their default choice; see `run_with_decisions`.
@@ -129,12 +138,12 @@ pub fn run_with_decisions(
         capacity_kg: res.capacity_kg,
     });
     let mut debrief = debrief;
-    debrief.decisions = decision_notes(&state.taken, &timeline);
+    debrief.decisions = decision_notes(&state.taken, &timeline, &catalog.run_rules.decisions);
     RunResult { timeline, debrief }
 }
 
 /// The Debrief's notes on every question answered (or defaulted) during the Run.
-fn decision_notes(taken: &[Taken], timeline: &[DaySnapshot]) -> Vec<String> {
+fn decision_notes(taken: &[Taken], timeline: &[DaySnapshot], rules: &DecisionRules) -> Vec<String> {
     // Cumulative (delivered, lost) Data at the end of `day` (0 = launch), clamped to the timeline.
     let at = |day: u32| -> (f64, f64) {
         let day = (day as usize).min(timeline.len());
@@ -145,7 +154,7 @@ fn decision_notes(taken: &[Taken], timeline: &[DaySnapshot]) -> Vec<String> {
         .map(|t| {
             let (delivered_before, lost_before) = at(t.day - 1);
             let (delivered_after, lost_after) = at(t.day + t.days.max(1) - 1);
-            decisions::note(t, delivered_after - delivered_before, lost_after - lost_before)
+            decisions::note(t, delivered_after - delivered_before, lost_after - lost_before, rules)
         })
         .collect()
 }

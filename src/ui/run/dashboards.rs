@@ -1,6 +1,6 @@
 //! Live dashboards for the day the playback is showing: battery charge, stored Data, Science Value, days.
 use leptos::prelude::*;
-use spaceooops::sim::{DaySnapshot, GaugeState};
+use spaceooops::sim::{self, DaySnapshot, GaugeState};
 
 use crate::ui::format::{num, percent};
 use crate::ui::state::AppState;
@@ -33,7 +33,7 @@ pub fn Dashboards() -> impl IntoView {
                 value=Signal::derive(move || percent(read(|s| s.battery_charge)))
                 fill=Signal::derive(move || read(|s| s.battery_charge))
                 warn=Signal::derive(move || battery_state() != GaugeState::Ok)
-                note=Signal::derive(move || battery_note(battery_state()).to_string())
+                note=Signal::derive(move || sim::battery_note(battery_state()).to_string())
             />
             <Dial
                 label="Stored Data"
@@ -76,15 +76,6 @@ fn Dial(
             </div>
             {note.map(|n| view! { <div class="dial-label dial-note">{move || n.get()}</div> })}
         </div>
-    }
-}
-
-/// Plain-language status for the battery state `sim` reports.
-fn battery_note(state: GaugeState) -> &'static str {
-    match state {
-        GaugeState::Ok => "\u{2714} Healthy",
-        GaugeState::Thin => "\u{26A0} Drained deep each eclipse: wearing fast",
-        GaugeState::Violated => "\u{2716} Cannot cover the eclipse: Instruments off part of each orbit",
     }
 }
 

@@ -25,7 +25,7 @@
 .sc-panel { fill: var(--accent); }
 .spacecraft.in-shadow .sc-body { fill: #4b5568; stroke: #6a5acd; }
 .spacecraft.in-shadow .sc-panel { fill: #2a3547; }
-.event-flash { fill: none; stroke: var(--danger); stroke-width: 2.5; transform-box: fill-box; transform-origin: center; animation: event-flash 0.9s ease-out; }
+.event-flash { fill: none; stroke: var(--danger); stroke-width: 2.5; transform-box: fill-box; transform-origin: center; animation: event-flash 1s ease-out 2; }
 @keyframes event-flash { from { transform: scale(0.6); opacity: 1; } to { transform: scale(3); opacity: 0; } }
 .orbit-caption { display: flex; flex-wrap: wrap; gap: 0.25rem 1.2rem; margin-top: 0.6rem; font-family: var(--font-mono); font-size: 0.85rem; }
 .orbit-name { color: var(--accent); }
@@ -33,6 +33,7 @@
 .orbit-state { color: var(--warn); }
 .orbit-state-shadow { color: #9d8cff; }
 .orbit-event { flex-basis: 100%; min-height: 1.3em; color: var(--danger); }
+.orbit-event-live { font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { .event-flash { animation-duration: 0.01s; } }
 
 .dashboards { display: grid; gap: 0.6rem; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 1rem 0; }

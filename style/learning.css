@@ -29,7 +29,11 @@
   display: flex; flex-direction: column; gap: 0.4rem; width: 100%; cursor: pointer;
 }
 .option-main:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
-.option-stats .stat { white-space: nowrap; }
+/* Keep a label with its "?" tip, but let long values ("Capacity 12 kg to Sun-synchronous Orbit …") wrap
+   inside the card instead of running into the next one. */
+.option-stats .stat { white-space: nowrap; max-width: 100%; min-width: 0; }
+.option-stats .stat-value { white-space: normal; overflow-wrap: anywhere; }
+.option-card { min-width: 0; }
 
 /* ---- first-time hints (Scenarios with tutorial hints, i.e. Crop Watch) */
 .first-hints { border-color: var(--accent); }

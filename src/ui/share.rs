@@ -8,22 +8,33 @@ use super::storage;
 
 const PREFIX: &str = "share=";
 
-/// If the page was opened with a share link, loads its Scenario and Design into the Design screen.
-/// A broken or outdated link leaves the Title screen with a friendly message.
+/// If the page's URL carries a share link, loads its Scenario and Design into the Design screen. Called at
+/// start-up and on every `hashchange`, so a link pasted into an already-open tab loads too; leaving the Run
+/// screen stops any playback in progress. A broken or outdated link goes to the Title screen with a friendly message.
 pub fn open_link_from_url(state: AppState) {
     let fragment = storage::url_fragment();
     let Some(code) = fragment.strip_prefix(PREFIX) else { return };
     match state.catalog.with_value(|c| sim::decode_design(code, c)) {
         Ok((design, scenario_id)) => {
+            state.notice.set(None);
             state.scenario_id.set(scenario_id);
             state.design.set(design);
             state.screen.set(Screen::Design);
         }
-        Err(e) => state.notice.set(Some(format!(
-            "That share link could not be opened: {e}. Press Start to choose a Scenario and begin a new Design."
-        ))),
+        Err(e) => {
+            state.notice.set(Some(format!(
+                "That share link could not be opened: {e}. Press Start to choose a Scenario and begin a new Design."
+            )));
+            state.screen.set(Screen::Title);
+        }
     }
     storage::clear_url_fragment();
+}
+
+/// Opens share links pasted into the address bar of the already-open tab (the browser only fires `hashchange`).
+pub fn listen_for_links(state: AppState) {
+    let handle = window_event_listener(leptos::ev::hashchange, move |_| open_link_from_url(state));
+    on_cleanup(move || handle.remove());
 }
 
 #[component]

@@ -41,7 +41,7 @@ capacity_kg = { geo = 18.0 }
 
 [[launch_vehicles]]
 id = "small-launcher"
-name = "Small dedicated launcher"
+name = "Small dedicated Launch Vehicle"
 why = "A whole small rocket just for you: it carries hundreds of kilograms to exactly the Orbit you want, at a price far above a CubeSat budget."
 real_example = "like Rocket Lab Electron"
 # source: Electron lists ~US$7.5 million per launch and ~200 kg to a 500-600 km SSO, ~300 kg to low Earth orbit
@@ -51,7 +51,7 @@ capacity_kg = { leo-400 = 300.0, sso-600 = 200.0 }
 
 [[launch_vehicles]]
 id = "medium-launcher"
-name = "Medium launcher"
+name = "Medium Launch Vehicle"
 why = "A big rocket that can lift tonnes, even to geostationary Orbit. It takes you anywhere, but one launch costs more than most whole satellite programmes."
 real_example = "like SpaceX Falcon 9"
 # source: Falcon 9 ~17,400 kg to low Earth orbit and ~5,800 kg to geostationary transfer orbit with booster

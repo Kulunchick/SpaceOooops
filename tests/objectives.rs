@@ -117,6 +117,10 @@ fn objective_bonuses_require_a_successful_run() {
     assert!(!d.success);
     assert!(d.objectives.iter().all(|o| !o.met));
     assert!(d.score.lines.iter().all(|l| l.kind != ScoreLineKind::PersonalObjective));
+    // The rule itself held for the Budget objective: the Debrief can tell "held, but not counted" from "missed".
+    let budget = d.objectives.iter().find(|o| o.detail.contains("Budget")).unwrap();
+    assert!(budget.held, "{budget:#?}");
+    assert!(d.objectives.iter().all(|o| o.held == o.detail.contains("only count when the Mission succeeds")));
 
     let d = flown(&Design::default(), CROP_WATCH, 1);
     assert!(!d.success);

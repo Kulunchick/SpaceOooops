@@ -225,6 +225,8 @@ pub struct DecisionRules {
     pub flare_ride_out_failure_multiplier: f64,
     /// Buying time on another ground station for one whole outage.
     pub outage_station_time_cost_usd: f64,
+    /// Data lost over an outage below this many MB is reported as "no Data was lost" (rounding noise).
+    pub negligible_lost_data_mb: f64,
 }
 
 /// A real mission the Debrief can compare the player's Design with (`data/real_missions.toml`).
@@ -288,6 +290,9 @@ pub struct CauseRules {
     pub poor_coverage_below: f64,
     pub poor_fit_below: f64,
     pub drag_altitude_below_km: f64,
+    /// When weighing a poorly suited Instrument, the Orbit's coverage counts as at least this, so a poor
+    /// Instrument still shows its cost in an Orbit that covers almost nothing.
+    pub min_coverage_for_fit_cost: f64,
 }
 
 fn yes() -> bool {

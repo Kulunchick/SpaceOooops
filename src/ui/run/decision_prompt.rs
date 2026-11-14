@@ -57,14 +57,20 @@ pub fn DecisionPromptPanel() -> impl IntoView {
                             .map(|o| {
                                 let decision = Decision { prompt_id: id.clone(), choice: o.id.clone() };
                                 let is_default = o.id == default;
+                                let available = o.available;
                                 view! {
                                     <button
                                         class="decision-option"
                                         class:decision-default=is_default
-                                        on:click=move |_| state.decide(decision.clone())
+                                        class:decision-unavailable=!available
+                                        disabled=!available
+                                        on:click=move |_| if available { state.decide(decision.clone()) }
                                     >
                                         <span class="decision-label">{o.label}</span>
                                         <span class="decision-consequence">{o.consequence}</span>
+                                        {o.unavailable_reason.map(|r| view! {
+                                            <span class="decision-unavailable-reason">{r}</span>
+                                        })}
                                     </button>
                                 }
                             })

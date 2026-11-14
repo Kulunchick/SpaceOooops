@@ -12,5 +12,9 @@
 .decision-default { border-style: dashed; }
 .decision-label { font-weight: 600; color: var(--accent); }
 .decision-consequence { font-size: 0.9rem; color: var(--text-muted); }
+.decision-option:disabled { cursor: not-allowed; opacity: 0.6; }
+.decision-option:disabled:hover { border-color: var(--border); }
+.decision-unavailable .decision-label { color: var(--text-muted); text-decoration: line-through; }
+.decision-unavailable-reason { font-size: 0.9rem; color: var(--danger); font-weight: 600; }
 .decision-notes { margin: 0; padding-left: 1.2rem; }
 .decision-notes li { margin: 0.3rem 0; }

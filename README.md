@@ -11,17 +11,26 @@ Orbit shortens the Lifetime. You can play solo or as a team of up to four on one
 
 ## How to play
 
-1. Pick a Scenario and read the brief: objective, required Science Value, minimum Lifetime and Budget.
+1. Choose solo play, or team play with 2 to 4 players on one screen: each player owns one or more Roles and has a
+   Personal Objective worth bonus points.
+2. Pick a Scenario and read the brief: objective, required Science Value, minimum Lifetime and Budget.
    The three Scenarios are tied to Angola: Crop Watch (easy), Connect the Villages (medium) and Space Weather Sentinel (hard).
-2. Design the mission in four Role tabs: Science (Instruments), Spacecraft (structure, power, attitude control), Launch & Orbit
-   (Orbit and Launch Vehicle) and Budget & Comms. Live gauges show Budget, Mass, Power, Data and Lifetime.
-3. Pass the Launch Review. It blocks Designs that break a hard constraint and explains why. In team play every Role must vote Go.
-4. Watch the Run, a day-by-day simulation with seeded Random Events.
-5. Read the Debrief: Success or failure, the Score, the causes in plain language and a Real-Mission Match. Then change the
-   Design and fly again.
+3. Design the mission in four Role tabs: Science (Instruments), Spacecraft (structure, power, attitude control), Launch & Orbit
+   (Orbit and Launch Vehicle) and Budget & Comms. Live gauges show Budget, Mass, Power, Data and Lifetime, and every number
+   has a "why it matters" tip. Crop Watch adds first-time hints.
+4. Pass the Launch Review. It blocks Designs that break a hard constraint and explains why. In team play every Role votes
+   Go or No-Go, and a No-Go shows its objection.
+5. Watch the Run, a day-by-day simulation with seeded Random Events, played back over an orbit animation with live
+   dashboards. Solar flares and ground-station outages pause the Run and ask you what to do (enter safe mode or ride it
+   out; wait or buy time on another station). If you skip, the spacecraft takes the safe default.
+6. Read the Debrief: Success or failure, the Score line by line, the causes in plain language with this Run's numbers,
+   your decisions and their effects, each Role's Personal Objective, a Real-Mission Match to a real mission of a similar
+   kind, and a comparison with your previous Run. Then change the Design and fly again.
 
-The terms above are defined in `GLOSSARY.md`. The full plan is in `.scratch/mission-design-game/spec.md`. Features are built
-in the order given there, so the deployed game may not yet include every step.
+Every Run is saved in the browser's history (newest first, with "Load this Design"), and "Share design" copies a link that
+opens the same Scenario and Design in any browser.
+
+The terms above are defined in `GLOSSARY.md`. The plan is in `.scratch/mission-design-game/spec.md`.
 
 ## Tech stack
 
@@ -42,7 +51,8 @@ Launch Vehicle classes are generic and use public figures, cross-checked against
 [Electron](https://en.wikipedia.org/wiki/Electron_(rocket)) and [Falcon 9](https://en.wikipedia.org/wiki/Falcon_9)).
 The challenge author is Angola's GGPEN ([ggpen.gov.ao](https://ggpen.gov.ao)) according to the challenge text.
 The game has a Sources page, reachable from the title screen, with the same list.
-It uses no NASA logos, flags or mission identifiers and is not endorsed by NASA.
+It uses no NASA logos, insignia, mission patches or flags. Real missions, including some NASA missions, are named in plain
+text only, as factual references for comparison; no endorsement is implied. SpaceOooops is not endorsed by NASA.
 
 ## Acknowledgement of AI tools (SI)
 
@@ -71,6 +81,13 @@ Pushing to `main` runs `.github/workflows/deploy.yml`: `cargo test`, the release
 
 ## Layout
 
-- `src/sim/` pure-Rust simulation, no web/UI dependencies (library crate `spaceooops`)
-- `src/ui/` Leptos UI, one file per screen (binary `spaceooops-app`)
-- `style/main.css` dark mission-control base styles and colour tokens
+- `src/sim/` pure-Rust simulation, no web/UI dependencies (library crate `spaceooops`): catalog, Launch Review, the
+  Run, interactive decisions, Debrief causes, Score, Personal Objectives, Real-Mission Match and Share links
+- `src/ui/` Leptos UI, one file per screen or component (binary `spaceooops-app`); `src/ui/run/` and `src/ui/debrief/`
+  hold the Run and Debrief screens
+- `data/*.toml` every game number and catalog entry, with sources noted next to the values
+- `tests/` integration tests of the `sim` module through its public interface (`tests/sweep.rs` checks properties over
+  a sweep of random Designs)
+- `style/*.css` dark mission-control styles: `main.css` (base and colour tokens), `design.css`, `run.css`,
+  `decisions.css`, `learning.css`, `team.css`, `history.css`
+- `GLOSSARY.md` the game's terms; `docs/adr/` design decisions

@@ -15,9 +15,19 @@ pub fn ObjectivesSection() -> impl IntoView {
                     .into_iter()
                     .map(|o| {
                         let owner = state.team.with(|t| t.owner_name(o.role));
+                        // Held but not counted: the rule held, yet bonuses need a successful Mission.
+                        let not_counted = o.held && !o.met;
+                        let mark = if o.met { "\u{2714}" } else if not_counted { "\u{2013}" } else { "\u{2716}" };
+                        let points = if o.met {
+                            format!("+{:.0}", o.bonus)
+                        } else if not_counted {
+                            format!("held, not counted ({:.0})", o.bonus)
+                        } else {
+                            format!("missed ({:.0})", o.bonus)
+                        };
                         view! {
-                            <li class="objective-result" class:met=o.met class:missed=!o.met>
-                                <span class="objective-mark">{if o.met { "\u{2714}" } else { "\u{2716}" }}</span>
+                            <li class="objective-result" class:met=o.met class:missed=!o.met && !not_counted class:not-counted=not_counted>
+                                <span class="objective-mark">{mark}</span>
                                 <div>
                                     <div>
                                         <span class="role-name">{o.role.name()}</span>
@@ -27,7 +37,7 @@ pub fn ObjectivesSection() -> impl IntoView {
                                     <div class="muted">{o.detail}</div>
                                 </div>
                                 <span class="objective-points num">
-                                    {if o.met { format!("+{:.0}", o.bonus) } else { format!("missed ({:.0})", o.bonus) }}
+                                    {points}
                                 </span>
                             </li>
                         }

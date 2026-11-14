@@ -54,6 +54,7 @@ pub fn App() -> impl IntoView {
     let state = AppState::new(catalog);
     provide_context(state);
     share::open_link_from_url(state);
+    share::listen_for_links(state);
     let screen = state.screen;
     view! {
         <main class="app">

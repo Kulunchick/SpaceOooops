@@ -86,7 +86,7 @@ why = "Fees for using ground antennas, paid every day of the Mission. Faster com
 
 [[terms]]
 key = "Real example"
-why = "A real rocket or service of this class, so you can look it up."
+why = "A real Launch Vehicle or launch service of this class, so you can look it up."
 
 # ---------------------------------------------------------------- Component categories
 
@@ -127,7 +127,7 @@ why = "The path the spacecraft flies. It sets how much it sees of the target, ho
 
 [[terms]]
 key = "Launch Vehicle"
-why = "The rocket ride to Orbit. Bigger rockets carry more Mass and reach more Orbits, but cost much more."
+why = "The spacecraft's ride to Orbit. Bigger Launch Vehicles carry more Mass and reach more Orbits, but cost much more."
 
 [[terms]]
 key = "Cost breakdown"

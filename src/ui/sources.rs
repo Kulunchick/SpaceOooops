@@ -63,7 +63,7 @@ pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
 
             <h3>"Launch Vehicles"</h3>
             <p>
-                "Launch Vehicles in the game are generic classes, such as a rideshare slot or a small launcher. Each tooltip "
+                "Launch Vehicles in the game are generic classes, such as a rideshare slot or a small dedicated Launch Vehicle. Each tooltip "
                 "names a real example of its class. The operators' own pages and "
                 "payload user's guides are the primary sources, but they could not be opened reliably when this page was "
                 "written, so the secondary sources below were used for the figures."
@@ -100,7 +100,9 @@ pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
 
             <h3>"Notices"</h3>
             <p>
-                "SpaceOooops uses no NASA logos, flags or mission identifiers. It is a project made for the "
+                "SpaceOooops uses no NASA logos, insignia, mission patches or flags. Real missions, including some "
+                "NASA missions, are named in plain text only, as factual references for comparison; no endorsement "
+                "is implied. SpaceOooops is a project made for the "
                 "2026 NASA Space Apps Challenge and is not endorsed by NASA. NASA does not endorse any non-U.S. "
                 "Government entity and is not responsible for information on non-U.S. Government websites."
             </p>

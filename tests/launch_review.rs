@@ -267,3 +267,27 @@ fn an_empty_design_never_shows_negative_zero_in_a_gauge() {
         assert!(!gauge.detail.contains("-0"), "{}", gauge.detail);
     }
 }
+
+#[test]
+fn gauges_of_an_unfinished_design_say_what_is_still_to_pick_instead_of_odd_numbers() {
+    let c = load_catalog().unwrap();
+    let g = launch_review(&c, &Design::default(), CROP_WATCH).gauges;
+    assert!(g.mass.detail.contains("not chosen yet"), "{}", g.mass.detail);
+    assert!(g.power.detail.contains("not chosen yet"), "{}", g.power.detail);
+    assert!(g.data.detail.contains("not chosen yet"), "{}", g.data.detail);
+    assert!(g.lifetime.detail.contains("not chosen yet"), "{}", g.lifetime.detail);
+
+    // Half a Design: no estimate of the Lifetime until every part with a Reliability Tier and the Orbit are in.
+    let mut partial = crop_watch_known_good();
+    partial.battery = None;
+    partial.comms = None;
+    let g = launch_review(&c, &partial, CROP_WATCH).gauges;
+    assert!(!g.lifetime.detail.contains("6666"), "{}", g.lifetime.detail);
+    assert!(g.lifetime.detail.contains("not chosen yet"), "{}", g.lifetime.detail);
+
+    // A complete Design shows its numbers.
+    let g = launch_review(&c, &crop_watch_known_good(), CROP_WATCH).gauges;
+    for gauge in [&g.budget, &g.mass, &g.power, &g.data, &g.lifetime] {
+        assert!(!gauge.detail.contains("not chosen"), "{}", gauge.detail);
+    }
+}
