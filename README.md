@@ -56,10 +56,31 @@ The game has a Sources page, reachable from the title screen, with the same list
 It uses no NASA logos, insignia, mission patches or flags. Real missions, including some NASA missions, are named in plain
 text only, as factual references for comparison; no endorsement is implied. SpaceOooops is not endorsed by NASA.
 
+## Assets and licences
+
+Every external asset shipped with the game (library, fonts, and later models, images, sounds and music) is listed in
+`data/credits.toml`, shown on the in-game Sources page, and listed here. The list below must match the data file exactly;
+`cargo test` (`tests/credits.rs`) fails if it does not, and prints the text to paste. To add an asset, add an `[[asset]]`
+entry to `data/credits.toml`, then update this list.
+
+<!-- credits:start -->
+- three.js r186 (0.186.1), by three.js authors (mrdoob and contributors). MIT (library). Source: https://www.npmjs.com/package/three/v/0.186.1
+- Russo One (display font), by Jovanny Lemonad. SIL Open Font License 1.1 (font). Source: https://fonts.google.com/specimen/Russo+One (via https://www.npmjs.com/package/@fontsource/russo-one 5.3.0)
+- Atkinson Hyperlegible (body font), by Braille Institute of America. SIL Open Font License 1.1 (font). Source: https://fonts.google.com/specimen/Atkinson+Hyperlegible (via https://www.npmjs.com/package/@fontsource/atkinson-hyperlegible 5.3.0)
+<!-- credits:end -->
+
+The static backdrop `assets/images/fallback-earth.svg` and the favicon are the team's own work.
+
 ## Acknowledgement of AI tools (SI)
 
 The code of this project was written with Claude Code, an AI coding assistant by Anthropic, working from a specification
 prepared by the project team. This is also stated on the in-game Sources page.
+
+Images, music and sound, as recorded in `data/credits.toml` (`ai_generated`):
+
+<!-- ai-assets:start -->
+No image, music or sound effect in this game was made with AI tools.
+<!-- ai-assets:end -->
 
 ## Prerequisites
 

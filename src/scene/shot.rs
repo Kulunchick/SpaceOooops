@@ -13,12 +13,19 @@ pub enum Shot {
     /// The Design hangar: the spacecraft assembled on a stand in the centre, the Orbit preview and the rocket
     /// beside it. The player may drag to turn the model.
     Hangar,
+    /// Scenario select: Earth with Angola centred, every Scenario marker in view.
+    Globe { lat: f64, lon: f64 },
+    /// Brief: the camera holds close over one place on Earth.
+    Region { lat: f64, lon: f64 },
 }
 
 /// Whether the scene is dimmed behind the screen's panels. Screens still laid out as full-page documents dim it so
 /// their text stays readable; a screen designed as panels over the scene (and its own Shot) shows it clearly.
 pub(super) fn dims(screen: Screen) -> bool {
-    !matches!(screen, Screen::Title | Screen::Design)
+    !matches!(
+        screen,
+        Screen::Title | Screen::ScenarioSelect | Screen::Brief | Screen::Design | Screen::Sources | Screen::TeamSetup | Screen::History
+    )
 }
 
 pub(super) fn for_screen(screen: Screen) -> Shot {
@@ -28,6 +35,7 @@ pub(super) fn for_screen(screen: Screen) -> Shot {
         Design => Shot::Hangar,
         // Screens that have no Shot of their own yet keep the title framing; the UI dims the scene behind
         // their panels. Later tickets move each screen to its own Shot (globe, hangar, pad, orbit-follow, ...).
+        // Scenario select and Brief are framed by `markers::shot`, which `build` tries first.
         Sources | TeamSetup | ScenarioSelect | Brief | LaunchReview | Run | Debrief | History => {
             Shot::TitleOrbit
         }

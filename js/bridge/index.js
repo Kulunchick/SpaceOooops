@@ -11,6 +11,7 @@ import { createEarth, EARTH_RADIUS } from './earth.js';
 import { createCameraRig } from './camera.js';
 import { createTitleCraft } from './spacecraft.js';
 import { createHangar } from './hangar.js';
+import { createMarkers } from './markers.js';
 
 let renderer = null;
 let scene = null;
@@ -21,6 +22,7 @@ let reducedMotion = false;
 let quality = 'high';
 let spec = null;
 let canvasEl = null;
+let markers = null;
 
 /** Whether this browser can create a WebGL context at all. */
 export function hasWebGL() {
@@ -40,6 +42,8 @@ function buildWorld() {
   orbit.rotation.set(0.5, 0, 0.35);
   orbit.add(craft);
   scene.add(earth, stars, orbit);
+  markers = createMarkers(scene);
+  if (spec) markers.set(spec.markers);
   const hangar = createHangar({ scene, camera, canvas: canvasEl });
   if (spec) hangar.apply(spec, reducedMotion);
   return { earth, clouds, stars, craft, orbit, hangar };
@@ -55,6 +59,8 @@ function disposeWorld() {
       o.material?.dispose();
     });
   }
+  markers?.dispose();
+  markers = null;
   world = null;
 }
 
@@ -78,6 +84,8 @@ function frame(dt, seconds) {
   world.craft.rotation.y = angle;
   world.clouds.rotation.y = t * 0.01;
   rig.update(dt, seconds, reducedMotion);
+  markers?.update(seconds, reducedMotion);
+  renderer.domElement.dataset.flying = String(rig.flying);
   world.hangar.frame(dt, t);
   renderer.render(scene, camera);
 }
@@ -108,6 +116,8 @@ export async function init(canvas, initialQuality = 'high') {
   if (spec) rig.setShot(spec.shot);
   resize();
   window.addEventListener('resize', resize);
+  // A click anywhere during a camera flight skips it.
+  window.addEventListener('pointerdown', () => rig.skip(), true);
 
   const clock = new THREE.Timer();
   renderer.setAnimationLoop((timestamp) => {
@@ -121,6 +131,7 @@ export function apply(sceneSpec) {
   spec = sceneSpec;
   if (rig) rig.setShot(sceneSpec.shot);
   world?.hangar.apply(sceneSpec, reducedMotion);
+  markers?.set(sceneSpec.markers);
 }
 
 export function setQuality(next) {

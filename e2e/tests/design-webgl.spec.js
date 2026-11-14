@@ -17,7 +17,7 @@ test('a share link lands on the Design with the spacecraft assembled in the hang
   await expect(page.getByRole('tab', { name: /Science/ })).toBeVisible();
   const canvas = page.locator('canvas.scene-canvas');
   await expect(page.locator('.scene-layer')).toHaveAttribute('data-scene', 'live');
-  await expect(canvas).toHaveAttribute('data-shot', 'hangar');
+  await expect(canvas).toHaveAttribute('data-shot', 'hangar', { timeout: 20_000 });
   await expect.poll(() => partIds(page)).toEqual(expect.arrayContaining(CROP_WATCH_PARTS));
   await expect(page.locator('.scene-layer')).not.toHaveClass(/dimmed/);
   expect(errors).toEqual([]);
@@ -26,7 +26,7 @@ test('a share link lands on the Design with the spacecraft assembled in the hang
 test('adding and removing an Instrument adds and removes its part', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto(`./#share=${CROP_WATCH_SHARE}`);
-  await expect(page.locator('canvas.scene-canvas')).toHaveAttribute('data-shot', 'hangar');
+  await expect(page.locator('canvas.scene-canvas')).toHaveAttribute('data-shot', 'hangar', { timeout: 20_000 });
   const card = page.getByRole('button', { name: /Wide-field camera/ });
   await card.click();
   await expect.poll(() => partIds(page)).toContain('wide-camera');
@@ -39,7 +39,7 @@ test('dragging on the stage turns the model; the panels stay clickable', async (
   await page.emulateMedia({ reducedMotion: 'reduce' }); // no idle turn, so only the drag moves it
   await page.goto(`./#share=${CROP_WATCH_SHARE}`);
   const canvas = page.locator('canvas.scene-canvas');
-  await expect(canvas).toHaveAttribute('data-shot', 'hangar');
+  await expect(canvas).toHaveAttribute('data-shot', 'hangar', { timeout: 20_000 });
   const yaw = async () => Number(await canvas.getAttribute('data-yaw'));
   await expect.poll(yaw).not.toBeNaN();
   const before = await yaw();

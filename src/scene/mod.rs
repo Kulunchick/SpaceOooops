@@ -6,6 +6,7 @@
 //! Each concern lives in its own file (see the low-poly overhaul architecture contract). Every field added
 //! to `SceneSpec` after the first version is optional or has a default, so an older renderer ignores it.
 mod hangar;
+mod markers;
 mod shot;
 mod spacecraft;
 
@@ -14,8 +15,11 @@ use serde::Serialize;
 use crate::sim::{Catalog, Design};
 
 pub use hangar::{HangarPreview, OrbitPreview, RocketPreview};
+pub use markers::Marker;
 pub use shot::Shot;
 pub use spacecraft::{Finish, Part, PartKind, SpacecraftModel};
+
+use crate::sim::Scenario;
 
 /// The screen the player is on. The UI's screen state is this type, so every screen has a Shot.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -49,11 +53,15 @@ pub struct SceneInputs<'a> {
     pub catalog: Option<&'a Catalog>,
     /// The current Design; the spacecraft model is assembled from it.
     pub design: Option<&'a Design>,
+    /// The catalog's Scenarios, for the markers on Scenario select and Brief.
+    pub scenarios: &'a [Scenario],
+    /// The id of the chosen Scenario (empty or unknown means none).
+    pub chosen: Option<&'a str>,
 }
 
-impl<'a> SceneInputs<'a> {
+impl SceneInputs<'static> {
     pub fn on(screen: Screen) -> Self {
-        SceneInputs { screen, catalog: None, design: None }
+        SceneInputs { screen, catalog: None, design: None, scenarios: &[], chosen: None }
     }
 }
 
@@ -70,15 +78,19 @@ pub struct SceneSpec {
     /// Design-screen previews next to the spacecraft: the chosen Orbit and Launch Vehicle.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hangar: Option<HangarPreview>,
+    /// Scenario pins on the globe; empty except on Scenario select and Brief.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub markers: Vec<Marker>,
 }
 
 /// Builds the Scene Spec for the given inputs.
-pub fn build(inputs: &SceneInputs) -> SceneSpec {
+pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
     SceneSpec {
-        shot: shot::for_screen(inputs.screen),
+        shot: markers::shot(inputs.screen, inputs.scenarios, inputs.chosen).unwrap_or_else(|| shot::for_screen(inputs.screen)),
         dimmed: shot::dims(inputs.screen),
         spacecraft: spacecraft::for_inputs(inputs),
         hangar: hangar::for_inputs(inputs),
+        markers: markers::markers(inputs.screen, inputs.scenarios, inputs.chosen),
     }
 }
 

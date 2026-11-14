@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use spaceooops::credits;
 
 /// One external link. All links open in a new tab.
 #[component]
@@ -6,11 +7,19 @@ fn Ext(href: &'static str, label: &'static str) -> impl IntoView {
     view! { <a href=href target="_blank" rel="noopener noreferrer">{label}</a> }
 }
 
+/// Splits a source string around its first `http(s)://` URL, so the URL can be a link and the rest stay text.
+fn split_first_url(s: &str) -> (String, Option<String>, String) {
+    let Some(start) = s.find("http") else { return (s.to_string(), None, String::new()) };
+    let end = s[start..].find(|c: char| c.is_whitespace() || c == ')').map_or(s.len(), |i| start + i);
+    (s[..start].to_string(), Some(s[start..end].to_string()), s[end..].to_string())
+}
+
 #[component]
 pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
+    let assets = credits::assets();
     view! {
-        <section class="screen sources-screen">
-            <h2>"Sources and credits"</h2>
+        <section class="screen sources-screen lp-panel">
+            <h2 class="lp-display">"Sources and credits"</h2>
             <p class="muted">
                 "Where the numbers and ideas in SpaceOooops come from. Game values are simplified and "
                 "only approximately realistic."
@@ -92,11 +101,38 @@ pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
                 "."
             </p>
 
+            <h3>"Assets and licences"</h3>
+            <p>
+                "Every external asset shipped with the game, with its author, source and licence. "
+                "This list is read from the game's credits data file."
+            </p>
+            <ul class="sources-list credits-list">
+                {assets
+                    .iter()
+                    .map(|a| {
+                        let (before, url, after) = split_first_url(&a.source);
+                        view! {
+                            <li class="credit">
+                                <strong class="credit-name">{a.name.clone()}</strong>
+                                " "
+                                <span class="credit-kind">{a.kind.clone()}</span>
+                                <br />
+                                {format!("By {}. Licence: {}. Source: {}", a.author, a.licence, before)}
+                                {url.map(|u| view! { <a href=u.clone() target="_blank" rel="noopener noreferrer">{u.clone()}</a> })}
+                                {after}
+                                {a.ai_generated.then(|| view! { " " <strong class="credit-ai">"Made with AI tools."</strong> })}
+                            </li>
+                        }
+                    })
+                    .collect_view()}
+            </ul>
+
             <h3>"Use of AI tools (SI)"</h3>
             <p>
                 "The code of this game was written with Claude Code, an AI coding assistant by Anthropic, working from a "
                 "specification prepared by the project team."
             </p>
+            <p class="ai-assets">{credits::ai_statement(&assets)}</p>
 
             <h3>"Notices"</h3>
             <p>
@@ -107,7 +143,7 @@ pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
                 "Government entity and is not responsible for information on non-U.S. Government websites."
             </p>
 
-            <button class="btn" on:click=move |_| on_back()>"Back"</button>
+            <button class="lp-btn" on:click=move |_| on_back()>"Back"</button>
         </section>
     }
 }

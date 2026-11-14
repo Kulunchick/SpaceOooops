@@ -28,6 +28,7 @@ const FALLBACK_KIND = 'titleOrbit';
 export function createCameraRig(camera) {
   let shot = { kind: FALLBACK_KIND };
   let snap = true;
+  let flying = false;
   const framing = { x: 0, y: 0 };
   // How much of the framing shift applies (eased, so switching to a pose without framing does not jump).
   let framingWeight = 1;
@@ -43,12 +44,21 @@ export function createCameraRig(camera) {
 
   return {
     setShot(next) {
-      if (next) shot = next;
+      if (!next) return;
+      shot = next;
+    },
+    /** A click during a flight skips it: the camera cuts to the Shot. Clicks while the camera is at rest do nothing. */
+    skip() {
+      if (flying) snap = true;
     },
     /** Shifts the picture so the subject sits beside (wide screens) or above (narrow screens) the DOM panels. */
     setFraming(x, y) {
       framing.x = x;
       framing.y = y;
+    },
+    /** True while the camera is still easing toward its Shot. */
+    get flying() {
+      return flying;
     },
     /** Cuts straight to the current Shot on the next update instead of easing (reduced motion, first frame). */
     cut() {
@@ -70,10 +80,14 @@ export function createCameraRig(camera) {
         target.lerp(desiredTarget, k);
         framingWeight += (wantFraming - framingWeight) * k;
       }
+      flying = position.distanceTo(p.position) + target.distanceTo(desiredTarget) > 0.02;
       camera.position.copy(position);
       camera.lookAt(target);
-      camera.translateX(-framing.x * framingWeight);
-      camera.translateY(-framing.y * framingWeight);
+      // The shift scales with the distance, so the subject sits at the same place on screen for every Shot,
+      // and is eased out for poses that frame their subject themselves (`framing: false`).
+      const scale = (camera.position.distanceTo(target) / 4.4) * framingWeight;
+      camera.translateX(-framing.x * scale);
+      camera.translateY(-framing.y * scale);
     },
   };
 }
