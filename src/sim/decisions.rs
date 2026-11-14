@@ -36,6 +36,29 @@ pub struct DecisionOption {
     pub label: String,
     /// What this choice costs and what it buys, in one sentence.
     pub consequence: String,
+    /// The option can be taken right now. An unavailable option (e.g. station time the remaining Budget cannot pay
+    /// for) is shown but cannot be chosen; a `Decision` naming it takes the default instead.
+    #[serde(default = "available")]
+    pub available: bool,
+    /// For an unavailable option: why, in plain language.
+    #[serde(default)]
+    pub unavailable_reason: Option<String>,
+}
+
+fn available() -> bool {
+    true
+}
+
+impl DecisionOption {
+    fn new(id: &str, label: &str, consequence: String) -> Self {
+        DecisionOption {
+            id: id.to_string(),
+            label: label.to_string(),
+            consequence,
+            available: true,
+            unavailable_reason: None,
+        }
+    }
 }
 
 pub(crate) const SAFE_MODE: &str = "safe-mode";
@@ -49,28 +72,48 @@ pub(crate) fn flare_prompt(day: u32, tuning: &EventTuning, rules: &DecisionRules
         day,
         question: "Solar-flare warning: a strong flare is about to hit the spacecraft. Enter safe mode?".to_string(),
         options: vec![
-            DecisionOption {
-                id: SAFE_MODE.to_string(),
-                label: "Enter safe mode".to_string(),
-                consequence: format!(
+            DecisionOption::new(
+                SAFE_MODE,
+                "Enter safe mode",
+                format!(
                     "The Instruments switch off for {}, so that science is lost, but the electronics are protected.",
                     days(tuning.flare_safe_mode_days)
                 ),
-            },
-            DecisionOption {
-                id: RIDE_OUT.to_string(),
-                label: "Ride it out".to_string(),
-                consequence: format!(
+            ),
+            DecisionOption::new(
+                RIDE_OUT,
+                "Ride it out",
+                format!(
                     "The Instruments keep working, but today every Component is {:.0} times more likely to fail than in safe mode.",
                     rules.flare_ride_out_failure_multiplier
                 ),
-            },
+            ),
         ],
         default: SAFE_MODE.to_string(),
     }
 }
 
-pub(crate) fn outage_prompt(day: u32, tuning: &EventTuning, rules: &DecisionRules) -> DecisionPrompt {
+/// `budget_left_usd`: what is left of the Scenario's Budget after the Design and earlier purchases.
+pub(crate) fn outage_prompt(day: u32, tuning: &EventTuning, rules: &DecisionRules, budget_left_usd: f64) -> DecisionPrompt {
+    let cost = rules.outage_station_time_cost_usd;
+    let left = budget_left_usd.max(0.0);
+    let mut buy = DecisionOption::new(
+        BUY_STATION_TIME,
+        "Buy station time",
+        format!(
+            "Costs {} of the {} of Budget left (it counts toward the Mission's cost), and Data keeps coming down as usual.",
+            money(cost),
+            money(left)
+        ),
+    );
+    if cost > left {
+        buy.available = false;
+        buy.unavailable_reason = Some(format!(
+            "Not enough Budget: station time costs {}, but only {} of the Budget is left.",
+            money(cost),
+            money(left)
+        ));
+    }
     DecisionPrompt {
         id: format!("day-{day}-ground-station-outage"),
         day,
@@ -79,34 +122,27 @@ pub(crate) fn outage_prompt(day: u32, tuning: &EventTuning, rules: &DecisionRule
             days(tuning.outage_days)
         ),
         options: vec![
-            DecisionOption {
-                id: BUY_STATION_TIME.to_string(),
-                label: "Buy station time".to_string(),
-                consequence: format!(
-                    "Costs {} of Budget, and Data keeps coming down as usual.",
-                    money(rules.outage_station_time_cost_usd)
-                ),
-            },
-            DecisionOption {
-                id: WAIT.to_string(),
-                label: "Wait it out".to_string(),
-                consequence: format!(
+            buy,
+            DecisionOption::new(
+                WAIT,
+                "Wait it out",
+                format!(
                     "Free, but Data piles up on board for {}; whatever does not fit in storage is lost.",
                     days(tuning.outage_days)
                 ),
-            },
+            ),
         ],
         default: WAIT.to_string(),
     }
 }
 
-/// The option that applies to `prompt`: the player's valid choice, else the default.
+/// The option that applies to `prompt`: the player's valid choice of an available option, else the default.
 /// Returns the option id and whether the player chose it.
 pub(crate) fn chosen(prompt: &DecisionPrompt, decisions: &[Decision]) -> (String, bool) {
     decisions
         .iter()
         .rev()
-        .find(|d| d.prompt_id == prompt.id && prompt.options.iter().any(|o| o.id == d.choice))
+        .find(|d| d.prompt_id == prompt.id && prompt.options.iter().any(|o| o.id == d.choice && o.available))
         .map_or((prompt.default.clone(), false), |d| (d.choice.clone(), true))
 }
 

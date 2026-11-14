@@ -317,7 +317,11 @@ pub fn launch_review(catalog: &Catalog, design: &Design, scenario_id: &str) -> L
         soft(
             FindingKind::BasicTierOnCritical,
             Role::Spacecraft,
-            format!("The {name} is Basic tier, and the Mission ends if it fails. A Flight-proven one costs more but fails far less often."),
+            format!(
+                "The {name} {} Basic tier, and the Mission ends if {}. A Flight-proven choice costs more but fails far less often.",
+                if name.ends_with('s') { "are" } else { "is" },
+                if name.ends_with('s') { "they fail" } else { "it fails" }
+            ),
         );
     }
     if gauges.lifetime.state == GaugeState::Violated && r.scenario.is_some() && lifetime_days > 0.0 {

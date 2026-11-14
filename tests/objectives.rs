@@ -146,3 +146,18 @@ fn outlook_for_an_unflyable_design_puts_every_role_at_risk_without_panicking() {
     // An unknown Scenario does not panic either.
     assert!(objective_outlook(&c, &Design::default(), "no-such-scenario").iter().all(|o| o.at_risk));
 }
+
+#[test]
+fn a_no_go_on_an_objective_that_looks_safe_reads_as_the_players_own_call() {
+    let c = catalog();
+    let outlook = objective_outlook(&c, &crop_watch_known_good(), CROP_WATCH);
+    assert!(outlook.iter().any(|o| !o.at_risk) && outlook.iter().any(|o| o.at_risk), "{outlook:#?}");
+    for o in &outlook {
+        if o.at_risk {
+            assert_eq!(o.objection, o.reason);
+        } else {
+            assert!(!o.objection.contains("On track"), "{}", o.objection);
+            assert!(o.objection.contains("looks safe") && o.objection.contains("own"), "{}", o.objection);
+        }
+    }
+}

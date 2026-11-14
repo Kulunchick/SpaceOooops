@@ -59,8 +59,12 @@ pub struct ObjectiveOutlook {
     pub bonus: f64,
     /// The trial Run missed the objective: the Role may reasonably vote No-Go over it.
     pub at_risk: bool,
-    /// Plain-language reason, shown as the objection when the Role votes No-Go.
+    /// Plain-language estimate with the trial Run's numbers ("On track in a trial Run. …").
     pub reason: String,
+    /// What a No-Go vote by this Role says: the reason when the objective is at risk, otherwise a neutral line
+    /// that the objective looks safe and the objection is the player's own.
+    #[serde(default)]
+    pub objection: String,
 }
 
 /// The Personal Objectives that apply in a Scenario: one per Role that has one (Role order), with a
@@ -98,15 +102,29 @@ pub fn objective_outlook(catalog: &Catalog, design: &Design, scenario_id: &str) 
             } else {
                 format!("At risk in a trial Run. {detail}")
             };
+            let objection = if met {
+                "This Role's objective looks safe in a trial Run; the No-Go is the player's own call, so talk it \
+                 through as a team."
+                    .to_string()
+            } else {
+                reason.clone()
+            };
             ObjectiveOutlook {
                 role: spec.role,
                 description: spec.description,
                 bonus: spec.bonus,
                 at_risk: !met,
                 reason,
+                objection,
             }
         })
         .collect()
+}
+
+/// A Science Value with one decimal, so 109.6 never reads as the goal of 110.
+fn one_decimal(v: f64) -> String {
+    let s = format!("{v:.1}");
+    s.strip_suffix(".0").map_or(s.clone(), str::to_string)
 }
 
 /// Personal Objective results for a Run.
@@ -122,7 +140,7 @@ pub(crate) fn objectives(ctx: &DebriefContext) -> Vec<ObjectiveResult> {
                     (
                         share <= threshold,
                         format!(
-                            "The Design uses {:.0}% of the Budget; the goal is {:.0}% or less.",
+                            "The Mission cost {:.0}% of the Budget; the goal is {:.0}% or less.",
                             share * 100.0,
                             threshold * 100.0
                         ),
@@ -146,7 +164,11 @@ pub(crate) fn objectives(ctx: &DebriefContext) -> Vec<ObjectiveResult> {
                     let target = s.required_science_value * (1.0 + threshold);
                     (
                         s.science_value >= target,
-                        format!("Science Value reached {:.0}; the goal is {:.0} or more.", s.science_value, target),
+                        format!(
+                            "Science Value reached {}; the goal is {} or more.",
+                            one_decimal(s.science_value),
+                            one_decimal(target)
+                        ),
                     )
                 }
                 ObjectiveRule::LostDataAtMost { threshold } => (

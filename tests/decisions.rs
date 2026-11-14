@@ -114,6 +114,62 @@ fn buying_station_time_costs_budget_and_shows_in_the_total_cost() {
     assert!((buy.debrief.score.total - sum).abs() < 1e-9);
 }
 
+/// The catalog with Crop Watch's Budget cut so the known-good Design has only `left` US$ to spare.
+fn catalog_with_budget_left(left: f64) -> Catalog {
+    let mut c = catalog();
+    let cost = launch_review(&c, &crop_watch_known_good(), CROP_WATCH).cost.total_usd;
+    c.scenarios.iter_mut().find(|s| s.id == CROP_WATCH).unwrap().budget_usd = cost + left;
+    c
+}
+
+#[test]
+fn every_option_is_available_while_the_budget_can_pay_for_it() {
+    let (_, prompt) = seed_with_prompt(&crop_watch_known_good(), CROP_WATCH, EventKind::GroundStationOutage);
+    assert!(prompt.options.iter().all(|o| o.available && o.unavailable_reason.is_none()), "{prompt:#?}");
+}
+
+#[test]
+fn station_time_the_remaining_budget_cannot_cover_is_unavailable_with_a_reason() {
+    let catalog = catalog_with_budget_left(10_000.0);
+    let design = crop_watch_known_good();
+    let (seed, _) = seed_with_prompt(&design, CROP_WATCH, EventKind::GroundStationOutage);
+    let plain = run(&catalog, &design, CROP_WATCH, seed);
+    let prompt = prompts(&plain).into_iter().find(|p| p.id.contains("outage")).expect("the outage still asks");
+    let buy = prompt.options.iter().find(|o| o.id == "buy-station-time").unwrap();
+    assert!(!buy.available, "{buy:#?}");
+    let reason = buy.unavailable_reason.as_deref().expect("says why");
+    assert!(reason.contains("Budget") && reason.contains("$10k"), "{reason}");
+    let wait = prompt.options.iter().find(|o| o.id == prompt.default).unwrap();
+    assert!(wait.available);
+
+    // Choosing it anyway applies the default: nothing is bought, and the total stays within the Budget.
+    let forced = run_with_decisions(&catalog, &design, CROP_WATCH, seed, &[decide(&prompt, "buy-station-time")]);
+    assert_eq!(forced.timeline, plain.timeline);
+    assert_eq!(forced.debrief.stats, plain.debrief.stats);
+}
+
+#[test]
+fn buying_station_time_never_takes_the_mission_over_its_budget() {
+    // Room for exactly one purchase: after it, later outages cannot buy again.
+    let catalog = catalog_with_budget_left(45_000.0);
+    let design = crop_watch_known_good();
+    let budget = catalog.scenario(CROP_WATCH).unwrap().budget_usd;
+    for seed in 0..200 {
+        let mut decisions: Vec<Decision> = Vec::new();
+        let mut result = run(&catalog, &design, CROP_WATCH, seed);
+        while let Some(p) = prompts(&result).into_iter().find(|p| !decisions.iter().any(|d| d.prompt_id == p.id)) {
+            let buy = p.options.iter().any(|o| o.id == "buy-station-time");
+            decisions.push(decide(&p, if buy { "buy-station-time" } else { &p.default }));
+            result = run_with_decisions(&catalog, &design, CROP_WATCH, seed, &decisions);
+        }
+        assert!(result.debrief.stats.total_cost_usd <= budget, "seed {seed}: {}", result.debrief.stats.total_cost_usd);
+        let budget_objective = result.debrief.objectives.iter().find(|o| o.detail.contains("Budget"));
+        if let Some(o) = budget_objective {
+            assert!(!o.detail.contains("101%") && !o.detail.contains("102%"), "{}", o.detail);
+        }
+    }
+}
+
 #[test]
 fn days_before_a_decision_are_identical_whatever_the_choice() {
     let catalog = catalog();

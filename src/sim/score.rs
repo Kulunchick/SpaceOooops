@@ -74,7 +74,7 @@ pub(crate) fn score(rules: &ScoringRules, s: &ScoreInput) -> Vec<ScoreLine> {
         lines.push(ScoreLine {
             kind: ScoreLineKind::Penalty,
             label: format!(
-                "Mission ended early (day {} of the {} days required)",
+                "Mission ended early: {} of the {} days required were flown",
                 s.days_survived, s.min_lifetime_days
             ),
             points: -missed * rules.early_end_penalty_points,

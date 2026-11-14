@@ -126,7 +126,8 @@ pub(crate) fn ground_station_outage(tuning: &EventTuning) -> RandomEvent {
 }
 
 pub(crate) fn component_failure(kind: ComponentKind, id: &str, name: &str, fatal: bool, during_flare: bool) -> RandomEvent {
-    let cause = if during_flare { "Hit by the solar flare, the" } else { "The" };
+    let (cause, name) =
+        if during_flare { ("Hit by the solar flare, the", mid_sentence(name)) } else { ("The", name.to_string()) };
     let text = if fatal {
         format!("{cause} {name} failed. The spacecraft cannot work without it: the Mission ends.")
     } else {
@@ -149,6 +150,18 @@ pub(crate) fn battery_shortfall(id: &str, name: &str, eclipse_minutes: f64, worn
         component: Some(id.to_string()),
         prompt: None,
         choice: None,
+    }
+}
+
+/// A catalog name as it reads mid-sentence: "Deployable solar panels" becomes "deployable solar panels", but
+/// names that start with an abbreviation or a code ("S-band radio", "UHF radio") keep their capitals.
+fn mid_sentence(name: &str) -> String {
+    let first_word = name.split_whitespace().next().unwrap_or("");
+    let plain_word = first_word.chars().skip(1).all(|c| c.is_ascii_lowercase()) && first_word.len() > 1;
+    let mut chars = name.chars();
+    match chars.next() {
+        Some(c) if plain_word => c.to_lowercase().chain(chars).collect(),
+        _ => name.to_string(),
     }
 }
 

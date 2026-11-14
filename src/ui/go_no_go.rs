@@ -52,9 +52,10 @@ fn role_row(state: AppState, role: Role, outlook: Memo<Vec<ObjectiveOutlook>>) -
                             {if o.at_risk { " At risk" } else { " On track" }}
                         </span>
                     </div>
-                    {move || (solo() || vote() == Some(false)).then(|| view! {
-                        <div class="muted objection">{o.reason.clone()}</div>
-                    })}
+                    {move || {
+                        let text = if solo() { Some(o.reason.clone()) } else if vote() == Some(false) { Some(o.objection.clone()) } else { None };
+                        text.map(|t| view! { <div class="muted objection">{t}</div> })
+                    }}
                 })}
             </div>
             <Show when=move || !solo()>

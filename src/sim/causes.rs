@@ -1,13 +1,15 @@
 //! Debrief causes: why the Mission went the way it did, in plain language with this Run's numbers, the choice
 //! that led to it and, where there is one, what would fix it. Ordered by what they cost; thresholds and the cap
 //! live in `data/causes.toml`.
+use std::collections::BTreeSet;
+
 use serde::{Deserialize, Serialize};
 
 use super::catalog::*;
 use super::debrief::DebriefContext;
 use super::design::ReliabilityTier;
 use super::decisions::RIDE_OUT;
-use super::events::{EventKind, RandomEvent};
+use super::events::{EventKind, RandomEvent, days};
 use super::resources::{Resolved, Resources, downlink_mb, resolve, resources};
 use super::review::{Finding, GaugeState};
 
@@ -50,10 +52,12 @@ pub struct Cause {
 struct Weighed {
     cause: Cause,
     impact: f64,
+    /// This cause cut the Run short: a critical failure that ended it, or the Orbit giving out.
+    ended_run: bool,
 }
 
 fn weighed(kind: CauseKind, text: String, day: Option<u32>, impact: f64) -> Weighed {
-    Weighed { cause: Cause { kind, text, day }, impact }
+    Weighed { cause: Cause { kind, text: text.trim_end().to_string(), day }, impact, ended_run: false }
 }
 
 /// The causes of a Design that never flew: its Launch Review violations.
@@ -81,8 +85,8 @@ struct Facts<'a> {
     value_per_day: f64,
     /// Average Science Value of one MB of this Design's Data.
     value_per_mb: f64,
-    /// Days spent in safe mode after solar flares.
-    safe_mode_days: Vec<u32>,
+    /// Days spent in safe mode after solar flares (overlapping flares count each day once).
+    safe_mode_days: BTreeSet<u32>,
 }
 
 impl<'a> Facts<'a> {
@@ -101,7 +105,7 @@ impl<'a> Facts<'a> {
             Some(cap) => scenario.min_lifetime_days.min(cap.max(0.0).floor() as u32),
             None => scenario.min_lifetime_days,
         };
-        let mut safe_mode_days = Vec::new();
+        let mut safe_mode_days = BTreeSet::new();
         for day in ctx.timeline {
             if day.events.iter().any(safe_mode_flare) {
                 safe_mode_days.extend(day.day..day.day + scenario.events.flare_safe_mode_days);
@@ -154,23 +158,25 @@ pub(crate) fn causes(ctx: &DebriefContext) -> Vec<Cause> {
     problems.extend(data_lost(&f));
     problems.extend(component_failures(&f));
     problems.extend(orbit_lifetime(&f));
-    let coverage = poor_coverage(&f, rules);
-    let fit = poor_fit(&f, rules);
-    if coverage.is_none() && fit.is_empty() && !ctx.stats.science_met {
+    problems.extend(poor_coverage(&f, rules));
+    problems.extend(poor_fit(&f, rules));
+    problems.extend(flares(&f));
+    let floor = rules.min_impact_share * scenario.required_science_value;
+    // A poor Orbit or Instrument fit that matters already explains a low best case; otherwise say how far even a
+    // perfect Run of these Instruments falls short.
+    let fit_explains = problems
+        .iter()
+        .any(|w| matches!(w.cause.kind, CauseKind::PoorCoverage | CauseKind::PoorInstrumentFit) && w.impact > floor);
+    if !ctx.stats.science_met && !fit_explains {
         problems.extend(science_shortfall(&f));
     }
-    problems.extend(coverage);
-    problems.extend(fit);
-    problems.extend(flares(&f));
     // Most costly first; the sort is stable, so equal costs keep the order above.
     problems.sort_by(|a, b| b.impact.total_cmp(&a.impact));
-    let floor = rules.min_impact_share * scenario.required_science_value;
-    let mut problems: Vec<Cause> = problems.into_iter().filter(|w| w.impact > floor).map(|w| w.cause).collect();
 
     if !ctx.success {
-        problems.truncate(rules.max_causes);
-        return problems;
+        return failure_causes(&f, problems, floor, rules.max_causes);
     }
+    let mut problems: Vec<Cause> = problems.into_iter().filter(|w| w.impact > floor).map(|w| w.cause).collect();
     let mut out = vec![went_well(&f)];
     out.append(&mut problems);
     out.extend(risk_taken(&f));
@@ -178,6 +184,39 @@ pub(crate) fn causes(ctx: &DebriefContext) -> Vec<Cause> {
         out.extend(margin_limit(&f));
     }
     out.truncate(rules.max_causes);
+    out
+}
+
+/// The causes of a failed Run: the costliest ones above the floor, and always the ones that decided the failure,
+/// whatever they cost: what cut the Run short (when the Lifetime was missed) and the costliest reason the Science
+/// Value fell short (when it was missed). So a failed Run always says why, by construction.
+fn failure_causes(f: &Facts, mut problems: Vec<Weighed>, floor: f64, max: usize) -> Vec<Cause> {
+    let s = f.ctx.stats;
+    if !s.science_met && !problems.iter().any(|w| w.cause.kind != CauseKind::LifetimeShortfall) {
+        problems.push(science_margin(f));
+    }
+    let mut must: Vec<usize> = Vec::new();
+    if !s.lifetime_met {
+        must.extend(problems.iter().position(|w| w.ended_run));
+    }
+    if !s.science_met {
+        must.extend(problems.iter().position(|w| w.cause.kind != CauseKind::LifetimeShortfall));
+    }
+    let mut keep: Vec<bool> = (0..problems.len()).map(|i| must.contains(&i)).collect();
+    let mut room = max.saturating_sub(keep.iter().filter(|&&k| k).count());
+    for (i, w) in problems.iter().enumerate() {
+        if room > 0 && !keep[i] && w.impact > floor {
+            keep[i] = true;
+            room -= 1;
+        }
+    }
+    // The Science Value was reached: what cut the Run short is the whole story, so it comes first.
+    let lead = if s.science_met { problems.iter().position(|w| w.ended_run) } else { None };
+    let mut out: Vec<Cause> = Vec::new();
+    if let Some(i) = lead {
+        out.push(problems[i].cause.clone());
+    }
+    out.extend(problems.into_iter().enumerate().filter(|(i, _)| keep[*i] && Some(*i) != lead).map(|(_, w)| w.cause));
     out
 }
 
@@ -197,13 +236,24 @@ fn battery(f: &Facts) -> Option<Weighed> {
     let minutes = f.res.eclipse_minutes;
     let need_wh = f.res.eclipse_energy_wh;
     let healthy = f.catalog.review.battery_max_depth_of_discharge;
-    let fix = match f.catalog.batteries.iter().find(|b| b.capacity_wh * healthy >= need_wh) {
-        Some(b) if b.id != battery.id => format!(
-            "The {} would carry it through with a shallow, healthy discharge.",
-            b.name
+    let less_power = "use fewer or less power-hungry Instruments, so each eclipse takes less energy";
+    // The smallest bigger battery that would cover every eclipse for the whole planned Mission, wear included.
+    let mut bigger: Vec<&Battery> = f.catalog.batteries.iter().filter(|b| b.capacity_wh > battery.capacity_wh).collect();
+    bigger.sort_by(|a, b| a.capacity_wh.total_cmp(&b.capacity_wh));
+    let fix = match (bigger.iter().find(|b| days_until_short(f, b.capacity_wh).is_none()), bigger.last()) {
+        (Some(b), _) => format!(
+            "The {} would be drained only {} deep each eclipse and last the whole Mission.",
+            b.name,
+            pct(need_wh / b.capacity_wh)
         ),
-        _ => "Even the biggest battery would drain deep: use fewer power-hungry parts.".to_string(),
+        (None, Some(b)) => format!(
+            "Even the {} would be drained {} deep each eclipse and wear out before the end: {less_power}.",
+            b.name,
+            pct(need_wh / b.capacity_wh)
+        ),
+        (None, None) => format!("You already fly the biggest battery: {less_power}."),
     };
+    let depth = need_wh / battery.capacity_wh;
     let text = if need_wh > battery.capacity_wh {
         format!(
             "Your {} was too small: each orbit spends {minutes:.0} min in Earth's shadow, and getting through it takes \
@@ -212,18 +262,61 @@ fn battery(f: &Facts) -> Option<Weighed> {
             battery.name,
             pct(lost_share)
         )
-    } else {
+    } else if depth > healthy {
         format!(
             "Your {} was drained {} deep in each of the {minutes:.0} min in Earth's shadow every orbit (a healthy \
-             battery stays under {}), so it wore out. From day {first} it could no longer cover the eclipse, and {} of \
-             the Mission's operating time was lost. {fix}",
+             battery stays under {}), so it wore out fast. From day {first} it could no longer cover the eclipse, and \
+             {} of the Mission's operating time was lost. {fix}",
             battery.name,
-            pct(need_wh / battery.capacity_wh),
+            pct(depth),
             pct(healthy),
+            pct(lost_share)
+        )
+    } else {
+        format!(
+            "Your {} was drained {} deep in each of the {minutes:.0} min in Earth's shadow every orbit, within the \
+             healthy {}, but every eclipse still wears a battery a little. After about {} eclipses that slow wear left \
+             it too weak: from day {first} it could no longer cover the eclipse, and {} of the Mission's operating time \
+             was lost. {fix}",
+            battery.name,
+            pct(depth),
+            pct(healthy),
+            thousands(f64::from(first) * cycles_per_day(f)),
             pct(lost_share)
         )
     };
     Some(weighed(CauseKind::BatteryTooSmall, text, Some(first), lost_days * f.value_per_day))
+}
+
+/// Eclipses (orbits) per day in the chosen Orbit.
+fn cycles_per_day(f: &Facts) -> f64 {
+    f.r.orbit.filter(|o| o.period_min > 0.0).map_or(0.0, |o| 24.0 * 60.0 / o.period_min)
+}
+
+/// The first day a battery of `capacity_wh` could no longer cover the eclipse, worn by the same rule the Run uses
+/// (`data/run.toml`), or `None` if it lasts the whole planned Mission.
+fn days_until_short(f: &Facts, capacity_wh: f64) -> Option<u32> {
+    let need = f.res.eclipse_energy_wh;
+    let healthy = f.catalog.review.battery_max_depth_of_discharge;
+    let rules = &f.catalog.run_rules;
+    let cycles = cycles_per_day(f);
+    if need <= 0.0 || healthy <= 0.0 {
+        return None;
+    }
+    let mut now = capacity_wh;
+    for day in 1..=f.planned_days {
+        if now > 0.0 {
+            let relative = (need / now / healthy).min(1.0 / healthy);
+            let wear = rules.battery_fade_per_cycle_at_max_depth
+                * cycles
+                * (0..rules.battery_fade_exponent).fold(1.0, |acc, _| acc * relative);
+            now = (now - wear * capacity_wh).max(0.0);
+        }
+        if need > now {
+            return Some(day);
+        }
+    }
+    None
 }
 
 fn data_lost(f: &Facts) -> Option<Weighed> {
@@ -305,36 +398,47 @@ fn component_failures(f: &Facts) -> Vec<Weighed> {
         for e in day.events.iter().filter(|e| e.kind == EventKind::ComponentFailure) {
             let Some(id) = &e.component else { continue };
             let Some((name, tier, critical, lost)) = part(f, id) else { continue };
-            let flare_day =
-                f.safe_mode_days.contains(&day.day) || day.events.iter().any(|e| e.kind == EventKind::SolarFlare);
-            let flare = if flare_day { ", hit by a solar flare," } else { "" };
+            // The flare raises the failure chance on its own day only.
+            let flare_day = day.events.iter().any(|e| e.kind == EventKind::SolarFlare);
+            let flare = if flare_day { " when a solar flare hit" } else { "" };
             let tier_text = tier_name(f, tier);
             let advice = tier_advice(f, tier);
             let (text, impact) = if critical {
-                let missing = f.planned_days.saturating_sub(day.day.saturating_sub(1));
-                let short = f.scenario.min_lifetime_days.saturating_sub(day.day.saturating_sub(1));
+                // It failed on this day, so the days before it are the days fully flown.
+                let flown = day.day.saturating_sub(1);
+                let missing = f.planned_days.saturating_sub(flown);
+                let short = f.scenario.min_lifetime_days.saturating_sub(flown);
                 (
                     format!(
-                        "Your {tier_text} {name} failed on day {}{flare} and the Mission ended there, {short} days short \
-                         of the {} days needed. {advice}",
-                        day.day, f.scenario.min_lifetime_days
+                        "Your {tier_text} {name} failed on day {}{flare} and the Mission ended there, after {flown} of \
+                         the {} days needed ({} short). {advice}",
+                        day.day,
+                        f.scenario.min_lifetime_days,
+                        days(short)
                     ),
                     f64::from(missing) * f.value_per_day + f.penalty(short),
                 )
             } else {
                 let remaining = f.days_flown().saturating_sub(day.day);
                 let kept = f.catalog.run_rules.degraded_output_fraction;
+                let rest = if remaining == 0 {
+                    "on the last day of the Mission".to_string()
+                } else {
+                    format!("for the last {}", days(remaining))
+                };
                 (
                     format!(
-                        "Your {tier_text} {name} failed on day {}{flare}. It kept working at {} of normal for the last \
-                         {remaining} days, so {lost}. {advice}",
+                        "Your {tier_text} {name} failed on day {}{flare}. It kept working at {} of normal {rest}, so \
+                         {lost}. {advice}",
                         day.day,
                         pct(kept)
                     ),
                     f64::from(remaining) * f.value_per_day * (1.0 - kept),
                 )
             };
-            out.push(weighed(CauseKind::ComponentFailure, text, Some(day.day), impact));
+            let mut w = weighed(CauseKind::ComponentFailure, text, Some(day.day), impact);
+            w.ended_run = critical;
+            out.push(w);
         }
     }
     out
@@ -384,13 +488,18 @@ fn orbit_lifetime(f: &Facts) -> Option<Weighed> {
             format!(" The {} lasts long enough for {}.", o.name, f.scenario.name)
         });
     let text = format!(
-        "{why} after {} days, {short} days before the {min} days {} needs.{better}",
-        f.planned_days, f.scenario.name
+        "{why} after {}, {} before the {min} days {} needs.{better}",
+        days(f.planned_days),
+        days(short),
+        f.scenario.name
     );
     // Days lost to the Orbit are only counted if a failure did not end the Run before.
-    let lost_days = if f.days_flown() >= f.planned_days { short } else { 0 };
+    let reached_end = f.days_flown() >= f.planned_days;
+    let lost_days = if reached_end { short } else { 0 };
     let impact = f64::from(lost_days) * f.value_per_day + f.penalty(lost_days);
-    Some(weighed(CauseKind::LifetimeShortfall, text, Some(f.planned_days), impact))
+    let mut w = weighed(CauseKind::LifetimeShortfall, text, Some(f.planned_days), impact);
+    w.ended_run = reached_end;
+    Some(w)
 }
 
 fn cov(o: &Orbit, scenario_id: &str) -> f64 {
@@ -461,30 +570,50 @@ fn science_shortfall(f: &Facts) -> Option<Weighed> {
     Some(weighed(CauseKind::ScienceShortfall, text, None, required - best_case))
 }
 
+/// The Science Value fell short with no bigger reason to blame: a perfect Run would just have made it, so the
+/// Design had too little margin for the small losses every Run has.
+fn science_margin(f: &Facts) -> Weighed {
+    let s = f.ctx.stats;
+    let best_case = f.value_per_day_all * f64::from(f.scenario.min_lifetime_days);
+    let text = format!(
+        "Science Value reached {} of the {} required. Even a perfect Run of these Instruments would earn only about \
+         {}, so there was almost no margin, and the small losses of a real Run (eclipses, Data left on board, Random \
+         Events) were enough to miss. Carry another Instrument that suits {}, or pick an Orbit that covers it better.",
+        value(s.science_value),
+        value(s.required_science_value),
+        value(best_case),
+        f.scenario.name
+    );
+    weighed(CauseKind::ScienceShortfall, text, None, (s.required_science_value - s.science_value).max(0.0))
+}
+
 fn flares(f: &Facts) -> Option<Weighed> {
-    let days: Vec<u32> = f
+    let flare_days: Vec<u32> = f
         .ctx
         .timeline
         .iter()
         .filter(|d| d.events.iter().any(safe_mode_flare))
         .map(|d| d.day)
         .collect();
-    if days.is_empty() {
+    if flare_days.is_empty() {
         return None;
     }
     let flown = f.days_flown();
     let safe: Vec<&u32> = f.safe_mode_days.iter().filter(|&&d| d <= flown).collect();
     let impact = safe.len() as f64 * f.value_per_day;
-    let (count, day_word) =
-        if days.len() == 1 { ("A solar flare".to_string(), "day") } else { (format!("{} solar flares", days.len()), "days") };
+    let (count, day_word) = if flare_days.len() == 1 {
+        ("A solar flare".to_string(), "day")
+    } else {
+        (format!("{} solar flares", flare_days.len()), "days")
+    };
     let text = format!(
-        "{count} ({day_word} {}) put the spacecraft in safe mode for {} days in all, costing about {} Science Value. No \
+        "{count} ({day_word} {}) put the spacecraft in safe mode for {} in all, costing about {} Science Value. No \
          Design can stop a flare: a margin above the required Science Value absorbs it.",
-        list(&days),
-        safe.len(),
+        list(&flare_days),
+        days(safe.len() as u32),
         value(impact)
     );
-    Some(weighed(CauseKind::RandomEvents, text, days.first().copied(), impact))
+    Some(weighed(CauseKind::RandomEvents, text, flare_days.first().copied(), impact))
 }
 
 fn went_well(f: &Facts) -> Cause {
@@ -574,6 +703,20 @@ fn pct(fraction: f64) -> String {
 
 fn value(v: f64) -> String {
     if v.abs() < 10.0 { format!("{v:.1}") } else { format!("{v:.0}") }
+}
+
+/// A count, rounded to hundreds from 1,000 up, with thousands separators: "40", "4,900".
+fn thousands(n: f64) -> String {
+    let n = if n >= 1000.0 { (n / 100.0).round() * 100.0 } else { n.round().max(1.0) } as u64;
+    let digits = n.to_string();
+    let mut out = String::new();
+    for (i, ch) in digits.chars().enumerate() {
+        if i > 0 && (digits.len() - i).is_multiple_of(3) {
+            out.push(',');
+        }
+        out.push(ch);
+    }
+    out
 }
 
 /// A Data volume in MB or GB.

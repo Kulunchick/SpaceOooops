@@ -105,8 +105,9 @@ pub fn run_with_decisions(
     let success = r.scenario.is_some() && stats.science_met && stats.lifetime_met;
     let ending = if state.ended {
         format!(
-            "The Mission ended on day {} of {} planned days of operations: a critical Component failed.",
-            state.day, ctx.planned_days
+            "The Mission ended on day {}: a critical Component failed, so only {} of the {} planned days of \
+             operations were flown.",
+            state.day, days_survived, ctx.planned_days
         )
     } else if ctx.planned_days < res.min_lifetime_days {
         format!(
@@ -185,6 +186,8 @@ struct RunContext<'a> {
     battery_max_depth: f64,
     downlink_mb_per_day: f64,
     storage_mb: f64,
+    /// Budget left after the Design's cost, before anything is bought during the Run.
+    budget_left_usd: f64,
 }
 
 const NO_EVENTS: EventTuning = EventTuning {
@@ -252,6 +255,7 @@ impl<'a> RunContext<'a> {
             battery_max_depth: catalog.review.battery_max_depth_of_discharge,
             downlink_mb_per_day: res.downlink_mb_per_day,
             storage_mb: computer.storage_mb,
+            budget_left_usd: res.budget_usd - res.cost.total_usd,
         }
     }
 }
@@ -351,7 +355,7 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
         day_events.push(event);
     }
     if draws.outage && s.outage_days_left == 0 {
-        let prompt = decisions::outage_prompt(s.day, tuning, choices);
+        let prompt = decisions::outage_prompt(s.day, tuning, choices, ctx.budget_left_usd - s.extra_cost_usd);
         let (choice, by_player) = decisions::chosen(&prompt, ctx.decisions);
         let buy = choice == decisions::BUY_STATION_TIME;
         let cost_usd = if buy { choices.outage_station_time_cost_usd } else { 0.0 };
