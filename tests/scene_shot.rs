@@ -25,7 +25,7 @@ fn the_title_shows_the_scene_clearly() {
 #[test]
 fn screens_still_laid_out_as_full_pages_dim_the_scene_behind_them() {
     // Design is a hangar over a visible scene since ticket 02 (see tests/scene_spacecraft.rs).
-    for screen in [Screen::LaunchReview, Screen::Run, Screen::Debrief] {
+    for screen in [Screen::Run, Screen::Debrief] {
         assert!(scene::build(&SceneInputs::on(screen)).dimmed, "{screen:?} should dim the scene");
     }
 }

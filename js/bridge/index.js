@@ -12,6 +12,7 @@ import { createCameraRig } from './camera.js';
 import { createTitleCraft } from './spacecraft.js';
 import { createHangar } from './hangar.js';
 import { createMarkers } from './markers.js';
+import { createPad } from './pad.js';
 
 let renderer = null;
 let scene = null;
@@ -46,12 +47,15 @@ function buildWorld() {
   if (spec) markers.set(spec.markers);
   const hangar = createHangar({ scene, camera, canvas: canvasEl });
   if (spec) hangar.apply(spec, reducedMotion);
-  return { earth, clouds, stars, craft, orbit, hangar };
+  const pad = createPad({ scene, camera, canvas: canvasEl });
+  if (spec) pad.apply(spec, reducedMotion);
+  return { earth, clouds, stars, craft, orbit, hangar, pad };
 }
 
 function disposeWorld() {
   if (!world) return;
   world.hangar.dispose();
+  world.pad.dispose();
   for (const obj of [world.earth, world.stars, world.orbit]) {
     scene.remove(obj);
     obj.traverse((o) => {
@@ -87,6 +91,7 @@ function frame(dt, seconds) {
   markers?.update(seconds, reducedMotion);
   renderer.domElement.dataset.flying = String(rig.flying);
   world.hangar.frame(dt, t);
+  world.pad.frame(dt, t);
   renderer.render(scene, camera);
 }
 
@@ -131,6 +136,7 @@ export function apply(sceneSpec) {
   spec = sceneSpec;
   if (rig) rig.setShot(sceneSpec.shot);
   world?.hangar.apply(sceneSpec, reducedMotion);
+  world?.pad.apply(sceneSpec, reducedMotion);
   markers?.set(sceneSpec.markers);
 }
 
@@ -150,6 +156,7 @@ export function setReducedMotion(on) {
   reducedMotion = Boolean(on);
   rig?.cut();
   world?.hangar.setReducedMotion(reducedMotion);
+  world?.pad.setReducedMotion(reducedMotion);
 }
 
 // Audio lives in audio.js and is loaded by Rust directly (it must work without WebGL); re-exported for the contract.

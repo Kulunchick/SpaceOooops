@@ -36,6 +36,10 @@ pub struct AppState {
     pub team: RwSignal<Team>,
     /// Go/No-Go votes per Role at Launch Review; any Design change clears them.
     pub votes: RwSignal<Votes>,
+    /// The launch sequence (countdown, lift-off) is playing between Launch Review and the Run (ticket 07).
+    pub launching: RwSignal<bool>,
+    /// The 3D scene is running (false while loading and without WebGL); set by the scene layer.
+    pub scene_live: RwSignal<bool>,
 }
 
 impl AppState {
@@ -53,6 +57,8 @@ impl AppState {
             votes.set(Votes::default());
         });
         AppState {
+            launching: RwSignal::new(false),
+            scene_live: RwSignal::new(false),
             team: RwSignal::new(Team::default()),
             votes,
             catalog,
@@ -77,6 +83,30 @@ impl AppState {
 
     pub fn go(&self, screen: Screen) {
         self.screen.set(screen);
+    }
+
+    /// The Launch button: plays the launch sequence when the 3D scene is running and motion is allowed, then the
+    /// Run starts; otherwise straight to the Run, as before the overhaul.
+    pub fn begin_launch(&self) {
+        if self.launching.get_untracked() {
+            return;
+        }
+        if self.scene_live.get_untracked() && !super::scene_bridge::reduced_motion() {
+            self.launching.set(true);
+            // Safety net: the Run starts even if the renderer never reports the end of the sequence.
+            let state = *self;
+            set_timeout(move || state.finish_launch(), std::time::Duration::from_secs(25));
+        } else {
+            self.launch();
+        }
+    }
+
+    /// Ends the launch sequence (it finished, or was skipped) and starts the Run. Safe to call twice.
+    pub fn finish_launch(&self) {
+        if self.launching.get_untracked() {
+            self.launching.set(false);
+            self.launch();
+        }
     }
 
     /// Flies the current Design with a fresh seed and starts the Run playback. Also "Fly again".

@@ -63,7 +63,12 @@ fn preview(c: &Catalog, d: &Design) -> HangarPreview {
         inclination_deg: o.inclination_deg,
         class: o.orbit_class.clone(),
     });
-    let launch_vehicle = d.launch_vehicle.as_deref().and_then(|id| c.launch_vehicle(id)).map(|lv| {
+    HangarPreview { orbit, launch_vehicle: rocket_preview(c, d) }
+}
+
+/// The rocket of the Design's chosen Launch Vehicle (shared with the launch pad).
+pub(super) fn rocket_preview(c: &Catalog, d: &Design) -> Option<RocketPreview> {
+    d.launch_vehicle.as_deref().and_then(|id| c.launch_vehicle(id)).map(|lv| {
         let height_m = if lv.rocket.height_m > 0.0 { lv.rocket.height_m } else { 20.0 };
         RocketPreview {
             id: lv.id.clone(),
@@ -71,6 +76,5 @@ fn preview(c: &Catalog, d: &Design) -> HangarPreview {
             height_m,
             height: 0.7 * (height_m / 4.0).ln().max(0.5),
         }
-    });
-    HangarPreview { orbit, launch_vehicle }
+    })
 }

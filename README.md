@@ -70,6 +70,8 @@ entry to `data/credits.toml`, then update this list.
 - Kenney UI SFX Set (click and snap sounds), by Kenney Vleugels (Kenney.nl). CC0 1.0 (sound). Source: https://kenney.nl/assets/ui-audio (click1.ogg, switch1.ogg)
 - Outer Space Loop (menu music), by wipics. CC0 1.0 (music). Source: https://opengameart.org/content/outer-space-loop
 - Space Flight (Run music), by wipics. CC0 1.0 (music). Source: https://opengameart.org/content/space-flight
+- Kenney Sci-Fi Sounds (launch engine and ignition), by Kenney Vleugels (Kenney.nl). CC0 1.0 (sound). Source: https://kenney.nl/assets/sci-fi-sounds (spaceEngineLarge_000.ogg, lowFrequency_explosion_000.ogg)
+- Kenney Interface Sounds (Go and No-Go votes), by Kenney Vleugels (Kenney.nl). CC0 1.0 (sound). Source: https://kenney.nl/assets/interface-sounds (confirmation_002.ogg, error_001.ogg)
 <!-- credits:end -->
 
 The static backdrop `assets/images/fallback-earth.svg` and the favicon are the team's own work.

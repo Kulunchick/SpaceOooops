@@ -31,6 +31,9 @@ export async function scene_init(canvas, quality) {
         return false;
     }
 }
+export function scene_reduced_motion() {
+    return Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
 export function scene_apply(json) {
     latest = json;
     if (bridge) bridge.apply(JSON.parse(json));
@@ -41,6 +44,13 @@ extern "C" {
     fn scene_init(canvas: &web_sys::HtmlCanvasElement, quality: &str) -> js_sys::Promise;
     /// Hands the bridge the latest Scene Spec as JSON (kept until the bridge is ready).
     fn scene_apply(json: &str);
+    /// The player asked the browser for reduced motion.
+    fn scene_reduced_motion() -> bool;
+}
+
+/// Reduced motion skips the launch sequence, as it cuts every camera move.
+pub fn reduced_motion() -> bool {
+    scene_reduced_motion()
 }
 
 /// Whether the 3D scene is running. Exposed on the scene layer as `data-scene` for CSS and browser tests.
@@ -71,6 +81,7 @@ pub fn SceneLayer() -> impl IntoView {
     canvas.on_load(move |el| {
         leptos::task::spawn_local(async move {
             let live = JsFuture::from(scene_init(&el, "high")).await.ok().and_then(|v| v.as_bool()).unwrap_or(false);
+            state.scene_live.set(live);
             mode.set(if live { SceneMode::Live } else { SceneMode::Fallback });
         });
     });
@@ -79,9 +90,14 @@ pub fn SceneLayer() -> impl IntoView {
     let spec = Memo::new(move |_| {
         let screen = state.screen.get();
         let chosen = state.scenario_id.get();
+        // Solo play never votes, so only team play puts vote lamps on the tower.
+        let votes: Vec<Option<bool>> = if state.team.with(|t| t.solo) { Vec::new() } else { state.votes.get().to_vec() };
+        let launching = state.launching.get();
         state.design.with(|design| {
             state.catalog.with_value(|c| {
                 scene::build(&SceneInputs {
+                    votes: &votes,
+                    launching,
                     catalog: Some(c),
                     design: Some(design),
                     scenarios: &c.scenarios,
@@ -91,6 +107,8 @@ pub fn SceneLayer() -> impl IntoView {
             })
         })
     });
+    // The renderer reports the end of the launch sequence (finished or skipped by a click).
+    let _ = window_event_listener_untyped("spaceooops-launch-done", move |_| state.finish_launch());
     Effect::new(move |_| spec.with(|s| scene_apply(&scene::to_json(s))));
     // Audio: the music track from the spec, and one-shot Cues from the change since the previous spec.
     // Audio is independent of the renderer, so this runs with or without WebGL.

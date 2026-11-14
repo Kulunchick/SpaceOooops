@@ -13,6 +13,12 @@
 const SAMPLES = {
   snap: 'snap.ogg',
   click: 'click.ogg',
+  go: 'vote-go.ogg',
+  nogo: 'vote-nogo.ogg',
+  engine: 'launch-engine.ogg',
+  ignition: 'launch-ignition.ogg',
+  // 'launch' (the Cue when Launch is pressed) and 'countdown' (one tick per second, played by pad.js) have no
+  // sample: they are the synthesised tone.
 };
 const TRACKS = {
   menu: 'music-menu.mp3',

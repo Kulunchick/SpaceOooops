@@ -64,3 +64,23 @@ licence_file = "assets/audio/LICENSE-wipics-cc0.txt"
 kind = "music"
 ai_generated = false
 files = ["assets/audio/music-run.mp3"]
+
+[[asset]]
+name = "Kenney Sci-Fi Sounds (launch engine and ignition)"
+author = "Kenney Vleugels (Kenney.nl)"
+source = "https://kenney.nl/assets/sci-fi-sounds (spaceEngineLarge_000.ogg, lowFrequency_explosion_000.ogg)"
+licence = "CC0 1.0"
+licence_file = "assets/audio/LICENSE-kenney-sci-fi-sounds.txt"
+kind = "sound"
+ai_generated = false
+files = ["assets/audio/launch-engine.ogg", "assets/audio/launch-ignition.ogg"]
+
+[[asset]]
+name = "Kenney Interface Sounds (Go and No-Go votes)"
+author = "Kenney Vleugels (Kenney.nl)"
+source = "https://kenney.nl/assets/interface-sounds (confirmation_002.ogg, error_001.ogg)"
+licence = "CC0 1.0"
+licence_file = "assets/audio/LICENSE-kenney-interface-sounds.txt"
+kind = "sound"
+ai_generated = false
+files = ["assets/audio/vote-go.ogg", "assets/audio/vote-nogo.ogg"]
