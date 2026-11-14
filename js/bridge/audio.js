@@ -216,6 +216,16 @@ const SYNTHS = {
     note('triangle', 392, 392, 0, 0.12, 0.3);
     note('triangle', 294, 294, 0.16, 0.18, 0.3);
   },
+  // Debrief, Success: a rising major arpeggio (C E G C) ending on a held chord.
+  success: () => {
+    [523, 659, 784, 1047].forEach((f, i) => note('triangle', f, f, i * 0.14, 0.3, 0.28));
+    [523, 659, 784].forEach((f) => note('sine', f, f, 0.56, 0.9, 0.18));
+  },
+  // Debrief, failed Mission: three slow falling notes in a minor key and a low sag.
+  'mission-failed': () => {
+    [392, 311, 233].forEach((f, i) => note('sawtooth', f, f * 0.97, i * 0.32, 0.4, 0.16));
+    note('sine', 110, 55, 0.9, 0.9, 0.3);
+  },
 };
 
 export function play(cue) {

@@ -6,6 +6,7 @@
 //! Each concern lives in its own file (see the low-poly overhaul architecture contract). Every field added
 //! to `SceneSpec` after the first version is optional or has a default, so an older renderer ignores it.
 mod cues;
+mod debrief;
 pub mod effects;
 mod hangar;
 mod markers;
@@ -19,6 +20,7 @@ use serde::Serialize;
 use crate::sim::{Catalog, Design};
 
 pub use cues::{one_shots, Cue, Track};
+pub use debrief::{fate_for_cause, DebriefScene, Fate, PartClass};
 pub use effects::{Effect, EffectKind, Station};
 pub use hangar::{HangarPreview, OrbitPreview, RocketPreview};
 pub use markers::Marker;
@@ -48,7 +50,7 @@ impl Screen {
     /// Screens whose scene shows the spacecraft assembled from the Design. Later tickets add their screens
     /// (Launch Review on the pad, the Run in orbit, the Debrief shots) here.
     pub fn shows_spacecraft(self) -> bool {
-        matches!(self, Screen::Design | Screen::LaunchReview | Screen::Run)
+        matches!(self, Screen::Design | Screen::LaunchReview | Screen::Run | Screen::Debrief)
     }
 }
 
@@ -119,6 +121,9 @@ pub struct SceneSpec {
     /// Ground stations on the globe during the Run (their beacons, outages and contact beams).
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub stations: Vec<Station>,
+    /// The Debrief's verdict visual (Debrief screen with a finished Run only).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub debrief: Option<DebriefScene>,
     /// The music track that should be playing now (the bridge crossfades when it changes).
     pub music: Track,
 }
@@ -126,8 +131,10 @@ pub struct SceneSpec {
 /// Builds the Scene Spec for the given inputs.
 pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
     let orbit = orbit::for_inputs(inputs);
+    let debrief = debrief::for_inputs(inputs);
     SceneSpec {
         shot: markers::shot(inputs.screen, inputs.scenarios, inputs.chosen)
+            .or_else(|| debrief.as_ref().map(shot::for_debrief))
             .or_else(|| orbit.as_ref().map(|o| Shot::Orbit { radius: o.radius }))
             .unwrap_or_else(|| shot::for_screen(inputs.screen)),
         dimmed: shot::dims(inputs.screen),
@@ -138,6 +145,7 @@ pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
         orbit,
         effects: effects::for_inputs(inputs),
         stations: effects::stations_for(inputs),
+        debrief,
         music: cues::track_for(inputs.screen),
     }
 }

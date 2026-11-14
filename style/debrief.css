@@ -1,0 +1,33 @@
+/* Debrief over the dimmed scene (low-poly ticket 08): every section in one scrollable panel at the left, the
+   spacecraft's verdict (hero shot or failure visual) beside it on the right (the camera rig shifts the scene).
+   On narrow screens the panel sits below the picture. Without WebGL the Debrief is the plain page it was. */
+.screen.debrief {
+  max-width: 44rem;
+  margin: 0 0 0 clamp(0rem, 2vw, 2rem);
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.screen.debrief > h2 {
+  font-family: var(--lp-font-display);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--lp-accent);
+  text-shadow: 0 3px 0 #7a3d10;
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  margin-top: 0;
+}
+/* The veil: strong behind the panel, fading out to the right so the verdict scene stays visible. */
+.scene-layer[data-scene="live"].dimmed:has(~ .app .screen.debrief)::after {
+  opacity: 1;
+  background: linear-gradient(90deg, rgba(7, 11, 22, 0.92) 0, rgba(7, 11, 22, 0.88) 42rem, rgba(7, 11, 22, 0.25) 100%);
+}
+@media (max-width: 900px) {
+  .screen.debrief { max-width: 100%; margin: 42vh 0 0; max-height: none; overflow: visible; }
+  .scene-layer[data-scene="live"].dimmed:has(~ .app .screen.debrief)::after {
+    background: linear-gradient(180deg, rgba(7, 11, 22, 0.2) 0, rgba(7, 11, 22, 0.2) 35vh, rgba(7, 11, 22, 0.9) 50vh);
+  }
+}
+/* Without WebGL the Debrief keeps the page it always was. */
+.scene-layer[data-scene="fallback"] ~ .app .screen.debrief { max-width: 960px; margin: 0 auto; max-height: none; overflow: visible; }

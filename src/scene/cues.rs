@@ -58,6 +58,10 @@ pub enum Cue {
     Failure,
     /// Run: the battery stops covering the eclipse.
     BatteryShortfall,
+    /// The Debrief opens on a Success: a jingle.
+    Success,
+    /// The Debrief opens on a failed Mission: a falling tone.
+    MissionFailed,
 }
 
 impl Cue {
@@ -72,6 +76,8 @@ impl Cue {
             Cue::Outage => "outage",
             Cue::Failure => "failure",
             Cue::BatteryShortfall => "battery",
+            Cue::Success => "success",
+            Cue::MissionFailed => "mission-failed",
         }
     }
 }
@@ -103,6 +109,7 @@ pub fn one_shots(previous: &SceneSpec, current: &SceneSpec) -> Vec<Cue> {
         }
     }
     cues.extend(event_cues(previous, current));
+    cues.extend(verdict_cue(previous, current));
     cues
 }
 
@@ -130,4 +137,11 @@ fn event_cues(previous: &SceneSpec, current: &SceneSpec) -> Vec<Cue> {
         }
     }
     cues
+}
+
+/// The verdict Cue: once, when the Debrief opens straight from the Run (the previous spec was the Run's orbit
+/// view). A re-render of the Debrief, or any other way of reaching it, is silent.
+fn verdict_cue(previous: &SceneSpec, current: &SceneSpec) -> Option<Cue> {
+    let debrief = current.debrief.as_ref()?;
+    (previous.orbit.is_some() && previous.debrief.is_none()).then_some(if debrief.success { Cue::Success } else { Cue::MissionFailed })
 }
