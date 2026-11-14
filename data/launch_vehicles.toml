@@ -2,6 +2,16 @@
 # `capacity_kg` lists the Mass it can carry to each orbit id; an Orbit not listed cannot be reached.
 
 [[launch_vehicles]]
+id = "station-deploy"
+name = "Space-station deployment"
+why = "Your CubeSat rides a cargo ship to the International Space Station and is pushed out by a small spring deployer. A cheap, gentle ride, but only to the station's low 400 km Orbit, where drag pulls it down within about a year."
+real_example = "like the Nanoracks CubeSat Deployer on the International Space Station"
+# source: station deployers take CubeSats up to 6U (~12 kg); commercial prices were ~US$85k per U in the 2010s,
+# so ~US$300k for a 6U slot here (approximate).
+cost_usd = 300_000.0
+capacity_kg = { leo-400 = 12.0 }
+
+[[launch_vehicles]]
 id = "cubesat-rideshare"
 name = "CubeSat rideshare"
 why = "Your CubeSat flies in a dispenser next to dozens of others on a big rocket. Cheap, but the slot has a strict Mass limit and the rocket goes where its main customer wants."
@@ -11,10 +21,41 @@ cost_usd = 330_000.0
 capacity_kg = { sso-600 = 12.0 }
 
 [[launch_vehicles]]
+id = "smallsat-rideshare"
+name = "SmallSat rideshare"
+why = "A bigger rideshare slot that bolts a satellite of up to a few hundred kilograms onto the ring of a big rocket. Room for a 12U CubeSat or a SmallSat, but only to the sun-synchronous Orbit the rocket is going to."
+real_example = "like an ESPA-class slot on a SpaceX Transporter rideshare mission"
+# source: trade press (SmallSat News, secondary) reported ~US$1.1 million for 200 kg on a SpaceX rideshare.
+cost_usd = 1_100_000.0
+capacity_kg = { sso-600 = 200.0 }
+
+[[launch_vehicles]]
+id = "geo-rideshare"
+name = "GEO rideshare slot"
+why = "A small spacecraft rides as a secondary passenger on a rocket that is taking a big satellite toward geostationary Orbit. The only affordable way to GEO, but the slot is small and strict about Mass, and it still costs millions."
+real_example = "like the secondary-payload ring on US Space Force Falcon Heavy and Atlas V launches that fly straight to GEO"
+# source: game estimate. Reaching GEO costs several times more per kilogram than low orbit
+# (roughly US$150-200k per kg for small secondary payloads); a 12U-sized slot of ~18 kg here.
+cost_usd = 3_500_000.0
+capacity_kg = { geo = 18.0 }
+
+[[launch_vehicles]]
 id = "small-launcher"
 name = "Small dedicated launcher"
 why = "A whole small rocket just for you: it carries hundreds of kilograms to exactly the Orbit you want, at a price far above a CubeSat budget."
 real_example = "like Rocket Lab Electron"
-# source: Electron lists ~US$7.5 million per launch and ~200 kg to a 500-600 km SSO.
+# source: Electron lists ~US$7.5 million per launch and ~200 kg to a 500-600 km SSO, ~300 kg to low Earth orbit
+# (Wikipedia, citing Rocket Lab; secondary).
 cost_usd = 7_500_000.0
-capacity_kg = { sso-600 = 200.0 }
+capacity_kg = { leo-400 = 300.0, sso-600 = 200.0 }
+
+[[launch_vehicles]]
+id = "medium-launcher"
+name = "Medium launcher"
+why = "A big rocket that can lift tonnes, even to geostationary Orbit. It takes you anywhere, but one launch costs more than most whole satellite programmes."
+real_example = "like SpaceX Falcon 9"
+# source: Falcon 9 ~17,400 kg to low Earth orbit and ~5,800 kg to geostationary transfer orbit with booster
+# landing (Wikipedia, citing SpaceX; secondary); list price ~US$70 million. Reaching GEO itself needs the
+# satellite's own engine, so ~3,000 kg here (approximate).
+cost_usd = 70_000_000.0
+capacity_kg = { leo-400 = 17_400.0, sso-600 = 13_000.0, geo = 3_000.0 }
