@@ -25,6 +25,27 @@ cost_usd = 60_000.0
 size_u = 6.0
 usable_volume_u = 5.5
 
+[[structures]]
+id = "cubesat-12u"
+name = "CubeSat 12U"
+why = "Twelve cubes in a 2 x 2 x 3 block, about the size of a small suitcase. Room for a big payload or several Instruments, but too heavy for a 6U rideshare slot."
+# source: 12U bus frame + power board + harness ~6 kg; 12U is the largest common CubeSat dispenser size.
+mass_kg = 6.0
+cost_usd = 100_000.0
+size_u = 12.0
+usable_volume_u = 11.0
+
+[[structures]]
+id = "smallsat"
+name = "SmallSat (100 kg class)"
+why = "A microsatellite about the size of a washing machine. Plenty of room and wall area for solar cells, but the empty bus already weighs tens of kilograms, so it needs a big, expensive launch slot."
+# source: ESPA-class microsatellite buses (~100-180 kg fully loaded) have a dry bus of ~50 kg and cost ~US$1-2 million.
+mass_kg = 50.0
+cost_usd = 1_500_000.0
+# Outer wall area about that of a 60U CubeSat, for body-mounted solar cells.
+size_u = 60.0
+usable_volume_u = 50.0
+
 # ---------------------------------------------------------------- Solar panels
 [[solar_panels]]
 id = "solar-body"
@@ -128,6 +149,21 @@ volume_u = 0.4
 downlink_mbps = 2.0
 # source: commercial ground-station networks charge roughly US$100-500 per pass.
 ops_cost_usd_per_day = 300.0
+critical = true
+
+[[comms]]
+id = "comms-x-band"
+name = "X-band radio"
+why = "A high-speed band with a directional antenna: tens of megabits per second, enough to send heavy science Data even in short passes. The radio, and the bigger ground dishes it needs, cost more."
+# source: commercial CubeSat X-band transmitters: ~0.3-0.6 kg, ~50-150 Mbps, ~10 W while transmitting
+# (only during passes, so ~3 W orbit average).
+mass_kg = 0.6
+power_w = 3.0
+cost_usd = 150_000.0
+volume_u = 0.4
+downlink_mbps = 50.0
+# source: X-band passes need larger dishes; commercial networks charge more per pass than for S-band.
+ops_cost_usd_per_day = 600.0
 critical = true
 
 # ---------------------------------------------------------------- Computer (one option, always on board)

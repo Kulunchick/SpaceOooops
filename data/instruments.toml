@@ -40,3 +40,64 @@ volume_u = 0.5
 data_mb_per_day = 60.0
 needs_fine_pointing = false
 fit = { crop-watch = 0.3 }
+
+# ---------------------------------------------------------------- Connect the Villages
+# For a communications payload, "Data" is the village traffic it carries; the spacecraft's comms band is the
+# feeder link that passes it to the gateway ground station.
+
+[[instruments]]
+id = "village-relay"
+name = "Ka-band village relay"
+why = "A radio relay with a small folding dish aimed at Angola. Village terminals with small dishes talk to it, and it passes their phone and internet traffic to a gateway station over the spacecraft's comms band. A village is only served while the satellite is in view, so it needs an Orbit that stays over Angola."
+# source: game estimate from CubeSat Ka-band communication payload demonstrations: a few kg, ~4U with the
+# folded antenna, 5-10 W while transmitting.
+mass_kg = 4.0
+power_w = 7.0
+cost_usd = 600_000.0
+volume_u = 4.0
+# About 2 GB of messages, calls and web pages a day for a pilot network of village terminals.
+data_mb_per_day = 2_000.0
+needs_fine_pointing = true
+fit = { connect-the-villages = 1.0 }
+
+[[instruments]]
+id = "store-and-forward"
+name = "UHF store-and-forward messenger"
+why = "Collects short text messages and sensor readings from simple village terminals and drops them at a ground station later. Cheap, light and works from low Orbit, but it cannot carry phone calls or internet, so it serves villages only a little."
+# source: store-and-forward IoT / amateur CubeSat payloads: ~0.5 kg, ~1-2 W, kilobytes per message.
+mass_kg = 0.5
+power_w = 1.5
+cost_usd = 100_000.0
+volume_u = 0.5
+data_mb_per_day = 20.0
+needs_fine_pointing = false
+fit = { connect-the-villages = 0.4 }
+
+# ---------------------------------------------------------------- Space Weather Sentinel
+
+[[instruments]]
+id = "particle-detector"
+name = "Energetic particle detector"
+why = "Counts the fast protons and electrons that damage satellites. Over the South Atlantic Anomaly, which reaches toward southern Africa, Earth's radiation belt dips close to the ground and the counts soar. It looks in every direction, so it needs no precise pointing, but it makes a lot of Data."
+# source: CubeSat particle telescopes (e.g. REPTile on the CSSWE 3U CubeSat) take ~1U, ~1 kg, 1-2 W.
+mass_kg = 0.8
+power_w = 1.5
+cost_usd = 150_000.0
+volume_u = 1.0
+# Fine time resolution all around the orbit.
+data_mb_per_day = 300.0
+needs_fine_pointing = false
+fit = { space-weather-sentinel = 1.0 }
+
+[[instruments]]
+id = "ionosphere-probe"
+name = "Ionosphere plasma probe"
+why = "A small Langmuir probe and magnetometer that measure the charged gas around the spacecraft. Storms in this layer throw GPS positions off and cut radio links on the ground. It only works inside the ionosphere, so the lower the Orbit, the better."
+# source: CubeSat Langmuir probes and fluxgate magnetometers: a few hundred grams, ~1 W each.
+mass_kg = 0.4
+power_w = 1.0
+cost_usd = 80_000.0
+volume_u = 0.5
+data_mb_per_day = 200.0
+needs_fine_pointing = false
+fit = { space-weather-sentinel = 0.8 }

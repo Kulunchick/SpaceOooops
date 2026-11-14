@@ -1,6 +1,25 @@
 # Orbits. `coverage` says how well an Orbit covers each Scenario's target (0..1), keyed by scenario id.
 
 [[orbits]]
+id = "leo-400"
+name = "Low Earth Orbit, 400 km (LEO)"
+why = "The space station's Orbit, tilted 52 degrees to the equator. Close to the ground and inside the ionosphere, so it is cheap to reach and good for measuring the upper atmosphere, but air drag pulls a CubeSat down within about a year, and each pass over a ground station is short."
+altitude_km = 400.0
+# source: Kepler's third law for a 400 km circular orbit gives ~92.6 min.
+period_min = 92.6
+# source: up to ~36 min of each orbit in Earth's shadow at 400 km; ~35 min (0.38) typical over the year.
+eclipse_fraction = 0.38
+# source: an orbit tilted 52 degrees passes over one mid-latitude ground station ~4 times a day for ~6 min each.
+contact_minutes_per_day = 25.0
+# source: CubeSats released from the space station (~400-420 km) typically re-enter within ~6-18 months,
+# sooner near solar maximum; ~10 months here.
+lifetime_cap_days = 300.0
+# Crop Watch: covers Angola, but the local time of each pass drifts, so lighting changes between images.
+# Connect the Villages: a low satellite is over a village only a few minutes a day.
+# Space Weather Sentinel: flies through the ionosphere and the South Atlantic Anomaly many times a day.
+coverage = { crop-watch = 0.7, connect-the-villages = 0.05, space-weather-sentinel = 1.0 }
+
+[[orbits]]
 id = "sso-600"
 name = "Sun-synchronous Orbit, 600 km (SSO)"
 why = "A near-polar Orbit that passes over every place at the same local time each day, so lighting is the same in every image. It still spends about a third of each orbit in Earth's shadow."
@@ -13,4 +32,23 @@ eclipse_fraction = 0.36
 contact_minutes_per_day = 40.0
 # source: atmospheric drag keeps a CubeSat at 600 km up for well over 5 years; radiation limits parts to ~5 years.
 lifetime_cap_days = 1825.0
-coverage = { crop-watch = 1.0 }
+# Space Weather Sentinel: 600 km is above the densest part of the ionosphere (peak ~300-400 km).
+coverage = { crop-watch = 1.0, connect-the-villages = 0.05, space-weather-sentinel = 0.6 }
+
+[[orbits]]
+id = "geo"
+name = "Geostationary Orbit, 35,786 km (GEO)"
+why = "So high that one orbit takes a whole day: the satellite hangs over the same spot on the equator, always in view of Angola and of its ground station. Almost always in sunlight, but very far away and expensive to reach."
+altitude_km = 35_786.0
+# source: one sidereal day, ~1436 min.
+period_min = 1436.1
+# source: GEO satellites are eclipsed only in two ~45-day seasons around the equinoxes, at most ~70 min a day.
+# Designers size Power and battery for that worst case: 69/1436 = 0.048.
+eclipse_fraction = 0.048
+# source: a geostationary satellite never sets: in view of its ground station all day.
+contact_minutes_per_day = 1440.0
+# source: no drag at GEO; radiation dose limits small-satellite electronics to roughly 10 years.
+lifetime_cap_days = 3650.0
+# Crop Watch: 36,000 km is too far for a CubeSat camera to see single fields.
+# Space Weather Sentinel: GEO is far outside the ionosphere and the South Atlantic Anomaly.
+coverage = { crop-watch = 0.2, connect-the-villages = 1.0, space-weather-sentinel = 0.0 }

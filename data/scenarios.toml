@@ -39,3 +39,62 @@ flare_failure_multiplier = 20.0
 # Ground-station outages (weather, maintenance, network faults): about twice a year.
 outage_daily_chance = 0.006
 outage_days = 3
+
+[[scenarios]]
+id = "connect-the-villages"
+name = "Connect the Villages"
+difficulty = "Medium"
+objective = "Relay phone and internet traffic to remote villages across Angola from geostationary Orbit, for a one-year pilot service."
+why_it_matters = "Many villages in Angola's eastern and southern provinces are hundreds of kilometres from the nearest mobile mast or fibre cable. A satellite that stays over Angola can reach every village at once through a small dish, connecting schools, clinics and families. Angola already runs its own large communications satellite, AngoSat-2, launched in 2022; a small pilot shows how cheaply the next step could be tested."
+required_science_value = 100.0
+# A one-year pilot service.
+min_lifetime_days = 365
+# source: game estimate. Small-GEO pilot missions are far cheaper than a full ~US$300 million comsat, but the
+# launch to GEO alone costs millions.
+budget_usd = 6_000_000.0
+key_constraints = [
+    "Only a satellite in geostationary Orbit (GEO) stays over Angola all day.",
+    "The launch to GEO is expensive, and the affordable slot carries only 18 kg.",
+    "The relay's dish must be pointed precisely at Angola.",
+]
+# Science Value here is service delivered: a relay carrying ~2 GB a day for a year earns about 1.4x the requirement.
+science_value_per_gb = 0.2
+
+[scenarios.events]
+# source: NOAA SWPC - strong (X-class) flares a few times a year near solar maximum.
+solar_flare_daily_chance = 0.004
+flare_safe_mode_days = 2
+# GEO lies outside most of the magnetosphere's shielding, so a flare hits harder than in low Orbit.
+flare_failure_multiplier = 30.0
+outage_daily_chance = 0.006
+outage_days = 3
+
+[[scenarios]]
+id = "space-weather-sentinel"
+name = "Space Weather Sentinel"
+difficulty = "Hard"
+objective = "Measure radiation and the ionosphere over the South Atlantic Anomaly and southern Africa from a 400 km Orbit for six months, with more than one Instrument."
+why_it_matters = "Solar storms disturb the ionosphere, the charged top layer of the atmosphere. That throws GPS positions off by metres, cuts radio links and can damage satellites. Over the South Atlantic Anomaly, which reaches toward southern Africa, Earth's radiation belt dips closest to the ground. Few instruments watch this region, so better measurements help forecast storms for Angola and its neighbours."
+required_science_value = 70.0
+# A six-month measurement campaign: short enough to finish before drag brings a 400 km CubeSat down.
+min_lifetime_days = 180
+# source: game estimate; university space-weather CubeSats typically cost about US$1-2 million including launch.
+budget_usd = 1_500_000.0
+key_constraints = [
+    "One Instrument is not enough: you need several to reach the Science goal.",
+    "At 400 km, air drag brings a CubeSat down within about a year.",
+    "Passes over the ground station are short: heavy Data needs a fast radio.",
+    "The Budget is small.",
+]
+# Game-tuned: a particle detector and an ionosphere probe delivering all their Data for six months earn about
+# 1.2x the requirement; losing a quarter of the Data falls short.
+science_value_per_gb = 1.0
+
+[scenarios.events]
+# The mission flies near solar maximum, when flares are most frequent (NOAA SWPC); ~3 per year here.
+solar_flare_daily_chance = 0.008
+flare_safe_mode_days = 2
+flare_failure_multiplier = 20.0
+# A single university ground station: outages about three to four times a year.
+outage_daily_chance = 0.01
+outage_days = 3
