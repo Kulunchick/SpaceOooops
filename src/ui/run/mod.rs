@@ -30,6 +30,11 @@ pub fn RunScreen() -> impl IntoView {
             // Put the SVG orbit animation component here. It must read `AppState::playback`
             // (days elapsed, fractional) so it stays in sync with the dashboards and the event log.
             <div class="run-orbit-slot"></div>
+            <Show when=move || state.playback_finished()>
+                <p class="run-ending" aria-live="polite">
+                    {move || state.run_result.with(|r| r.as_ref().map(|r| r.debrief.ending.clone()).unwrap_or_default())}
+                </p>
+            </Show>
             <Dashboards />
             <EventLog />
         </section>

@@ -186,9 +186,9 @@ impl<'a> RunContext<'a> {
             })
             .collect();
         let min_days = r.scenario.map_or(0, |s| s.min_lifetime_days);
-        let planned_days = match r.orbit {
-            Some(o) if o.lifetime_cap_days >= 0.0 => min_days.min(o.lifetime_cap_days.floor() as u32),
-            _ => min_days,
+        let planned_days = match r.orbit.and_then(|o| o.lifetime_cap_days) {
+            Some(cap) => min_days.min(cap.max(0.0).floor() as u32),
+            None => min_days,
         };
         RunContext {
             rules: &catalog.run_rules,

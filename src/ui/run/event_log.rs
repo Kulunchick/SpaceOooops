@@ -8,13 +8,13 @@ use crate::ui::state::AppState;
 pub fn EventLog() -> impl IntoView {
     let state = expect_context::<AppState>();
     let shown = Memo::new(move |_| {
-        let Some(index) = state.playback_index() else { return Vec::new() };
-        if state.playback.get() <= 0.0 {
+        let shown = state.shown_day();
+        if shown == 0 {
             return Vec::new();
         }
         state.run_result.with(|r| {
             let Some(r) = r else { return Vec::new() };
-            r.timeline[..=index]
+            r.timeline[..shown.min(r.timeline.len())]
                 .iter()
                 .flat_map(|d| d.events.iter().map(move |e| (d.day, e.kind, e.text.clone())))
                 .rev()

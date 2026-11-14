@@ -196,16 +196,25 @@ fn thin_mass_margin_warns_and_turns_the_gauge_amber() {
 }
 
 #[test]
-fn all_basic_tier_shortens_lifetime_below_the_minimum() {
+fn all_basic_tier_shortens_lifetime_to_a_thin_margin() {
     let mut d = crop_watch_known_good();
     for pick in [&mut d.solar, &mut d.battery, &mut d.attitude, &mut d.comms] {
         pick.as_mut().unwrap().tier = ReliabilityTier::Basic;
     }
     d.computer_tier = ReliabilityTier::Basic;
     let r = review(&d);
-    warning(&r, FindingKind::ShortLifetime);
-    assert_eq!(r.gauges.lifetime.state, GaugeState::Violated);
+    assert_eq!(r.gauges.lifetime.state, GaugeState::Thin, "{:?}", r.gauges.lifetime);
+    assert!(r.warnings.iter().filter(|f| f.kind == FindingKind::BasicTierOnCritical).count() >= 4);
     assert!(r.can_launch);
+}
+
+#[test]
+fn only_critical_components_count_towards_the_expected_lifetime() {
+    // Attitude control is not critical: a Basic one degrades pointing but never ends the Mission.
+    let good = review(&crop_watch_known_good()).gauges.lifetime.value;
+    let mut d = crop_watch_known_good();
+    d.attitude = Some(Pick::new("reaction-wheels", ReliabilityTier::Basic));
+    assert_eq!(review(&d).gauges.lifetime.value, good);
 }
 
 // ---------------------------------------------------------------- incompatible options

@@ -152,8 +152,9 @@ pub struct Orbit {
     /// Share of each orbit spent in Earth's shadow.
     pub eclipse_fraction: f64,
     pub contact_minutes_per_day: f64,
-    /// Longest Lifetime this Orbit allows (atmospheric drag, radiation).
-    pub lifetime_cap_days: f64,
+    /// Longest Lifetime this Orbit allows (atmospheric drag, radiation); absent = no cap.
+    #[serde(default)]
+    pub lifetime_cap_days: Option<f64>,
     /// How well the Orbit covers each Scenario's target (0..=1), keyed by scenario id.
     #[serde(default)]
     pub coverage: BTreeMap<String, f64>,

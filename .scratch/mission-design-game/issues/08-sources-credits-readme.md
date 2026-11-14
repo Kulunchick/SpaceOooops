@@ -1,4 +1,4 @@
-﻿# 08: Sources, credits and README
+# 08: Sources, credits and README
 
 **What to build:** A Sources page, reachable from the title screen, lists where the numbers and ideas come from:
 - NASA CubeSat 101.
