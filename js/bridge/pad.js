@@ -322,6 +322,8 @@ export function createPad({ scene, camera, canvas }) {
         stack.fairing.visible = false;
         stack.fairing.position.y = 0;
       }
+      stack.craftHolder.visible = true;
+      if (stack.craftScale) stack.craftHolder.scale.setScalar(stack.craftScale);
       for (const a of stack.pad.arms) a.rotation.y = 0;
     }
     engineLight.intensity = 0;
@@ -447,6 +449,10 @@ export function createPad({ scene, camera, canvas }) {
     if (stack.fairing) {
       const k = Math.min(t / FAIRING_CLOSE, 1);
       stack.fairing.position.y = 0.4 * H * (1 - (1 - (1 - k) ** 3));
+      // The spacecraft is drawn larger than the fairing's inside so that it reads on the pad. It draws in as the
+      // fairing comes down and is hidden once covered, so it never pokes through the nose.
+      if (stack.craftScale) stack.craftHolder.scale.setScalar(stack.craftScale * (1 - 0.5 * Math.min(k / 0.6, 1)));
+      stack.craftHolder.visible = k < 0.8;
     }
     // Swing arms retract just before ignition.
     const armK = Math.min(Math.max((t - (T_IGNITION - 0.6)) / 0.9, 0), 1);

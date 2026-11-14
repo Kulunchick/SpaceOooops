@@ -29,10 +29,13 @@
   pointer-events: none;
 }
 .launch-sequence[hidden] { display: none; }
+/* Beside the rocket, not over its nose: the pad Shot centres the rocket while the launch plays. */
 .launch-count {
-  margin: 0;
+  align-self: flex-start;
+  margin: 0 0 0 clamp(0.5rem, 3vw, 3rem);
+  max-width: 34vw;
+  font-size: clamp(2.2rem, 6vw, 5rem);
   min-height: 1.2em;
-  font-size: clamp(3rem, 10vw, 6.5rem);
   color: var(--lp-accent);
   text-shadow: 0 4px 0 #7a3d10, 0 0 24px rgba(0, 0, 0, 0.6);
 }
