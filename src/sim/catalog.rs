@@ -199,6 +199,13 @@ pub struct RunRules {
     pub battery_fade_per_cycle_at_max_depth: f64,
     /// How steeply wear grows with deeper discharge.
     pub battery_fade_exponent: u32,
+    /// Minutes of each orbit lost to rebooting and re-pointing after the battery browns out in an eclipse.
+    #[serde(default)]
+    pub brownout_recovery_minutes: f64,
+}
+
+fn yes() -> bool {
+    true
 }
 
 /// Score weights.
@@ -207,6 +214,9 @@ pub struct ScoringRules {
     pub points_per_science_value: f64,
     pub budget_margin_points: f64,
     pub mass_margin_points: f64,
+    /// Budget and Mass margin bonuses are paid only when the Mission is a Success.
+    #[serde(default = "yes")]
+    pub margin_bonuses_need_success: bool,
     pub early_end_penalty_points: f64,
 }
 

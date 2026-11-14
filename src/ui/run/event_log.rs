@@ -51,13 +51,13 @@ fn icon(kind: EventKind) -> &'static str {
         EventKind::ComponentFailure => "\u{2716}",
         EventKind::SolarFlare => "\u{2600}",
         EventKind::GroundStationOutage => "\u{1F4E1}",
-        EventKind::BatteryWornOut => "\u{1F50B}",
+        EventKind::BatteryShortfall => "\u{1F50B}",
     }
 }
 
 fn event_class(kind: EventKind) -> &'static str {
     match kind {
-        EventKind::ComponentFailure | EventKind::BatteryWornOut => "event event-bad",
-        EventKind::SolarFlare | EventKind::GroundStationOutage => "event event-warn",
+        EventKind::ComponentFailure => "event event-bad",
+        EventKind::SolarFlare | EventKind::GroundStationOutage | EventKind::BatteryShortfall => "event event-warn",
     }
 }
