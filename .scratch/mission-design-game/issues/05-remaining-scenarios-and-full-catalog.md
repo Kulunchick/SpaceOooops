@@ -17,7 +17,7 @@ This completes the catalog:
 **Status:** ready-for-agent
 
 - [ ] Both Scenarios appear in Scenario select with difficulty and key constraints, and are fully playable in the deployed app
-- [ ] Test: every Scenario has at least one known-good Design that reaches Success with a fixed seed
-- [ ] Test: every Scenario has at least one tempting but wrong Design that fails Launch Review or the Run, so the trade-off is real (e.g. GEO with a launcher that is too small)
-- [ ] Changing the Orbit visibly changes Lifetime, Power (eclipse) and Data (contact time) in the gauges
-- [ ] All new numbers live in data files
+- [x] Test: every Scenario has at least one known-good Design that reaches Success with a fixed seed
+- [x] Test: every Scenario has at least one tempting but wrong Design that fails Launch Review or the Run, so the trade-off is real (e.g. GEO with a launcher that is too small)
+- [x] Changing the Orbit visibly changes Lifetime, Power (eclipse) and Data (contact time) in the gauges
+- [x] All new numbers live in data files
