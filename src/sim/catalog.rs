@@ -66,6 +66,9 @@ pub struct SolarPanel {
     pub generation_w_per_u: f64,
     #[serde(default)]
     pub critical: bool,
+    /// Visual only: how the panels sit on the 3D model.
+    #[serde(default)]
+    pub layout: SolarLayout,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -95,6 +98,9 @@ pub struct AttitudeControl {
     pub fine_pointing: bool,
     #[serde(default)]
     pub critical: bool,
+    /// Visual only: the hardware the 3D model shows.
+    #[serde(default)]
+    pub hardware: AttitudeHardware,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -112,6 +118,9 @@ pub struct Comms {
     pub ops_cost_usd_per_day: f64,
     #[serde(default)]
     pub critical: bool,
+    /// Visual only: the antenna the 3D model shows.
+    #[serde(default)]
+    pub antenna: AntennaKind,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -144,6 +153,9 @@ pub struct Instrument {
     /// How well the Instrument suits each Scenario objective (0..=1), keyed by scenario id.
     #[serde(default)]
     pub fit: BTreeMap<String, f64>,
+    /// Visual only: the shape the Instrument has on the 3D model.
+    #[serde(default)]
+    pub shape: InstrumentShape,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -179,6 +191,86 @@ pub struct LaunchVehicle {
     pub cost_usd: f64,
     /// Payload capacity per orbit id; a missing entry means it cannot reach that Orbit.
     pub capacity_kg: BTreeMap<String, f64>,
+    /// Visual only: the rocket the 3D scene shows for this Launch Vehicle.
+    #[serde(default)]
+    pub rocket: RocketLook,
+}
+
+// ---- Visual-only catalog fields: they change how the 3D scene draws an option, never a game number. ----
+
+/// How solar panels sit on the spacecraft.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum SolarLayout {
+    /// Cells glued to the bus walls.
+    #[default]
+    Body,
+    /// Hinged wings that unfold from the bus.
+    Wings,
+}
+
+/// The attitude control hardware the spacecraft shows.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum AttitudeHardware {
+    #[default]
+    Magnetorquers,
+    ReactionWheels,
+}
+
+/// The antenna a comms option shows.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum AntennaKind {
+    /// Tape-measure dipole whips (UHF).
+    #[default]
+    Whip,
+    /// A flat patch antenna (S-band).
+    Patch,
+    /// A small parabolic dish (X-band).
+    Dish,
+}
+
+/// The shape an Instrument has on the spacecraft.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum InstrumentShape {
+    /// A plain payload box (an Instrument without a shape of its own).
+    #[default]
+    Box,
+    /// A long telescope barrel with a sunshade.
+    Telescope,
+    /// A squat camera with a large germanium lens and radiator fins.
+    ThermalCamera,
+    /// A small box camera with a wide lens.
+    WideCamera,
+    /// A folded reflector dish on an arm.
+    FoldedDish,
+    /// A helical antenna.
+    Helix,
+    /// A stack of detector discs behind a collimator.
+    ParticleStack,
+    /// A sphere probe on a long boom.
+    ProbeBoom,
+}
+
+/// How a Launch Vehicle's rocket looks: its class and real height.
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+pub struct RocketLook {
+    pub class: RocketClass,
+    pub height_m: f64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum RocketClass {
+    /// A small single-core launcher.
+    #[default]
+    Small,
+    /// A medium two-stage rocket.
+    Medium,
+    /// A rocket with strap-on boosters.
+    Heavy,
 }
 
 /// Cost multiplier and failure chance of one Reliability Tier.

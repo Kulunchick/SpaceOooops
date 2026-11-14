@@ -1,5 +1,6 @@
 // Camera rig: turns the Scene Spec's Shot into a camera pose and eases between poses.
-// Each Shot kind maps to a function (shot, seconds) -> { position, target }. Later tickets add their Shots
+// Each Shot kind maps to a function (shot, seconds) -> { position, target, framing? }. A pose with
+// `framing: false` is not shifted beside the DOM panels (its module frames the subject itself). Later tickets add their Shots
 // with `registerShot` from their own module, so this file need not change for every new Shot.
 import * as THREE from '../../vendor/three/three.module.js';
 import { latLonToVector } from './earth.js';
@@ -28,6 +29,8 @@ export function createCameraRig(camera) {
   let shot = { kind: FALLBACK_KIND };
   let snap = true;
   const framing = { x: 0, y: 0 };
+  // How much of the framing shift applies (eased, so switching to a pose without framing does not jump).
+  let framingWeight = 1;
   // The unshifted camera position; the framing shift is applied on top each frame.
   const position = new THREE.Vector3();
   const target = new THREE.Vector3();
@@ -55,19 +58,22 @@ export function createCameraRig(camera) {
     update(dt, seconds, reducedMotion) {
       const p = pose(reducedMotion ? 0 : seconds);
       desiredTarget.copy(p.target);
+      const wantFraming = p.framing === false ? 0 : 1;
       if (snap || reducedMotion) {
         position.copy(p.position);
         target.copy(desiredTarget);
+        framingWeight = wantFraming;
         snap = false;
       } else {
         const k = 1 - Math.exp(-dt * 2.5);
         position.lerp(p.position, k);
         target.lerp(desiredTarget, k);
+        framingWeight += (wantFraming - framingWeight) * k;
       }
       camera.position.copy(position);
       camera.lookAt(target);
-      camera.translateX(-framing.x);
-      camera.translateY(-framing.y);
+      camera.translateX(-framing.x * framingWeight);
+      camera.translateY(-framing.y * framingWeight);
     },
   };
 }

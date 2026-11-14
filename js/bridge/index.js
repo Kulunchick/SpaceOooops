@@ -10,6 +10,7 @@ import { palette } from './palette.js';
 import { createEarth, EARTH_RADIUS } from './earth.js';
 import { createCameraRig } from './camera.js';
 import { createTitleCraft } from './spacecraft.js';
+import { createHangar } from './hangar.js';
 
 let renderer = null;
 let scene = null;
@@ -19,6 +20,7 @@ let world = null;
 let reducedMotion = false;
 let quality = 'high';
 let spec = null;
+let canvasEl = null;
 
 /** Whether this browser can create a WebGL context at all. */
 export function hasWebGL() {
@@ -38,11 +40,14 @@ function buildWorld() {
   orbit.rotation.set(0.5, 0, 0.35);
   orbit.add(craft);
   scene.add(earth, stars, orbit);
-  return { earth, clouds, stars, craft, orbit };
+  const hangar = createHangar({ scene, camera, canvas: canvasEl });
+  if (spec) hangar.apply(spec, reducedMotion);
+  return { earth, clouds, stars, craft, orbit, hangar };
 }
 
 function disposeWorld() {
   if (!world) return;
+  world.hangar.dispose();
   for (const obj of [world.earth, world.stars, world.orbit]) {
     scene.remove(obj);
     obj.traverse((o) => {
@@ -73,6 +78,7 @@ function frame(dt, seconds) {
   world.craft.rotation.y = angle;
   world.clouds.rotation.y = t * 0.01;
   rig.update(dt, seconds, reducedMotion);
+  world.hangar.frame(dt, t);
   renderer.render(scene, camera);
 }
 
@@ -80,6 +86,7 @@ export async function init(canvas, initialQuality = 'high') {
   if (renderer) return true;
   if (!hasWebGL()) return false;
   quality = initialQuality === 'low' ? 'low' : 'high';
+  canvasEl = canvas;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: quality === 'high', powerPreference: 'low-power' });
   } catch (e) {
@@ -113,6 +120,7 @@ export async function init(canvas, initialQuality = 'high') {
 export function apply(sceneSpec) {
   spec = sceneSpec;
   if (rig) rig.setShot(sceneSpec.shot);
+  world?.hangar.apply(sceneSpec, reducedMotion);
 }
 
 export function setQuality(next) {
@@ -130,6 +138,7 @@ export function setQuality(next) {
 export function setReducedMotion(on) {
   reducedMotion = Boolean(on);
   rig?.cut();
+  world?.hangar.setReducedMotion(reducedMotion);
 }
 
 // Audio: ticket 04 implements these in audio.js and re-exports them here.

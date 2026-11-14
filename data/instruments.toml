@@ -4,6 +4,8 @@
 
 [[instruments]]
 id = "multispectral-imager"
+# Visual only (3D model).
+shape = "telescope"
 name = "Multispectral imager"
 why = "A camera that sees red, green, blue and near-infrared light. Healthy plants reflect near-infrared strongly, so it shows crop stress before it is visible to the eye."
 # source: commercial CubeSat multispectral imagers (~5 m resolution) weigh ~1.2-1.5 kg and take ~2U.
@@ -18,6 +20,7 @@ fit = { crop-watch = 1.0 }
 
 [[instruments]]
 id = "thermal-imager"
+shape = "thermal-camera"
 name = "Thermal infrared imager"
 why = "A camera that measures ground temperature. Dry soil heats up faster than wet soil, so it reveals drought, but it is heavy and power-hungry."
 # source: uncooled microbolometer payloads for CubeSats: ~2.5-3 kg, 5-8 W while imaging.
@@ -31,6 +34,7 @@ fit = { crop-watch = 0.8 }
 
 [[instruments]]
 id = "wide-camera"
+shape = "wide-camera"
 name = "Wide-field camera"
 why = "A small, cheap colour camera with a wide view. It does not need precise pointing, but its coarse pictures show little detail about crops."
 mass_kg = 0.4
@@ -47,6 +51,7 @@ fit = { crop-watch = 0.3 }
 
 [[instruments]]
 id = "village-relay"
+shape = "folded-dish"
 name = "Ka-band village relay"
 why = "A radio relay with a small folding dish aimed at Angola. Village terminals with small dishes talk to it, and it passes their phone and internet traffic to a gateway station over the spacecraft's comms band. A village is only served while the satellite is in view, so it needs an Orbit that stays over Angola."
 # source: game estimate from CubeSat Ka-band communication payload demonstrations: a few kg, ~4U with the
@@ -62,6 +67,7 @@ fit = { connect-the-villages = 1.0 }
 
 [[instruments]]
 id = "store-and-forward"
+shape = "helix"
 name = "UHF store-and-forward messenger"
 why = "Collects short text messages and sensor readings from simple village terminals and drops them at a ground station later. Cheap, light and works from low Orbit, but it cannot carry phone calls or internet, so it serves villages only a little."
 # source: store-and-forward IoT / amateur CubeSat payloads: ~0.5 kg, ~1-2 W, kilobytes per message.
@@ -77,6 +83,7 @@ fit = { connect-the-villages = 0.4 }
 
 [[instruments]]
 id = "particle-detector"
+shape = "particle-stack"
 name = "Energetic particle detector"
 why = "Counts the fast protons and electrons that damage satellites. Over the South Atlantic Anomaly, which reaches toward southern Africa, Earth's radiation belt dips close to the ground and the counts soar. It looks in every direction, so it needs no precise pointing, but it makes a lot of Data."
 # source: CubeSat particle telescopes (e.g. REPTile on the CSSWE 3U CubeSat) take ~1U, ~1 kg, 1-2 W.
@@ -91,6 +98,7 @@ fit = { space-weather-sentinel = 1.0 }
 
 [[instruments]]
 id = "ionosphere-probe"
+shape = "probe-boom"
 name = "Ionosphere plasma probe"
 why = "A small Langmuir probe and magnetometer that measure the charged gas around the spacecraft. Storms in this layer throw GPS positions off and cut radio links on the ground. It only works inside the ionosphere, so the lower the Orbit, the better."
 # source: CubeSat Langmuir probes and fluxgate magnetometers: a few hundred grams, ~1 W each.

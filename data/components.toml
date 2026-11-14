@@ -54,6 +54,8 @@ usable_volume_u = 50.0
 # ---------------------------------------------------------------- Solar panels
 [[solar_panels]]
 id = "solar-body"
+# Visual only (3D model): cells on the bus walls.
+layout = "body"
 name = "Body-mounted solar panels"
 why = "Solar cells glued to the outside walls. Simple and robust, but only a few walls face the Sun at once, so they make little Power."
 mass_kg = 0.3
@@ -64,6 +66,8 @@ generation_w_per_u = 2.0
 
 [[solar_panels]]
 id = "solar-deployable"
+# Visual only (3D model): hinged wings.
+layout = "wings"
 name = "Deployable solar panels"
 why = "Wings that unfold after launch and face the Sun. About three times the Power of body-mounted cells, but heavier, pricier and one more thing that must unfold."
 mass_kg = 1.2
@@ -108,6 +112,8 @@ critical = true
 # ---------------------------------------------------------------- Attitude control
 [[attitude_controls]]
 id = "magnetorquers"
+# Visual only (3D model).
+hardware = "magnetorquers"
 name = "Magnetorquers"
 why = "Coils that push against Earth's magnetic field. They stop the spacecraft tumbling, but cannot hold a camera steady on a target."
 mass_kg = 0.3
@@ -118,6 +124,8 @@ fine_pointing = false
 
 [[attitude_controls]]
 id = "reaction-wheels"
+# Visual only (3D model).
+hardware = "reaction-wheels"
 name = "Reaction wheels"
 why = "Small spinning wheels that turn the spacecraft precisely. Needed to point a sharp camera at the ground."
 # source: commercial 3-axis CubeSat ADCS units: ~1.2-1.5 kg, ~0.8U, 1.5-3 W.
@@ -130,6 +138,8 @@ fine_pointing = true
 # ---------------------------------------------------------------- Comms
 [[comms]]
 id = "comms-uhf"
+# Visual only (3D model): tape-measure dipole whips.
+antenna = "whip"
 name = "UHF radio"
 why = "A simple radio used by most student CubeSats. Cheap and low-power, but it sends only a few megabytes per day: fine for health data, far too slow for images."
 mass_kg = 0.25
@@ -144,6 +154,8 @@ critical = true
 
 [[comms]]
 id = "comms-s-band"
+# Visual only (3D model): a flat patch antenna.
+antenna = "patch"
 name = "S-band radio"
 why = "A faster radio band with a patch antenna. Hundreds of megabytes per day, enough for compressed images, at a higher price and ground-station fee."
 mass_kg = 0.5
@@ -158,6 +170,8 @@ critical = true
 
 [[comms]]
 id = "comms-x-band"
+# Visual only (3D model): a small dish.
+antenna = "dish"
 name = "X-band radio"
 why = "A high-speed band with a directional antenna: tens of megabits per second, enough to send heavy science Data even in short passes. The radio, and the bigger ground dishes it needs, cost more."
 # source: commercial CubeSat X-band transmitters: ~0.3-0.6 kg, ~50-150 Mbps, ~10 W while transmitting

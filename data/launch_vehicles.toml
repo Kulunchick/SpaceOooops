@@ -3,6 +3,8 @@
 
 [[launch_vehicles]]
 id = "station-deploy"
+# Visual only (3D scene): the cargo rocket that carries the deployer to the station (Falcon 9 class, ~70 m).
+rocket = { class = "medium", height_m = 70.0 }
 name = "Space-station deployment"
 why = "Your CubeSat rides a cargo ship to the International Space Station and is pushed out by a small spring deployer. A cheap, gentle ride, but only to the station's low 400 km Orbit, where drag pulls it down within about a year."
 real_example = "like the Nanoracks CubeSat Deployer on the International Space Station"
@@ -13,6 +15,7 @@ capacity_kg = { leo-400 = 12.0 }
 
 [[launch_vehicles]]
 id = "cubesat-rideshare"
+rocket = { class = "medium", height_m = 70.0 }
 name = "CubeSat rideshare"
 why = "Your CubeSat flies in a dispenser next to dozens of others on a big rocket. Cheap, but the slot has a strict Mass limit and the rocket goes where its main customer wants."
 real_example = "like a 6U slot on a SpaceX Transporter rideshare mission"
@@ -22,6 +25,7 @@ capacity_kg = { sso-600 = 12.0 }
 
 [[launch_vehicles]]
 id = "smallsat-rideshare"
+rocket = { class = "medium", height_m = 70.0 }
 name = "SmallSat rideshare"
 why = "A bigger rideshare slot that bolts a satellite of up to a few hundred kilograms onto the ring of a big rocket. Room for a 12U CubeSat or a SmallSat, but only to the sun-synchronous Orbit the rocket is going to."
 real_example = "like an ESPA-class slot on a SpaceX Transporter rideshare mission"
@@ -31,6 +35,8 @@ capacity_kg = { sso-600 = 200.0 }
 
 [[launch_vehicles]]
 id = "geo-rideshare"
+# Ariane 5 class with strap-on boosters, ~52 m.
+rocket = { class = "heavy", height_m = 52.0 }
 name = "GEO rideshare slot"
 why = "A small spacecraft rides as a secondary passenger on a rocket that is taking a big satellite toward geostationary Orbit. The only affordable way to GEO, but the slot is small and strict about Mass, and it still costs millions."
 real_example = "like the secondary-payload ring on US Space Force Falcon Heavy and Atlas V launches that fly straight to GEO"
@@ -41,6 +47,8 @@ capacity_kg = { geo = 18.0 }
 
 [[launch_vehicles]]
 id = "small-launcher"
+# Electron class, ~18 m.
+rocket = { class = "small", height_m = 18.0 }
 name = "Small dedicated Launch Vehicle"
 why = "A whole small rocket just for you: it carries hundreds of kilograms to exactly the Orbit you want, at a price far above a CubeSat budget."
 real_example = "like Rocket Lab Electron"
@@ -51,6 +59,7 @@ capacity_kg = { leo-400 = 300.0, sso-600 = 200.0 }
 
 [[launch_vehicles]]
 id = "medium-launcher"
+rocket = { class = "medium", height_m = 70.0 }
 name = "Medium Launch Vehicle"
 why = "A big rocket that can lift tonnes, even to geostationary Orbit. It takes you anywhere, but one launch costs more than most whole satellite programmes."
 real_example = "like SpaceX Falcon 9"

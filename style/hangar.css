@@ -1,0 +1,131 @@
+/* Design screen around the 3D hangar (low-poly ticket 02): header with the Role tabs, the open Role as a
+   translucent side panel, the empty stage the spacecraft is framed in, and the gauge strip along the bottom. */
+
+.design-screen.hangar-layout {
+  position: fixed;
+  inset: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0.75rem;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  overflow: hidden;
+}
+
+.hangar-layout .design-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.6rem 1rem;
+  color: var(--lp-text);
+  background: var(--lp-panel-solid);
+  border-top: 3px solid var(--lp-panel-edge);
+}
+@supports ((backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px))) {
+  .hangar-layout .design-head { background: var(--lp-panel); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+}
+.hangar-layout .design-head h2 { margin: 0; font-size: 1.25rem; font-family: var(--lp-font-display); letter-spacing: 0.04em; }
+.hangar-layout .design-head .actions { margin: 0 0 0 auto; gap: 0.5rem; align-items: flex-start; }
+.hangar-layout .design-head .btn { padding: 0.45rem 1rem; }
+.hangar-layout .share { position: relative; }
+.hangar-layout .share-box {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  width: min(26rem, 80vw);
+  z-index: 10;
+  background: var(--lp-panel-solid);
+  border: 1px solid var(--lp-panel-edge);
+  padding: 0.5rem;
+}
+.hangar-layout .share-box p { margin: 0.3rem 0 0; }
+
+/* Role tabs: four chips; the side each Role's panel docks on is marked with an arrow. */
+.hangar-layout .tabs { border: 0; margin: 0; gap: 0.35rem; flex-wrap: wrap; }
+.hangar-layout .tab {
+  font-family: var(--lp-font-body);
+  font-weight: 700;
+  color: var(--lp-text-muted);
+  background: rgba(28, 44, 76, 0.7);
+  border: 1px solid var(--lp-panel-edge);
+  border-radius: 0;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  padding: 0.4rem 1.1rem;
+}
+.hangar-layout .tab[data-side="left"]::before { content: "\25C2 "; }
+.hangar-layout .tab[data-side="right"]::after { content: " \25B8"; }
+.hangar-layout .tab.active { color: var(--lp-accent-ink); background: var(--lp-accent); border-color: var(--lp-accent); }
+.hangar-layout .tab:focus-visible { outline: none; box-shadow: inset 0 0 0 3px var(--lp-text); }
+
+/* The middle row: the Role panel on its side, the stage taking the rest. */
+.design-main { display: flex; gap: 0.75rem; min-height: 0; }
+.hangar-layout[data-panel-side="right"] .role-panel { order: 2; }
+.role-panel {
+  flex: 0 0 clamp(330px, 38vw, 560px);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem 1.1rem;
+  --lp-cut: 12px;
+}
+.role-panel .panel { background: rgba(18, 24, 33, 0.72); }
+.role-panel .option-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.role-panel .option-card { background: rgba(18, 24, 33, 0.8); }
+.role-panel h3:first-child { margin-top: 0.25rem; }
+
+.hangar-stage {
+  flex: 1 1 auto;
+  min-width: 0;
+  position: relative;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.hangar-stage:active { cursor: grabbing; }
+.hangar-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 0.25rem;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  color: var(--lp-text-muted);
+  background: rgba(7, 11, 22, 0.55);
+  padding: 0.15rem 0.6rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Gauge strip along the bottom edge: five gauges in a row; states stay readable as icon + text. */
+.gauge-strip .gauges { margin: 0; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.4rem; }
+.gauge-strip .gauge {
+  background: rgba(13, 22, 42, 0.86);
+  border-color: var(--lp-panel-edge);
+  padding: 0.35rem 0.55rem;
+}
+@supports ((backdrop-filter: blur(6px)) or (-webkit-backdrop-filter: blur(6px))) {
+  .gauge-strip .gauge { background: rgba(13, 22, 42, 0.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+}
+.gauge-strip .gauge-detail { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Without WebGL there is nothing to frame: the stage folds away and the Role panel takes the width. */
+.scene-layer[data-scene="fallback"] ~ .app .hangar-stage { display: none; }
+.scene-layer[data-scene="fallback"] ~ .app .role-panel { flex: 1 1 auto; }
+
+/* Tablets and small laptops: the stage sits above the panel, the panel scrolls below it. */
+@media (max-width: 900px) {
+  .design-screen.hangar-layout { padding: 0.5rem; gap: 0.4rem; }
+  .design-main { flex-direction: column; }
+  .hangar-layout[data-panel-side="right"] .role-panel { order: 0; }
+  .hangar-stage { order: -1; flex: 0 0 34vh; }
+  .role-panel { flex: 1 1 auto; }
+  .hangar-layout .design-head .actions { margin-left: 0; }
+  .gauge-strip .gauge-detail { display: none; }
+}
+@media (max-width: 560px) {
+  .hangar-layout .design-head h2 { font-size: 1rem; }
+  .hangar-stage { flex-basis: 26vh; }
+  .gauge-strip .gauges { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .gauge-strip .gauge-bar { display: none; }
+}
