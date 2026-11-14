@@ -3,15 +3,17 @@
 mod brief;
 mod budget_comms_tab;
 mod cost_table;
+mod debrief;
 mod design;
 mod format;
 mod gauges;
 mod launch_orbit_tab;
 mod launch_review;
 mod option_card;
-mod placeholder;
+mod run;
 mod scenario_select;
 mod science_tab;
+mod seed;
 mod sources;
 mod spacecraft_tab;
 mod state;
@@ -53,7 +55,8 @@ pub fn App() -> impl IntoView {
                 Screen::Brief => view! { <brief::BriefScreen /> }.into_any(),
                 Screen::Design => view! { <design::DesignScreen /> }.into_any(),
                 Screen::LaunchReview => view! { <launch_review::LaunchReviewScreen /> }.into_any(),
-                Screen::Run => view! { <placeholder::PlaceholderScreen on_back=move || state.go(Screen::Design) /> }.into_any(),
+                Screen::Run => view! { <run::RunScreen /> }.into_any(),
+                Screen::Debrief => view! { <debrief::DebriefScreen /> }.into_any(),
             }}
         </main>
     }

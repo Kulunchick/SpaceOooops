@@ -1,7 +1,9 @@
 //! Shared app state, provided once as context. The Design lives here, so leaving and returning to the
 //! Design screen (e.g. "Modify design" after a Run) finds every choice intact.
 use leptos::prelude::*;
-use spaceooops::sim::{self, Catalog, Design, LaunchReview, Pick, ReliabilityTier, Role};
+use spaceooops::sim::{self, Catalog, Design, LaunchReview, Pick, ReliabilityTier, Role, RunResult};
+
+use super::seed::new_seed;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Screen {
@@ -11,8 +13,8 @@ pub enum Screen {
     Brief,
     Design,
     LaunchReview,
-    /// Placeholder until the Run screen exists (ticket 03).
     Run,
+    Debrief,
 }
 
 #[derive(Clone, Copy)]
@@ -24,6 +26,13 @@ pub struct AppState {
     pub tab: RwSignal<Role>,
     /// Launch Review of the current Design, recomputed on every change.
     pub review: Memo<LaunchReview>,
+    /// The last Run's result (timeline + Debrief) and the seed it flew with.
+    pub run_result: RwSignal<Option<RunResult>>,
+    pub seed: RwSignal<u64>,
+    /// Run playback position in days elapsed, fractional: 0.0 at launch, `timeline.len()` at the end.
+    /// The single source of truth for everything that animates with the Run (dashboards, event log,
+    /// orbit animation); read it, and only the playback driver in `run/playback.rs` writes it.
+    pub playback: RwSignal<f64>,
 }
 
 impl AppState {
@@ -42,11 +51,42 @@ impl AppState {
             design,
             tab: RwSignal::new(Role::Science),
             review,
+            run_result: RwSignal::new(None),
+            seed: RwSignal::new(0),
+            playback: RwSignal::new(0.0),
         }
     }
 
     pub fn go(&self, screen: Screen) {
         self.screen.set(screen);
+    }
+
+    /// Flies the current Design with a fresh seed and starts the Run playback. Also "Fly again".
+    pub fn launch(&self) {
+        let seed = new_seed();
+        let scenario_id = self.scenario_id.get_untracked();
+        let result = self
+            .design
+            .with_untracked(|d| self.catalog.with_value(|c| sim::run(c, d, &scenario_id, seed)));
+        self.seed.set(seed);
+        self.run_result.set(Some(result));
+        self.playback.set(0.0);
+        self.go(Screen::Run);
+    }
+
+    /// Number of days in the last Run's timeline.
+    pub fn run_days(&self) -> usize {
+        self.run_result.with(|r| r.as_ref().map_or(0, |r| r.timeline.len()))
+    }
+
+    /// Index into the timeline of the day the playback is showing (`None` before any Run).
+    pub fn playback_index(&self) -> Option<usize> {
+        let days = self.run_days();
+        if days == 0 {
+            return None;
+        }
+        let shown_day = (self.playback.get().ceil() as usize).clamp(1, days);
+        Some(shown_day - 1)
     }
 
     /// Reason why an option clashes with the current choices, if it does.

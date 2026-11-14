@@ -38,7 +38,7 @@ pub fn LaunchReviewScreen() -> impl IntoView {
                     disabled=move || !can_launch()
                     on:click=move |_| {
                         if can_launch() {
-                            state.go(Screen::Run);
+                            state.launch();
                         }
                     }
                 >
