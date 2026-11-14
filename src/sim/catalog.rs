@@ -5,6 +5,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 use super::design::ReliabilityTier;
+use super::objectives::ObjectiveSpec;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Scenario {
@@ -229,6 +230,10 @@ pub struct Catalog {
     pub review: ReviewRules,
     pub run_rules: RunRules,
     pub scoring: ScoringRules,
+    /// Personal Objectives: one default per Role plus optional Scenario-specific ones.
+    pub objectives: Vec<ObjectiveSpec>,
+    /// Seed of the trial Run behind the pre-launch objective outlook.
+    pub objectives_preview_seed: u64,
 }
 
 impl Catalog {
@@ -290,6 +295,13 @@ const LAUNCH_VEHICLES: (&str, &str) =
 const REVIEW: (&str, &str) = ("data/review.toml", include_str!("../../data/review.toml"));
 const RUN: (&str, &str) = ("data/run.toml", include_str!("../../data/run.toml"));
 const SCORING: (&str, &str) = ("data/scoring.toml", include_str!("../../data/scoring.toml"));
+const OBJECTIVES: (&str, &str) = ("data/objectives.toml", include_str!("../../data/objectives.toml"));
+
+#[derive(Deserialize)]
+struct ObjectivesFile {
+    preview_seed: u64,
+    objectives: Vec<ObjectiveSpec>,
+}
 
 #[derive(Deserialize)]
 struct ScenariosFile {
@@ -351,6 +363,7 @@ pub fn load_catalog() -> Result<Catalog, CatalogError> {
     let review: ReviewFile = parse(REVIEW)?;
     let run: RunFile = parse(RUN)?;
     let scoring: ScoringFile = parse(SCORING)?;
+    let objectives: ObjectivesFile = parse(OBJECTIVES)?;
     let catalog = Catalog {
         scenarios: scenarios.scenarios,
         structures: components.structures,
@@ -366,6 +379,8 @@ pub fn load_catalog() -> Result<Catalog, CatalogError> {
         review: review.review,
         run_rules: run.run,
         scoring: scoring.scoring,
+        objectives: objectives.objectives,
+        objectives_preview_seed: objectives.preview_seed,
     };
     validate(&catalog)?;
     Ok(catalog)
@@ -403,6 +418,11 @@ fn validate(c: &Catalog) -> Result<(), CatalogError> {
     for lv in &c.launch_vehicles {
         if let Some(key) = lv.capacity_kg.keys().find(|k| !orbit_ids.contains(k.as_str())) {
             return Err(CatalogError::Invalid(format!("launch vehicle '{}' has capacity to unknown orbit '{key}'", lv.id)));
+        }
+    }
+    for o in &c.objectives {
+        if let Some(key) = o.scenario.as_ref().filter(|k| !scenario_ids.contains(k.as_str())) {
+            return Err(CatalogError::Invalid(format!("objective '{}' is for unknown scenario '{key}'", o.id)));
         }
     }
     for tier in [ReliabilityTier::Basic, ReliabilityTier::FlightProven] {

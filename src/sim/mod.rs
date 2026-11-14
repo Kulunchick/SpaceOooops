@@ -18,7 +18,9 @@ pub use causes::{Cause, CauseKind};
 pub use debrief::{Debrief, RunStats};
 pub use design::*;
 pub use events::{EventKind, RandomEvent};
-pub use objectives::ObjectiveResult;
+pub use objectives::{
+    ObjectiveOutlook, ObjectiveResult, ObjectiveRule, ObjectiveSpec, objective_outlook, scenario_objectives,
+};
 pub use real_mission::RealMissionMatch;
 pub use review::*;
 pub use run::{DaySnapshot, RunResult, run};
