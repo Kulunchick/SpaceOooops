@@ -9,14 +9,14 @@ fn review(design: &Design) -> LaunchReview {
     launch_review(&catalog, design, CROP_WATCH)
 }
 
-fn violation<'a>(r: &'a LaunchReview, kind: FindingKind) -> &'a Finding {
+fn violation(r: &LaunchReview, kind: FindingKind) -> &Finding {
     r.violations
         .iter()
         .find(|f| f.kind == kind)
         .unwrap_or_else(|| panic!("expected a {kind:?} violation, got {:#?}", r.violations))
 }
 
-fn warning<'a>(r: &'a LaunchReview, kind: FindingKind) -> &'a Finding {
+fn warning(r: &LaunchReview, kind: FindingKind) -> &Finding {
     r.warnings
         .iter()
         .find(|f| f.kind == kind)

@@ -287,8 +287,8 @@ pub fn launch_review(catalog: &Catalog, design: &Design, scenario_id: &str) -> L
             ),
         );
     }
-    if let (Some((solar, _)), Some(_), Some(orbit)) = (r.solar, r.structure, r.orbit) {
-        if consumption_w > generation_w {
+    if let (Some((solar, _)), Some(_), Some(orbit)) = (r.solar, r.structure, r.orbit)
+        && consumption_w > generation_w {
             hard(
                 FindingKind::NegativePower,
                 Role::Spacecraft,
@@ -300,9 +300,8 @@ pub fn launch_review(catalog: &Catalog, design: &Design, scenario_id: &str) -> L
                 ),
             );
         }
-    }
-    if let Some((attitude, _)) = r.attitude {
-        if !attitude.fine_pointing {
+    if let Some((attitude, _)) = r.attitude
+        && !attitude.fine_pointing {
             let pointers = fine_pointing_names(catalog);
             for instrument in r.instruments.iter().filter(|i| i.needs_fine_pointing) {
                 hard(
@@ -315,9 +314,8 @@ pub fn launch_review(catalog: &Catalog, design: &Design, scenario_id: &str) -> L
                 );
             }
         }
-    }
-    if let Some(structure) = r.structure {
-        if volume_used_u > structure.usable_volume_u {
+    if let Some(structure) = r.structure
+        && volume_used_u > structure.usable_volume_u {
             hard(
                 FindingKind::VolumeExceeded,
                 Role::Spacecraft,
@@ -327,7 +325,6 @@ pub fn launch_review(catalog: &Catalog, design: &Design, scenario_id: &str) -> L
                 ),
             );
         }
-    }
     if design.comms.is_none() {
         hard(
             FindingKind::NoComms,
