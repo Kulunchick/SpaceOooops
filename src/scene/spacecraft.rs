@@ -129,7 +129,7 @@ fn part(id: &str, kind: PartKind, size: [f64; 3], position: [f64; 3], facing: [f
 }
 
 /// Kebab-case name of a visual catalog enum, as the catalog data spells it.
-fn kebab<T: Serialize>(value: &T) -> String {
+pub(super) fn kebab<T: Serialize>(value: &T) -> String {
     serde_json::to_value(value).ok().and_then(|v| v.as_str().map(str::to_string)).unwrap_or_default()
 }
 

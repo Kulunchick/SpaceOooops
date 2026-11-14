@@ -1,6 +1,7 @@
 //! The 3D scene behind every screen: mounts the canvas once, loads the JS bridge (`js/bridge/index.js`),
 //! and pushes a fresh Scene Spec to it whenever the app state it is built from changes.
-//! This is the only file with `wasm-bindgen` externs for the bridge.
+//! This file holds the `wasm-bindgen` externs for the renderer bridge; `audio_bridge.rs` holds the ones for audio
+//! (`js/bridge/audio.js`), which is loaded separately so that sound works without WebGL.
 //!
 //! The bridge is loaded with a dynamic `import()` relative to the page's base URL, so it works under the
 //! GitHub Pages sub-path. If the import fails or the browser has no WebGL, the scene layer switches to the
@@ -8,7 +9,7 @@
 use leptos::html::Canvas;
 use leptos::prelude::*;
 use spaceooops::scene::{self, SceneInputs};
-use spaceooops::settings::{DeviceHints, Quality};
+use spaceooops::settings::{DeviceHints, Graphics};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 
@@ -61,20 +62,20 @@ export function scene_device_renderer() {
 }
 "#)]
 extern "C" {
-    /// Changes the quality of a running scene (or the one about to start).
-    fn scene_set_quality(quality: &str);
+    /// Changes the graphics level of a running scene (or the one about to start).
+    fn scene_set_quality(graphics: &str);
     fn scene_device_cores() -> f64;
     fn scene_device_memory() -> f64;
     fn scene_device_renderer() -> String;
     /// Loads the bridge and starts the renderer; resolves to `true` when the 3D scene is running.
-    fn scene_init(canvas: &web_sys::HtmlCanvasElement, quality: &str) -> js_sys::Promise;
+    fn scene_init(canvas: &web_sys::HtmlCanvasElement, graphics: &str) -> js_sys::Promise;
     /// Hands the bridge the latest Scene Spec as JSON (kept until the bridge is ready).
     fn scene_apply(json: &str);
     /// The player asked the browser for reduced motion.
     fn scene_reduced_motion() -> bool;
 }
 
-/// What this browser says about the machine, for the Low-quality default.
+/// What this browser says about the machine, for the Low graphics default.
 pub fn device_hints() -> DeviceHints {
     let cores = scene_device_cores();
     let memory = scene_device_memory();
@@ -86,9 +87,9 @@ pub fn device_hints() -> DeviceHints {
     }
 }
 
-/// Switches the 3D scene's quality (safe before the scene has started).
-pub fn set_quality(quality: Quality) {
-    scene_set_quality(quality.name());
+/// Switches the 3D scene's graphics level (safe before the scene has started).
+pub fn set_graphics(graphics: Graphics) {
+    scene_set_quality(graphics.name());
 }
 
 /// Reduced motion skips the launch sequence, as it cuts every camera move.
@@ -123,7 +124,7 @@ pub fn SceneLayer() -> impl IntoView {
 
     canvas.on_load(move |el| {
         leptos::task::spawn_local(async move {
-            let live = JsFuture::from(scene_init(&el, super::settings_widget::initial_quality().name())).await.ok().and_then(|v| v.as_bool()).unwrap_or(false);
+            let live = JsFuture::from(scene_init(&el, super::settings_widget::initial_graphics().name())).await.ok().and_then(|v| v.as_bool()).unwrap_or(false);
             state.scene_live.set(live);
             mode.set(if live { SceneMode::Live } else { SceneMode::Fallback });
         });

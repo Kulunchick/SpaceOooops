@@ -1,8 +1,8 @@
-//! The settings control in the corner of every screen: music volume, effects volume and mute, remembered
-//! between visits in local storage (same style as the run history store). Later settings (the quality
-//! level) add a row inside `.settings-panel`.
+//! The settings control in the corner of every screen: music volume, effects volume, mute and the Graphics
+//! level (Low/High), remembered between visits in local storage (same style as the run history store).
+//! Further settings add a row inside `.settings-panel`.
 use leptos::prelude::*;
-use spaceooops::settings::{Quality, Settings};
+use spaceooops::settings::{Graphics, Settings};
 
 use super::{audio_bridge, scene_bridge, storage};
 
@@ -16,9 +16,13 @@ fn save(settings: &Settings) {
     storage::write(KEY, &settings.to_text());
 }
 
-/// The quality level in force at start-up: the saved choice, else the device default (see `Quality::choose`).
-pub fn initial_quality() -> Quality {
-    Quality::choose(load().quality, &scene_bridge::device_hints())
+/// The graphics level in force at start-up: the saved choice, else the device default (see `Graphics::choose`).
+/// Computed once per page load and shared: reading the device hints creates a throwaway WebGL context.
+pub fn initial_graphics() -> Graphics {
+    thread_local! {
+        static INITIAL: std::cell::OnceCell<Graphics> = const { std::cell::OnceCell::new() };
+    }
+    INITIAL.with(|cell| *cell.get_or_init(|| Graphics::choose(load().graphics, &scene_bridge::device_hints())))
 }
 
 fn percent(v: f64) -> u32 {
@@ -30,26 +34,26 @@ pub fn SettingsWidget() -> impl IntoView {
     let settings = RwSignal::new(load());
     let open = RwSignal::new(false);
     // The level shown and drawn: the saved choice or the device default. Choosing one saves it.
-    let quality = RwSignal::new(initial_quality());
+    let graphics = RwSignal::new(initial_graphics());
 
     Effect::new(move |_| {
         let s = settings.get();
         audio_bridge::audio_set_volumes(s.music, s.effects, s.muted);
         save(&s);
     });
-    Effect::new(move |_| scene_bridge::set_quality(quality.get()));
+    Effect::new(move |_| scene_bridge::set_graphics(graphics.get()));
 
-    let quality_button = move |label: &'static str, id: &'static str, level: Quality| {
+    let graphics_button = move |label: &'static str, id: &'static str, level: Graphics| {
         view! {
             <button
                 id=id
                 type="button"
                 class="lp-btn settings-quality-option"
-                class:selected=move || quality.get() == level
-                aria-pressed=move || (quality.get() == level).to_string()
+                class:selected=move || graphics.get() == level
+                aria-pressed=move || (graphics.get() == level).to_string()
                 on:click=move |_| {
-                    quality.set(level);
-                    settings.update(|s| s.quality = Some(level));
+                    graphics.set(level);
+                    settings.update(|s| s.graphics = Some(level));
                 }
             >
                 {label}
@@ -83,12 +87,12 @@ pub fn SettingsWidget() -> impl IntoView {
             <button
                 class="lp-btn settings-toggle"
                 type="button"
-                aria-label="Sound settings"
+                aria-label="Sound and graphics settings"
                 aria-expanded=move || open.get().to_string()
                 aria-controls="settings-panel"
                 on:click=move |_| open.update(|o| *o = !*o)
             >
-                {move || if settings.get().muted { "Sound: off" } else { "Sound" }}
+                {move || if settings.get().muted { "Settings (muted)" } else { "Settings" }}
             </button>
             <div class="settings-panel lp-panel" id="settings-panel" hidden=move || !open.get()>
                 {slider("Music", "settings-music", |s| s.music, |s, v| s.music = v)}
@@ -102,11 +106,11 @@ pub fn SettingsWidget() -> impl IntoView {
                         on:change=move |ev| settings.update(|s| s.muted = event_target_checked(&ev))
                     />
                 </label>
-                <div class="settings-row settings-quality" role="group" aria-label="Graphics quality">
-                    <span>"Quality"</span>
+                <div class="settings-row settings-quality" role="group" aria-label="Graphics">
+                    <span>"Graphics"</span>
                     <span class="settings-quality-options">
-                        {quality_button("Low", "settings-quality-low", Quality::Low)}
-                        {quality_button("High", "settings-quality-high", Quality::High)}
+                        {graphics_button("Low", "settings-quality-low", Graphics::Low)}
+                        {graphics_button("High", "settings-quality-high", Graphics::High)}
                     </span>
                 </div>
             </div>

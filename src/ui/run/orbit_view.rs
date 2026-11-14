@@ -96,14 +96,10 @@ pub fn OrbitView() -> impl IntoView {
     let period = g.period_min;
     let theta = move || orbit::angle(progress(), period);
 
-    // The shown day's shadow fraction and Random Events (changes once per day, not per tick).
-    let day_snapshot = Memo::new(move |_| {
-        let i = state.playback_index()?;
-        state.run_result.with(|r| r.as_ref().and_then(|r| r.timeline.get(i).map(|d| (i, d.in_eclipse_fraction, d.events.clone()))))
-    });
     // Today's shadow fraction: the timeline's own value, else the Orbit's.
     let shadow_fraction = Memo::new(move |_| {
-        day_snapshot.with(|d| d.as_ref().map_or(geo.with_value(|g| g.eclipse_fraction), |d| d.1)).clamp(0.0, 1.0)
+        let orbit_fraction = geo.with_value(|g| g.eclipse_fraction);
+        state.run_result.with(|r| orbit::shadow_fraction_or(orbit_fraction, r.as_ref(), state.playback.get()))
     });
     let in_shadow = move || orbit::in_shadow(theta(), shadow_fraction.get());
     let hidden_behind_earth = move || {

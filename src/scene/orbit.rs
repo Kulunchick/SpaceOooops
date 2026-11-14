@@ -85,9 +85,14 @@ pub fn shown_day(playback: f64, days: usize) -> usize {
 
 /// Today's shadow fraction: the timeline's own value for the shown day, else the Orbit's.
 pub fn shadow_fraction(orbit: &Orbit, run: Option<&RunResult>, playback: f64) -> f64 {
+    shadow_fraction_or(orbit.eclipse_fraction, run, playback)
+}
+
+/// The same, for a caller that holds the Orbit's own eclipse fraction (or a default) rather than the `Orbit`.
+pub fn shadow_fraction_or(orbit_fraction: f64, run: Option<&RunResult>, playback: f64) -> f64 {
     let days = run.map_or(0, |r| r.timeline.len());
     let index = shown_day(playback, days).max(1) - 1;
-    run.and_then(|r| r.timeline.get(index)).map_or(orbit.eclipse_fraction, |d| d.in_eclipse_fraction).clamp(0.0, 1.0)
+    run.and_then(|r| r.timeline.get(index)).map_or(orbit_fraction, |d| d.in_eclipse_fraction).clamp(0.0, 1.0)
 }
 
 pub(super) fn for_inputs(inputs: &SceneInputs) -> Option<OrbitView> {

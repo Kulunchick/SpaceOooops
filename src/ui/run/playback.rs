@@ -1,5 +1,7 @@
 //! Playback of the Run timeline: the driver advances `AppState::playback`, the controls change speed,
-//! skip to the end and open the Debrief. The whole timeline takes about 30 s at 1x, whatever its length.
+//! skip to the end and open the Debrief. The timeline takes about 30 s at 1x
+//! whatever its length; while the 3D scene is live (and motion is not reduced), days with a Random Event play
+//! slower (`EVENT_DAY_SECONDS`), so a Run with events takes longer. That changes pace, never results.
 use std::time::Duration;
 
 use leptos::prelude::*;
@@ -78,7 +80,7 @@ pub fn PlaybackControls(speed: RwSignal<f64>) -> impl IntoView {
                 .into_iter()
                 .map(|s| view! {
                     <button
-                        class="btn btn-small"
+                        class="lp-btn lp-btn-small"
                         class:selected=move || speed.get() == s
                         aria-pressed=move || (speed.get() == s).to_string()
                         on:click=move |_| speed.set(s)
@@ -87,9 +89,9 @@ pub fn PlaybackControls(speed: RwSignal<f64>) -> impl IntoView {
                     </button>
                 })
                 .collect_view()}
-            <button class="btn btn-small" on:click=skip>"Skip \u{23ED}"</button>
+            <button class="lp-btn lp-btn-small" on:click=skip>"Skip \u{23ED}"</button>
             <button
-                class="btn btn-primary"
+                class="lp-btn lp-btn-primary"
                 class:pulse=finished
                 disabled=move || !finished()
                 on:click=move |_| state.go(Screen::Debrief)

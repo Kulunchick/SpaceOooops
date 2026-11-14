@@ -38,6 +38,8 @@ pub struct AppState {
     pub votes: RwSignal<Votes>,
     /// The launch sequence (countdown, lift-off) is playing between Launch Review and the Run (ticket 07).
     pub launching: RwSignal<bool>,
+    /// Counts launch sequences; the 25 s safety timer only acts for the sequence it was started in.
+    pub launch_epoch: StoredValue<u32>,
     /// The 3D scene is running (false while loading and without WebGL); set by the scene layer.
     pub scene_live: RwSignal<bool>,
 }
@@ -58,6 +60,7 @@ impl AppState {
         });
         AppState {
             launching: RwSignal::new(false),
+            launch_epoch: StoredValue::new(0),
             scene_live: RwSignal::new(false),
             team: RwSignal::new(Team::default()),
             votes,
@@ -93,9 +96,19 @@ impl AppState {
         }
         if self.scene_live.get_untracked() && !super::scene_bridge::reduced_motion() {
             self.launching.set(true);
-            // Safety net: the Run starts even if the renderer never reports the end of the sequence.
+            // Safety net: the Run starts even if the renderer never reports the end of the sequence. The timer
+            // belongs to this launch only: a later launch (or the end of this one) makes it a no-op.
             let state = *self;
-            set_timeout(move || state.finish_launch(), std::time::Duration::from_secs(25));
+            let epoch = self.launch_epoch.get_value() + 1;
+            self.launch_epoch.set_value(epoch);
+            set_timeout(
+                move || {
+                    if state.launch_epoch.get_value() == epoch {
+                        state.finish_launch();
+                    }
+                },
+                std::time::Duration::from_secs(25),
+            );
         } else {
             self.launch();
         }
@@ -105,6 +118,7 @@ impl AppState {
     pub fn finish_launch(&self) {
         if self.launching.get_untracked() {
             self.launching.set(false);
+            self.launch_epoch.update_value(|e| *e += 1);
             self.launch();
         }
     }

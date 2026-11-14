@@ -52,8 +52,8 @@ pub fn DesignScreen() -> impl IntoView {
                         .collect_view()}
                 </nav>
                 <div class="actions">
-                    <button class="btn" on:click=move |_| state.go(Screen::Brief)>"Scenario brief"</button>
-                    <button class="btn btn-primary" on:click=move |_| state.go(Screen::LaunchReview)>"Launch Review"</button>
+                    <button class="lp-btn" on:click=move |_| state.go(Screen::Brief)>"Scenario brief"</button>
+                    <button class="lp-btn lp-btn-primary" on:click=move |_| state.go(Screen::LaunchReview)>"Launch Review"</button>
                     <super::share::ShareButton />
                 </div>
             </header>

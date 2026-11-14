@@ -52,8 +52,8 @@ pub(super) fn for_screen(screen: Screen) -> Shot {
         Title => Shot::TitleOrbit,
         Design => Shot::Hangar,
         LaunchReview => Shot::Pad,
-        // Screens that have no Shot of their own yet keep the title framing; the UI dims the scene behind
-        // their panels. Later tickets move each screen to its own Shot (globe, hangar, pad, orbit-follow, ...).
+        // Screens with no Shot of their own keep the title framing (the Run and Debrief shots come from their own
+        // modules); the UI dims the scene behind the panels that still need it.
         // Scenario select and Brief are framed by `markers::shot`, which `build` tries first.
         Sources | TeamSetup | ScenarioSelect | Brief | Run | Debrief | History => {
             Shot::TitleOrbit

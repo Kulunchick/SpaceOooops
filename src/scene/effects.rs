@@ -39,10 +39,10 @@ pub enum EffectKind {
     StationDark { station: String },
     /// Data comes down: a beam links the spacecraft to the station (drawn while the station is in view).
     Contact { station: String },
-    /// A Component failed: its part sparks on the failure day and stays dark for the rest of the Run.
-    Failure { part: String },
+    /// A Component failed: its model part sparks on the failure day and stays dark for the rest of the Run.
+    Failure { component: String },
     /// The battery stopped covering the eclipse: its part flashes a warning on the day it starts.
-    BatteryShortfall { part: String },
+    BatteryShortfall { component: String },
 }
 
 /// The sim's option ids for the flare and outage answers that change what the scene shows.
@@ -116,11 +116,11 @@ pub fn all(run: &RunResult, tuning: Option<&EventTuning>) -> Vec<Effect> {
                     }
                 }
                 EventKind::ComponentFailure | EventKind::BatteryShortfall => {
-                    let Some(part) = e.component.clone() else { continue };
+                    let Some(component) = e.component.clone() else { continue };
                     let (id, kind, days) = if e.kind == EventKind::ComponentFailure {
-                        (format!("day-{}-failure-{part}", t.day), EffectKind::Failure { part }, run_days - start)
+                        (format!("day-{}-failure-{component}", t.day), EffectKind::Failure { component }, run_days - start)
                     } else {
-                        (format!("day-{}-battery-{part}", t.day), EffectKind::BatteryShortfall { part }, 1.0)
+                        (format!("day-{}-battery-{component}", t.day), EffectKind::BatteryShortfall { component }, 1.0)
                     };
                     push(id, kind, start, days);
                 }

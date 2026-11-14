@@ -174,10 +174,10 @@ export function createEffects({ scene, run, canvas, camera = null }) {
       if (e.kind === 'safeMode') {
         feather = Math.max(feather, smooth(t / SAFE_EASE_DAYS) * smooth((e.days - t) / SAFE_EASE_DAYS));
       } else if (e.kind === 'failure') {
-        if (t >= HIT) dark.push(e.part);
-        if (t >= HIT && t <= 1) spark = { id: e.part, amount: (t - HIT) / (1 - HIT) };
+        if (t >= HIT) dark.push(e.component);
+        if (t >= HIT && t <= 1) spark = { id: e.component, amount: (t - HIT) / (1 - HIT) };
       } else if (e.kind === 'batteryShortfall') {
-        warnParts.push(e.part);
+        warnParts.push(e.component);
         warn = Math.max(warn, 0.5 + 0.5 * Math.sin(t * Math.PI * 2 * 5));
       } else if (e.kind === 'flare') {
         flash = Math.max(flash, Math.max(0, 1 - Math.abs(t - HIT) / 0.12));
@@ -247,7 +247,7 @@ export function createEffects({ scene, run, canvas, camera = null }) {
     }
     canvas.dataset.stations = states.join(' ');
 
-    const contact = effects.find((e) => e.kind === 'contact' && stations.has(e.station) && !darkStations.has(e.station));
+    const contact = effects.find((e) => e.kind === 'contact' && stations.has(e.station));
     let linked = '';
     if (contact) {
       const g = stations.get(contact.station);

@@ -13,7 +13,7 @@ pub struct HangarPreview {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub orbit: Option<OrbitPreview>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub launch_vehicle: Option<RocketPreview>,
+    pub launch_vehicle: Option<LaunchVehiclePreview>,
 }
 
 /// The chosen Orbit drawn as a ring around a small Earth of radius 1.
@@ -32,7 +32,7 @@ pub struct OrbitPreview {
 /// The chosen Launch Vehicle's rocket.
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct RocketPreview {
+pub struct LaunchVehiclePreview {
     pub id: String,
     /// "small", "medium", "heavy".
     pub class: String,
@@ -58,16 +58,16 @@ fn preview(c: &Catalog, d: &Design) -> HangarPreview {
         inclination_deg: o.inclination_deg,
         class: o.orbit_class.clone(),
     });
-    HangarPreview { orbit, launch_vehicle: rocket_preview(c, d) }
+    HangarPreview { orbit, launch_vehicle: launch_vehicle_preview(c, d) }
 }
 
 /// The rocket of the Design's chosen Launch Vehicle (shared with the launch pad).
-pub(super) fn rocket_preview(c: &Catalog, d: &Design) -> Option<RocketPreview> {
+pub(super) fn launch_vehicle_preview(c: &Catalog, d: &Design) -> Option<LaunchVehiclePreview> {
     d.launch_vehicle.as_deref().and_then(|id| c.launch_vehicle(id)).map(|lv| {
         let height_m = if lv.rocket.height_m > 0.0 { lv.rocket.height_m } else { 20.0 };
-        RocketPreview {
+        LaunchVehiclePreview {
             id: lv.id.clone(),
-            class: serde_json::to_value(lv.rocket.class).ok().and_then(|v| v.as_str().map(String::from)).unwrap_or_default(),
+            class: super::spacecraft::kebab(&lv.rocket.class),
             height_m,
             height: 0.7 * (height_m / 4.0).ln().max(0.5),
         }

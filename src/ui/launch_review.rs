@@ -58,9 +58,9 @@ pub fn LaunchReviewScreen() -> impl IntoView {
                 <CostTable />
             </div>
             <div class="actions">
-                <button class="btn" on:click=move |_| state.go(Screen::Design)>"Modify design"</button>
+                <button class="lp-btn" on:click=move |_| state.go(Screen::Design)>"Modify design"</button>
                 <button
-                    class="btn btn-primary"
+                    class="lp-btn lp-btn-primary"
                     disabled=move || !can_launch() || state.launching.get()
                     on:click=move |_| {
                         if can_launch() {

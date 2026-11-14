@@ -196,9 +196,9 @@ pub struct LaunchVehicle {
     pub cost_usd: f64,
     /// Payload capacity per orbit id; a missing entry means it cannot reach that Orbit.
     pub capacity_kg: BTreeMap<String, f64>,
-    /// Visual only: the rocket the 3D scene shows for this Launch Vehicle.
+    /// Visual only: the Launch Vehicle model the 3D scene shows (the data key stays `rocket`).
     #[serde(default)]
-    pub rocket: RocketLook,
+    pub rocket: LaunchVehicleLook,
 }
 
 // ---- Visual-only catalog fields: they change how the 3D scene draws an option, never a game number. ----
@@ -259,16 +259,16 @@ pub enum InstrumentShape {
     ProbeBoom,
 }
 
-/// How a Launch Vehicle's rocket looks: its class and real height.
+/// How a Launch Vehicle looks: its class and real height.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
-pub struct RocketLook {
-    pub class: RocketClass,
+pub struct LaunchVehicleLook {
+    pub class: LaunchVehicleClass,
     pub height_m: f64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub enum RocketClass {
+pub enum LaunchVehicleClass {
     /// A small single-core launcher.
     #[default]
     Small,

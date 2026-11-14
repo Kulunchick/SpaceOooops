@@ -118,3 +118,15 @@ _Avoid_: Camera, view
 **Cue**:
 A music track or one-shot sound effect the game asks to be played.
 _Avoid_: Sound event, trigger
+
+**Graphics**:
+The player's Low/High setting for how much the 3D scene draws (face count and pixel ratio). Stored under the key `quality` for old saves.
+_Avoid_: Quality (reads as Reliability Tier)
+
+**Model part**:
+One drawn piece of the 3D spacecraft model (`Part` in the Scene Spec): the bus, a Component's hardware or an Instrument, identified by its catalog option id. A rendering term only; the game rules speak of Components and Instruments.
+_Avoid_: Part (for a Component), module
+
+**Fate**:
+How the Debrief scene shows a failed Mission's spacecraft: tumbling, dark, reentry or adrift (hero on Success).
+_Avoid_: Crash type

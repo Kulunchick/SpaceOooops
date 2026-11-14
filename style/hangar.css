@@ -28,7 +28,7 @@
 }
 .hangar-layout .design-head h2 { margin: 0; font-size: 1.25rem; font-family: var(--lp-font-display); letter-spacing: 0.04em; }
 .hangar-layout .design-head .actions { margin: 0 0 0 auto; gap: 0.5rem; align-items: flex-start; }
-.hangar-layout .design-head .btn { padding: 0.45rem 1rem; }
+.hangar-layout .design-head .lp-btn { padding: 0.45rem 1rem; }
 .hangar-layout .share { position: relative; }
 .hangar-layout .share-box {
   position: absolute;
@@ -137,7 +137,7 @@
   .hangar-layout .tab { padding: 0.3rem 0.55rem; font-size: 0.78rem; }
   .hangar-layout .tabs { gap: 0.25rem; }
   .hangar-layout .design-head .actions { margin: 0; gap: 0.3rem; width: 100%; }
-  .hangar-layout .design-head .btn { padding: 0.3rem 0.5rem; font-size: 0.7rem; letter-spacing: 0; }
+  .hangar-layout .design-head .lp-btn { padding: 0.3rem 0.5rem; font-size: 0.7rem; letter-spacing: 0; }
   .hangar-stage { flex-basis: 20vh; }
   .role-panel { padding: 0.6rem 0.7rem; }
   .gauge-strip .gauge { padding: 0.25rem 0.35rem; }

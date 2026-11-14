@@ -10,6 +10,14 @@ Partly supersedes ADR 0001. The game now needs a low-poly 3D look, which DOM, CS
 
 ## Consequences
 
-- Rust and JavaScript meet at one narrow API (`init`, `apply(sceneSpec)`, quality, reduced motion, audio). The Scene Spec travels as JSON.
+- Rust and JavaScript meet at one narrow API (`init`, `apply(sceneSpec)`, graphics level, reduced motion, audio). The Scene Spec travels as JSON.
 - The bridge's look is checked by eye in the browser; only the Scene Spec and smoke tests (Playwright) are automated.
 - three.js is shipped whole (about 2 MB uncompressed, much less gzipped) because there is no bundler to tree-shake it.
+
+## Decisions made while building
+
+- **Two bridge files with externs.** `src/ui/scene_bridge.rs` holds the externs for the renderer (`js/bridge/index.js`); `src/ui/audio_bridge.rs` holds those for `js/bridge/audio.js`, which is loaded on its own so that sound works without WebGL.
+- **UI click sound is chosen in JS, not as a Rust Cue.** `audio.js` plays `click` for any click on a button, role=button or link. A click is not a change of game state, so it has no place in the Scene Spec; everything state-driven (snap, launch, failure, votes) is a Rust Cue.
+- **Reduced motion keeps the 3D Run, frozen.** With `prefers-reduced-motion` the Run stays in the 3D scene with camera moves cut, idle drift off and the launch sequence skipped; it does not fall back to the SVG orbit view. (The spec's Solution paragraph says fall back; its Implementation Decisions say motion off. The code follows the latter. The SVG view is for browsers without WebGL.)
+- **Random Event days play slowly only while the 3D scene is live** (and motion is not reduced), so their effects and Cues can be seen and heard. This changes the pace of the playback, never the Run's results.
+- **Graphics (Low/High) changes the face count and pixel ratio live; antialiasing is fixed when the page starts**, because a WebGL context's attributes cannot change on a canvas that already has one.

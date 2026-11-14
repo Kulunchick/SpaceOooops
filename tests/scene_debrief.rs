@@ -138,7 +138,7 @@ fn every_cause_the_sim_can_produce_maps_to_a_visual() {
 
 #[test]
 fn a_failed_component_picks_the_visual_by_what_it_does() {
-    use spaceooops::scene::PartClass::*;
+    use spaceooops::scene::ComponentClass::*;
     let f = |part| scene::fate_for_cause(CauseKind::ComponentFailure, Some(part));
     assert_eq!(f(Attitude), Fate::Tumbling);
     assert_eq!(f(Solar), Fate::Dark);

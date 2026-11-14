@@ -26,7 +26,7 @@ pub enum Fate {
 
 /// The kind of Component that failed, as far as the visual cares.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum PartClass {
+pub enum ComponentClass {
     Solar,
     Battery,
     Attitude,
@@ -44,14 +44,14 @@ pub struct DebriefScene {
 
 /// The failure visual for a main cause. `part` is the Component behind a `ComponentFailure`, when known.
 /// A failure never maps to `Hero`, whatever the cause.
-pub fn fate_for_cause(kind: CauseKind, part: Option<PartClass>) -> Fate {
+pub fn fate_for_cause(kind: CauseKind, part: Option<ComponentClass>) -> Fate {
     match kind {
         CauseKind::BatteryTooSmall => Fate::Dark,
         CauseKind::LifetimeShortfall => Fate::Reentry,
         CauseKind::ComponentFailure => match part {
-            Some(PartClass::Attitude) => Fate::Tumbling,
-            Some(PartClass::Solar | PartClass::Battery) => Fate::Dark,
-            Some(PartClass::Comms | PartClass::Computer) | None => Fate::Adrift,
+            Some(ComponentClass::Attitude) => Fate::Tumbling,
+            Some(ComponentClass::Solar | ComponentClass::Battery) => Fate::Dark,
+            Some(ComponentClass::Comms | ComponentClass::Computer) | None => Fate::Adrift,
         },
         CauseKind::DataLost
         | CauseKind::ScienceShortfall
@@ -64,17 +64,17 @@ pub fn fate_for_cause(kind: CauseKind, part: Option<PartClass>) -> Fate {
     }
 }
 
-fn class_of(catalog: &Catalog, id: &str) -> Option<PartClass> {
+fn class_of(catalog: &Catalog, id: &str) -> Option<ComponentClass> {
     if catalog.attitude_controls.iter().any(|o| o.id == id) {
-        Some(PartClass::Attitude)
+        Some(ComponentClass::Attitude)
     } else if catalog.solar_panels.iter().any(|o| o.id == id) {
-        Some(PartClass::Solar)
+        Some(ComponentClass::Solar)
     } else if catalog.batteries.iter().any(|o| o.id == id) {
-        Some(PartClass::Battery)
+        Some(ComponentClass::Battery)
     } else if catalog.comms.iter().any(|o| o.id == id) {
-        Some(PartClass::Comms)
+        Some(ComponentClass::Comms)
     } else if catalog.computer.id == id {
-        Some(PartClass::Computer)
+        Some(ComponentClass::Computer)
     } else {
         None
     }

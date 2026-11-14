@@ -196,7 +196,7 @@ fn a_failed_component_is_marked_on_its_part_from_the_failure_day_to_the_end_of_t
             assert!(parts.iter().any(|p| &p.id == id), "seed {seed}: {id} is a part of the model");
             let expected: Vec<u32> =
                 r.timeline.iter().filter(|t| t.failed_components.contains(id)).map(|t| t.day).collect();
-            let marked = days_with(&c, &d, &r, |k| *k == EffectKind::Failure { part: id.clone() });
+            let marked = days_with(&c, &d, &r, |k| *k == EffectKind::Failure { component: id.clone() });
             assert_eq!(marked, expected, "seed {seed}: {id}");
         }
     }
@@ -210,7 +210,7 @@ fn a_battery_shortfall_is_marked_on_the_battery_on_the_day_it_starts() {
     let r = run(&c, &d, CROP_WATCH, 3);
     let days = event_days(&r, EventKind::BatteryShortfall);
     assert_eq!(days.len(), 1);
-    let marked = days_with(&c, &d, &r, |k| *k == EffectKind::BatteryShortfall { part: "battery-s".into() });
+    let marked = days_with(&c, &d, &r, |k| *k == EffectKind::BatteryShortfall { component: "battery-s".into() });
     assert_eq!(marked, days);
 }
 

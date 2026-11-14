@@ -135,6 +135,8 @@ export async function init(canvas, initialQuality = 'high') {
   canvasEl = canvas;
   canvas.dataset.quality = quality;
   try {
+    // Antialiasing is a context attribute: it is fixed by the level the page starts with (a canvas cannot get a
+    // second context), so switching Low/High in game changes face count and pixel ratio but not antialiasing.
     renderer = new THREE.WebGLRenderer({ canvas, antialias: quality === 'high', powerPreference: 'low-power' });
   } catch (e) {
     console.warn('WebGL renderer could not start:', e);

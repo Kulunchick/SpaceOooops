@@ -1,4 +1,4 @@
-//! Scene Spec: a plain-data description of what the 3D scene (and later the audio) should show right now.
+//! Scene Spec: a plain-data description of what the 3D scene (and the audio) should play right now.
 //! Pure Rust, no web dependencies: it is the only place that decides *what* to show; the JS bridge in
 //! `js/bridge/` decides only *how* to draw it. The UI builds `SceneInputs` from its state, calls `build`,
 //! serialises the result to JSON and hands it to the bridge.
@@ -20,9 +20,9 @@ use serde::Serialize;
 use crate::sim::{Catalog, Design};
 
 pub use cues::{one_shots, Cue, Track};
-pub use debrief::{fate_for_cause, DebriefScene, Fate, PartClass};
+pub use debrief::{fate_for_cause, DebriefScene, Fate, ComponentClass};
 pub use effects::{Effect, EffectKind, Station};
-pub use hangar::{HangarPreview, OrbitPreview, RocketPreview};
+pub use hangar::{HangarPreview, OrbitPreview, LaunchVehiclePreview};
 pub use markers::Marker;
 pub use orbit::OrbitView;
 pub use pad::{PadScene, PadVote};
@@ -47,15 +47,15 @@ pub enum Screen {
 }
 
 impl Screen {
-    /// Screens whose scene shows the spacecraft assembled from the Design. Later tickets add their screens
-    /// (Launch Review on the pad, the Run in orbit, the Debrief shots) here.
+    /// Screens whose scene shows the spacecraft assembled from the Design. Add a screen here when its scene
+    /// should show the spacecraft.
     pub fn shows_spacecraft(self) -> bool {
         matches!(self, Screen::Design | Screen::LaunchReview | Screen::Run | Screen::Debrief)
     }
 }
 
 /// Everything the Scene Spec is built from. Construct with `SceneInputs::on(screen)` and override fields
-/// with struct-update syntax, so new inputs added by later tickets do not break existing callers.
+/// with struct-update syntax, so a new input does not break existing callers.
 #[derive(Clone, Debug)]
 pub struct SceneInputs<'a> {
     pub screen: Screen,

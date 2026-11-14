@@ -13,7 +13,7 @@ async function unlock(page) {
 }
 
 async function openSettings(page) {
-  if (!(await page.locator('#settings-panel').isVisible())) await page.getByRole('button', { name: 'Sound settings' }).click();
+  if (!(await page.locator('#settings-panel').isVisible())) await page.getByRole('button', { name: 'Sound and graphics settings' }).click();
   await expect(page.locator('#settings-panel')).toBeVisible();
 }
 
@@ -84,8 +84,8 @@ export function registerAudioTests(test) {
     await expect(html(page)).toHaveAttribute('data-audio-sfx-gain', '0');
     await expect(html(page)).toHaveAttribute('data-audio-track', '');
     const before = await attr(page, 'audioSources');
-    await page.getByRole('button', { name: 'Sound settings' }).click(); // a UI click that would normally click
-    await page.getByRole('button', { name: 'Sound settings' }).click();
+    await page.getByRole('button', { name: 'Sound and graphics settings' }).click(); // a UI click that would normally click
+    await page.getByRole('button', { name: 'Sound and graphics settings' }).click();
     await page.waitForTimeout(400);
     expect(await attr(page, 'audioSources')).toBe(before);
     // Unmuting brings the music back.

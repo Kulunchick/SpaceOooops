@@ -12,11 +12,11 @@ test('a full Crop Watch Mission completes with reduced motion and no WebGL', asy
 
 test('the quality choice is saved even without a 3D scene', async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('button', { name: 'Sound settings' }).click();
+  await page.getByRole('button', { name: 'Sound and graphics settings' }).click();
   await page.locator('#settings-quality-low').click();
   await expect(page.locator('#settings-quality-low')).toHaveAttribute('aria-pressed', 'true');
   await page.reload();
-  await page.getByRole('button', { name: 'Sound settings' }).click();
+  await page.getByRole('button', { name: 'Sound and graphics settings' }).click();
   await expect(page.locator('#settings-quality-low')).toHaveAttribute('aria-pressed', 'true');
   expect(await page.evaluate(() => localStorage.getItem('spaceooops.settings.v1'))).toContain('quality=low');
 });

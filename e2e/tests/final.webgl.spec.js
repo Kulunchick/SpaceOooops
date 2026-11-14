@@ -7,7 +7,7 @@ const canvas = (page) => page.locator('canvas.scene-canvas');
 const SETTINGS_KEY = 'spaceooops.settings.v1';
 
 async function openSettings(page) {
-  if (!(await page.locator('#settings-panel').isVisible())) await page.getByRole('button', { name: 'Sound settings' }).click();
+  if (!(await page.locator('#settings-panel').isVisible())) await page.getByRole('button', { name: 'Sound and graphics settings' }).click();
   await expect(page.locator('#settings-panel')).toBeVisible();
 }
 
