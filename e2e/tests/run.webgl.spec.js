@@ -21,6 +21,8 @@ async function launchCropWatch(page) {
   await page.goto(`./#share=${CROP_WATCH_SHARE}`);
   await page.getByRole('button', { name: 'Launch Review' }).click();
   await page.getByRole('button', { name: 'Launch', exact: true }).click();
+  // The launch sequence on the pad (ticket 07) can be skipped.
+  await page.getByRole('button', { name: 'Skip launch' }).click();
   await expect(page.locator('.run-screen')).toBeVisible();
   await expect(page.locator('canvas.scene-canvas')).toHaveAttribute('data-shot', 'orbit', { timeout: 20_000 });
 }
