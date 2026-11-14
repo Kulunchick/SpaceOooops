@@ -10,11 +10,15 @@ use spaceooops::sim::EventKind;
 use crate::ui::format::{num, percent};
 use crate::ui::state::AppState;
 
-const W: f64 = 480.0;
-const H: f64 = 340.0;
+const W: f64 = 960.0;
+const H: f64 = 420.0;
 const CX: f64 = W / 2.0;
 const CY: f64 = H / 2.0;
-const EARTH_R: f64 = 40.0;
+const EARTH_R: f64 = 80.0;
+/// Drawn radius growth from the lowest to the highest Orbit (before the ellipse squash).
+const ORBIT_SPAN: f64 = 340.0;
+/// Smallest drawn half-angle of the shadow arc so a tiny shadow (GEO) is still visible.
+const MIN_ARC_HALF: f64 = 0.1;
 /// Visual revolutions of a reference orbit over the whole Run. Angular speed of every Orbit is
 /// scaled from this by the inverse of its period, so GEO is visibly slower than LEO.
 const VISUAL_REVS: f64 = 14.0;
@@ -56,7 +60,7 @@ fn geometry(state: AppState) -> Geometry {
                 altitude_km: o.altitude_km,
                 period_min: o.period_min.max(1.0),
                 eclipse_fraction: o.eclipse_fraction.clamp(0.0, 1.0),
-                rx: EARTH_R + 16.0 + 105.0 * f,
+                rx: EARTH_R + 14.0 + ORBIT_SPAN * f,
                 squash: 0.28 + 0.72 * o.inclination_deg.to_radians().sin().abs(),
             }
         }
@@ -65,7 +69,7 @@ fn geometry(state: AppState) -> Geometry {
             altitude_km: 0.0,
             period_min: REFERENCE_PERIOD_MIN,
             eclipse_fraction: 0.0,
-            rx: EARTH_R + 30.0,
+            rx: EARTH_R + 40.0,
             squash: 0.5,
         },
     })
@@ -125,6 +129,7 @@ pub fn OrbitView() -> impl IntoView {
         if half <= 0.0 {
             return String::new();
         }
+        let half = half.max(MIN_ARC_HALF);
         let steps = ((half / PI * 40.0).ceil() as usize).max(2);
         geo.with_value(|g| {
             (0..=steps)
@@ -165,12 +170,13 @@ pub fn OrbitView() -> impl IntoView {
     let orbit_ry = g.ry();
     let view_box = format!("0 0 {W} {H}");
     let aria = format!("Orbit animation: the spacecraft circling Earth on the {name}");
-    let sun_ray = format!("M 70 {CY} H {}", CX - orbit_rx - 12.0);
+    let sun_ray = format!("M 12 {CY} H 40 M 12 {} H 34 M 12 {} H 34", CY - 14.0, CY + 14.0);
+    let sun_y = CY - 24.0;
+    let cone = format!("M {CX} {} L {W} {} L {W} {} L {CX} {} Z", CY - EARTH_R, CY - EARTH_R * 0.55, CY + EARTH_R * 0.55, CY + EARTH_R);
     let night_y = CY - EARTH_R;
     let night_h = EARTH_R * 2.0;
-    let night_label_x = CX + EARTH_R + 6.0;
-    let night_label_y = night_y - 6.0;
-    let band_w = W - CX;
+    let night_label_x = CX + 8.0;
+    let night_label_y = CY + 5.0;
 
     view! {
         <div class="run-orbit-slot panel">
@@ -180,11 +186,15 @@ pub fn OrbitView() -> impl IntoView {
                         <stop offset="0%" stop-color="#4aa3d9" />
                         <stop offset="100%" stop-color="#14456b" />
                     </radialGradient>
+                    <linearGradient id="shadow-grad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#000" stop-opacity="0.75" />
+                        <stop offset="100%" stop-color="#000" stop-opacity="0.05" />
+                    </linearGradient>
                     <clipPath id="earth-clip"><circle cx=CX cy=CY r=EARTH_R /></clipPath>
                 </defs>
-                <text class="orbit-sun" x="14" y=CY>"\u{2600} Sun"</text>
+                <text class="orbit-sun" x="12" y=sun_y>"\u{2600} Sun"</text>
                 <path class="orbit-sun-rays" d=sun_ray />
-                <rect class="orbit-shadow-band" x=CX y=night_y width=band_w height=night_h />
+                <path class="orbit-shadow-band" d=cone fill="url(#shadow-grad)" />
                 <ellipse class="orbit-line" cx=CX cy=CY rx=orbit_rx ry=orbit_ry />
                 <path class="orbit-eclipse-arc" d=shadow_path />
                 <circle class="earth" cx=CX cy=CY r=EARTH_R fill="url(#earth-grad)" />
@@ -193,15 +203,18 @@ pub fn OrbitView() -> impl IntoView {
                 </g>
                 <line class="earth-terminator" x1=CX y1=night_y x2=CX y2=night_y + night_h />
                 <text class="orbit-night-label" x=night_label_x y=night_label_y>"\u{263E} Night"</text>
-                <circle class="ground-marker" r="3.5"
+                <circle class="ground-marker" r="5"
                     cx=move || format!("{:.1}", marker().0) cy=move || format!("{:.1}", marker().1)
                     opacity=move || if marker().2 { "1" } else { "0.25" } />
                 <g class="spacecraft" class:in-shadow=in_shadow transform=position
                     opacity=move || if hidden_behind_earth() { "0" } else { "1" }>
+                    <circle class="sc-halo" r="22" />
+                    <g transform="scale(1.8)">
                     {move || flash.get().map(|_| view! { <circle class="event-flash" r="10" /> })}
                     <rect class="sc-panel" x="-13" y="-2.5" width="9" height="5" />
                     <rect class="sc-panel" x="4" y="-2.5" width="9" height="5" />
                     <rect class="sc-body" x="-4" y="-4" width="8" height="8" rx="1.5" />
+                    </g>
                 </g>
             </svg>
             <div class="orbit-caption" aria-live="polite">
