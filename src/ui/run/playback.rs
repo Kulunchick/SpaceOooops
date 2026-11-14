@@ -10,6 +10,8 @@ use crate::ui::state::{AppState, Screen};
 const PLAYBACK_SECONDS: f64 = 30.0;
 const TICK_MS: u64 = 50;
 const SPEEDS: [f64; 2] = [1.0, 4.0];
+/// Pause on the last day before moving to the Debrief by itself.
+const END_HOLD_MS: u64 = 1500;
 
 /// Invisible component: ticks the playback position forward while the Run screen is open.
 #[component]
@@ -18,6 +20,8 @@ pub fn PlaybackDriver(speed: RwSignal<f64>) -> impl IntoView {
     let playback = state.playback;
     let run_result = state.run_result;
     let ticks_per_run = PLAYBACK_SECONDS * 1000.0 / TICK_MS as f64;
+    // Milliseconds spent at the end of the timeline; past the hold, open the Debrief once.
+    let held_ms = StoredValue::new(0u64);
     let handle = set_interval_with_handle(
         move || {
             let days = run_result.with_untracked(|r| r.as_ref().map_or(0, |r| r.timeline.len())) as f64;
@@ -25,6 +29,12 @@ pub fn PlaybackDriver(speed: RwSignal<f64>) -> impl IntoView {
             let now = playback.get_untracked();
             if now < days {
                 playback.set((now + step).min(days));
+                return;
+            }
+            let held = held_ms.get_value() + TICK_MS;
+            held_ms.set_value(held);
+            if held == END_HOLD_MS {
+                state.go(Screen::Debrief);
             }
         },
         Duration::from_millis(TICK_MS),
@@ -37,7 +47,7 @@ pub fn PlaybackDriver(speed: RwSignal<f64>) -> impl IntoView {
 #[component]
 pub fn PlaybackControls(speed: RwSignal<f64>) -> impl IntoView {
     let state = expect_context::<AppState>();
-    let finished = move || state.playback.get() >= state.run_days() as f64;
+    let finished = move || state.playback_finished();
     let skip = move |_| {
         state.playback.set(state.run_days() as f64);
         state.go(Screen::Debrief);

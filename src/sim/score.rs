@@ -46,6 +46,7 @@ pub(crate) struct ScoreInput {
     pub capacity_kg: Option<f64>,
     pub days_survived: u32,
     pub min_lifetime_days: u32,
+    pub success: bool,
 }
 
 pub(crate) fn score(rules: &ScoringRules, s: &ScoreInput) -> Vec<ScoreLine> {
@@ -54,17 +55,19 @@ pub(crate) fn score(rules: &ScoringRules, s: &ScoreInput) -> Vec<ScoreLine> {
         label: format!("Science Value ({:.1})", s.science_value),
         points: s.science_value * rules.points_per_science_value,
     }];
+    let paid = s.success || !rules.margin_bonuses_need_success;
+    let unpaid = if paid { "" } else { "; paid only on a Success" };
     let budget_margin = margin(s.budget_usd - s.total_cost_usd, s.budget_usd);
     lines.push(ScoreLine {
         kind: ScoreLineKind::BudgetMargin,
-        label: format!("Unspent Budget ({:.0}% left)", budget_margin * 100.0),
-        points: budget_margin * rules.budget_margin_points,
+        label: format!("Unspent Budget ({:.0}% left{unpaid})", budget_margin * 100.0),
+        points: if paid { budget_margin * rules.budget_margin_points } else { 0.0 },
     });
     let mass_margin = s.capacity_kg.map_or(0.0, |cap| margin(cap - s.total_mass_kg, cap));
     lines.push(ScoreLine {
         kind: ScoreLineKind::MassMargin,
-        label: format!("Mass margin ({:.0}% of the Launch Vehicle's capacity unused)", mass_margin * 100.0),
-        points: mass_margin * rules.mass_margin_points,
+        label: format!("Mass margin ({:.0}% of the Launch Vehicle's capacity unused{unpaid})", mass_margin * 100.0),
+        points: if paid { mass_margin * rules.mass_margin_points } else { 0.0 },
     });
     if s.days_survived < s.min_lifetime_days && s.min_lifetime_days > 0 {
         let missed = f64::from(s.min_lifetime_days - s.days_survived) / f64::from(s.min_lifetime_days);

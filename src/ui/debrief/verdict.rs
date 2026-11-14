@@ -7,6 +7,7 @@ use crate::ui::state::AppState;
 pub fn Verdict() -> impl IntoView {
     let state = expect_context::<AppState>();
     let success = move || state.run_result.with(|r| r.as_ref().is_some_and(|r| r.debrief.success));
+    let ending = move || state.run_result.with(|r| r.as_ref().map(|r| r.debrief.ending.clone()).unwrap_or_default());
     let total = move || state.run_result.with(|r| r.as_ref().map_or(0.0, |r| r.debrief.score.total));
     view! {
         <div class="panel verdict" class:verdict-success=success class:verdict-failure=move || !success()>
@@ -14,6 +15,7 @@ pub fn Verdict() -> impl IntoView {
             <div>
                 <div class="verdict-title">{move || if success() { "Success" } else { "Mission failed" }}</div>
                 <div class="verdict-score">"Score " {move || format!("{:.0}", total())}</div>
+                <p class="muted">{ending}</p>
             </div>
         </div>
     }

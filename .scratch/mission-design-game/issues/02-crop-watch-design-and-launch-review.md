@@ -10,7 +10,7 @@ They then build a Design across four Role tabs:
 
 Gauges for Budget, Mass, Power, Data and Lifetime are always visible and update on every change. They turn amber for thin margins and red for violations. The Launch Review screen lists every broken hard constraint and every soft warning with a plain-language reason. "Launch" is enabled only when no hard constraint is broken.
 
-All numbers come from human-readable data files bundled into the build, never hard-coded. They are approximately realistic, from NASA CubeSat 101 and public specs. This ticket only needs the minimal catalog for Crop Watch: SSO, one or two Launch Vehicle classes, two options per Component category, 2â€“3 Instruments, and the Basic and Flight-proven Reliability Tiers.
+All numbers come from human-readable data files bundled into the build, never hard-coded. They are approximately realistic, from NASA CubeSat 101 and public specs. This ticket only needs the minimal catalog for Crop Watch: SSO, one or two Launch Vehicle classes, two options per Component category, 2–3 Instruments, and the Basic and Flight-proven Reliability Tiers.
 
 This ticket adds two calls to the `sim` interface:
 - **Load catalog**.
@@ -22,7 +22,7 @@ The UI holds no rules; it renders what `sim` returns.
 
 **Status:** ready-for-agent
 
-- [ ] Scenario select â†’ brief â†’ Design works in the deployed app
+- [ ] Scenario select → brief → Design works in the deployed app
 - [ ] Gauges show the Launch Review totals and update instantly on every choice
 - [ ] Options show Mass, Power, cost, Data and Reliability Tier
 - [ ] Incompatible options are shown with the reason (e.g. imager needs reaction wheels)

@@ -9,8 +9,9 @@ pub enum EventKind {
     ComponentFailure,
     SolarFlare,
     GroundStationOutage,
-    /// The battery was drained so deep, so often, that it can no longer carry the spacecraft through an eclipse.
-    BatteryWornOut,
+    /// The battery can no longer carry the spacecraft through a whole eclipse (too small, or worn by deep
+    /// discharges), so the Instruments switch off for part of every orbit. Not fatal by itself.
+    BatteryShortfall,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -100,12 +101,16 @@ pub(crate) fn component_failure(kind: ComponentKind, id: &str, name: &str, fatal
     RandomEvent { kind: EventKind::ComponentFailure, text, component: Some(id.to_string()) }
 }
 
-pub(crate) fn battery_worn_out(id: &str, name: &str, fatal: bool) -> RandomEvent {
-    let ending = if fatal { "The Mission ends." } else { "The spacecraft now browns out in every eclipse." };
+pub(crate) fn battery_shortfall(id: &str, name: &str, eclipse_minutes: f64, worn: bool) -> RandomEvent {
+    let why = if worn {
+        format!("Worn by draining too deep in every pass through Earth's shadow, the {name} can no longer")
+    } else {
+        format!("The {name} is too small to")
+    };
     RandomEvent {
-        kind: EventKind::BatteryWornOut,
+        kind: EventKind::BatteryShortfall,
         text: format!(
-            "The {name} wore out: drained too deep in every pass through Earth's shadow, it can no longer carry the spacecraft through an eclipse. {ending}"
+            "{why} carry the spacecraft through the {eclipse_minutes:.0} minutes in Earth's shadow each orbit. The Instruments now switch off for part of every eclipse, so less Data comes down."
         ),
         component: Some(id.to_string()),
     }

@@ -52,7 +52,7 @@ pub(crate) struct Resources {
     pub downlink_mb_per_day: f64,
     /// Launch Vehicle capacity to the chosen Orbit; `None` = unreachable or not chosen.
     pub capacity_kg: Option<f64>,
-    /// Expected Lifetime from the Orbit cap and the summed daily failure chances.
+    /// Expected Lifetime from the Orbit cap and the summed daily failure chances of critical Components.
     pub lifetime_days: f64,
 }
 
@@ -115,13 +115,16 @@ pub(crate) fn resources(catalog: &Catalog, design: &Design, r: &Resolved) -> Res
         _ => None,
     };
 
-    let daily_failure: f64 = r.solar.map_or(0.0, |(_, t)| fail_chance(t))
-        + r.battery.map_or(0.0, |(_, t)| fail_chance(t))
-        + r.attitude.map_or(0.0, |(_, t)| fail_chance(t))
-        + r.comms.map_or(0.0, |(_, t)| fail_chance(t))
-        + fail_chance(design.computer_tier);
+    // Only critical Components end the Mission when they fail.
+    let critical = |c: bool, t: ReliabilityTier| if c { fail_chance(t) } else { 0.0 };
+    let daily_failure: f64 = r.solar.map_or(0.0, |(o, t)| critical(o.critical, t))
+        + r.battery.map_or(0.0, |(o, t)| critical(o.critical, t))
+        + r.attitude.map_or(0.0, |(o, t)| critical(o.critical, t))
+        + r.comms.map_or(0.0, |(o, t)| critical(o.critical, t))
+        + critical(computer.critical, design.computer_tier);
     let failure_limited_days = if daily_failure > 0.0 { 1.0 / daily_failure } else { f64::INFINITY };
-    let lifetime_days = r.orbit.map_or(failure_limited_days, |o| o.lifetime_cap_days.min(failure_limited_days));
+    let orbit_cap = r.orbit.and_then(|o| o.lifetime_cap_days).unwrap_or(f64::INFINITY);
+    let lifetime_days = orbit_cap.min(failure_limited_days);
     let lifetime_days = if lifetime_days.is_finite() { lifetime_days.floor() } else { 0.0 };
 
     Resources {

@@ -3,10 +3,11 @@
 use serde::{Deserialize, Serialize};
 
 use super::catalog::*;
-use super::debrief::{Debrief, DebriefContext, RunStats, debrief};
+use super::debrief::{Debrief, DebriefContext, RunStats, debrief, not_launched};
 use super::design::*;
 use super::events::{self, ComponentKind, RandomEvent};
 use super::resources::{Resources, resolve, resources};
+use super::review::{GaugeState, launch_review};
 use super::rng::Rng;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -22,6 +23,9 @@ pub struct DaySnapshot {
     pub day: u32,
     /// Battery charge at the worst point of the day (end of an eclipse), 0.0..=1.0.
     pub battery_charge: f64,
+    /// How the battery is coping, from the healthy depth of discharge in `data/review.toml`: `Ok` within it,
+    /// `Thin` drained deeper (it wears fast), `Violated` it cannot cover the eclipse, so Instruments go off.
+    pub battery_state: GaugeState,
     pub in_eclipse_fraction: f64,
     /// Share of the day the Instruments could run.
     pub operating_fraction: f64,
@@ -40,10 +44,26 @@ pub struct DaySnapshot {
 }
 
 /// Flies a Design through a Scenario. Same inputs and seed give an identical result.
-/// Never panics: an incomplete or nonsensical Design simply flies badly.
+/// Never panics. A Design that fails Launch Review never flies: empty timeline, no Success, Score 0.
 pub fn run(catalog: &Catalog, design: &Design, scenario_id: &str, seed: u64) -> RunResult {
     let r = resolve(catalog, design, scenario_id);
     let res = resources(catalog, design, &r);
+    let required_science_value = r.scenario.map_or(0.0, |s| s.required_science_value);
+    if !launch_review(catalog, design, scenario_id).can_launch {
+        let stats = RunStats {
+            science_value: 0.0,
+            required_science_value,
+            days_survived: 0,
+            min_lifetime_days: res.min_lifetime_days,
+            total_cost_usd: res.cost.total_usd,
+            total_mass_kg: res.mass_kg,
+            lost_data_fraction: 0.0,
+            delivered_data_mb: 0.0,
+            science_met: false,
+            lifetime_met: false,
+        };
+        return RunResult { timeline: Vec::new(), debrief: not_launched(stats) };
+    }
     let ctx = RunContext::new(catalog, design, scenario_id, &r, &res);
     let mut state = RunState::new(seed, &ctx);
     let mut timeline = Vec::with_capacity(ctx.planned_days as usize);
@@ -52,7 +72,6 @@ pub fn run(catalog: &Catalog, design: &Design, scenario_id: &str, seed: u64) -> 
     }
 
     let days_survived = if state.ended { state.day.saturating_sub(1) } else { state.day };
-    let required_science_value = r.scenario.map_or(0.0, |s| s.required_science_value);
     let stats = RunStats {
         science_value: state.science_value,
         required_science_value,
@@ -62,10 +81,23 @@ pub fn run(catalog: &Catalog, design: &Design, scenario_id: &str, seed: u64) -> 
         total_mass_kg: res.mass_kg,
         lost_data_fraction: if state.produced_mb > 0.0 { state.lost_mb / state.produced_mb } else { 0.0 },
         delivered_data_mb: state.delivered_mb,
+        science_met: state.science_value >= required_science_value,
+        lifetime_met: days_survived >= res.min_lifetime_days,
     };
-    let success = r.scenario.is_some()
-        && stats.science_value >= required_science_value
-        && days_survived >= res.min_lifetime_days;
+    let success = r.scenario.is_some() && stats.science_met && stats.lifetime_met;
+    let ending = if state.ended {
+        format!(
+            "The Mission ended on day {} of {} planned days of operations: a critical Component failed.",
+            state.day, ctx.planned_days
+        )
+    } else if ctx.planned_days < res.min_lifetime_days {
+        format!(
+            "The Orbit gave out after {} days (drag or radiation), before the {} days of operations the Scenario needs.",
+            ctx.planned_days, res.min_lifetime_days
+        )
+    } else {
+        format!("Planned mission complete: all {} days of operations flown.", ctx.planned_days)
+    };
     let debrief = debrief(&DebriefContext {
         catalog,
         design,
@@ -73,6 +105,7 @@ pub fn run(catalog: &Catalog, design: &Design, scenario_id: &str, seed: u64) -> 
         timeline: &timeline,
         stats: &stats,
         success,
+        ending,
         budget_usd: res.budget_usd,
         capacity_kg: res.capacity_kg,
     });
@@ -106,6 +139,7 @@ struct RunContext<'a> {
     consumption_w: f64,
     eclipse_fraction: f64,
     eclipse_energy_wh: f64,
+    eclipse_minutes: f64,
     /// Eclipse cycles (orbits) per day.
     cycles_per_day: f64,
     battery_capacity_wh: f64,
@@ -157,9 +191,9 @@ impl<'a> RunContext<'a> {
             })
             .collect();
         let min_days = r.scenario.map_or(0, |s| s.min_lifetime_days);
-        let planned_days = match r.orbit {
-            Some(o) if o.lifetime_cap_days >= 0.0 => min_days.min(o.lifetime_cap_days.floor() as u32),
-            _ => min_days,
+        let planned_days = match r.orbit.and_then(|o| o.lifetime_cap_days) {
+            Some(cap) => min_days.min(cap.max(0.0).floor() as u32),
+            None => min_days,
         };
         RunContext {
             rules: &catalog.run_rules,
@@ -171,6 +205,7 @@ impl<'a> RunContext<'a> {
             consumption_w: res.consumption_w,
             eclipse_fraction: r.orbit.map_or(0.0, |o| o.eclipse_fraction),
             eclipse_energy_wh: res.eclipse_energy_wh,
+            eclipse_minutes: res.eclipse_minutes,
             cycles_per_day: r.orbit.filter(|o| o.period_min > 0.0).map_or(0.0, |o| 24.0 * 60.0 / o.period_min),
             battery_capacity_wh: r.battery.map_or(0.0, |(b, _)| b.capacity_wh),
             battery_max_depth: catalog.review.battery_max_depth_of_discharge,
@@ -206,6 +241,8 @@ pub(crate) struct RunState {
     outage_days_left: u32,
     /// A fatal failure ended the Mission.
     ended: bool,
+    /// The battery has stopped covering the eclipse (reported once).
+    battery_short: bool,
 }
 
 impl RunState {
@@ -224,6 +261,7 @@ impl RunState {
             safe_mode_days_left: 0,
             outage_days_left: 0,
             ended: false,
+            battery_short: false,
         }
     }
 }
@@ -255,23 +293,20 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
         day_events.push(events::component_failure(kind, &part.id, &part.name, part.critical, draws.flare));
     }
 
-    // ---- battery wear: deeper discharges than the healthy depth wear the battery out fast
-    if let Some(battery) = &ctx.parts[BATTERY]
+    // ---- battery wear: deeper discharges than the healthy depth wear the battery out fast. Wear only
+    // shrinks capacity (so operating time is lost); it never ends the Mission by itself.
+    if ctx.parts[BATTERY].is_some()
         && !s.failed[BATTERY]
         && ctx.eclipse_energy_wh > 0.0
+        && s.battery_capacity_wh > 0.0
+        && ctx.battery_max_depth > 0.0
     {
-        if s.battery_capacity_wh > 0.0 && ctx.battery_max_depth > 0.0 {
-            let relative_depth = ctx.eclipse_energy_wh / s.battery_capacity_wh / ctx.battery_max_depth;
-            let wear = ctx.rules.battery_fade_per_cycle_at_max_depth
-                * ctx.cycles_per_day
-                * pow(relative_depth, ctx.rules.battery_fade_exponent);
-            s.battery_capacity_wh = (s.battery_capacity_wh - wear * ctx.battery_capacity_wh).max(0.0);
-        }
-        if s.battery_capacity_wh < ctx.eclipse_energy_wh {
-            s.failed[BATTERY] = true;
-            s.ended |= battery.critical;
-            day_events.push(events::battery_worn_out(&battery.id, &battery.name, battery.critical));
-        }
+        let relative_depth = (ctx.eclipse_energy_wh / s.battery_capacity_wh / ctx.battery_max_depth)
+            .min(1.0 / ctx.battery_max_depth);
+        let wear = ctx.rules.battery_fade_per_cycle_at_max_depth
+            * ctx.cycles_per_day
+            * pow(relative_depth, ctx.rules.battery_fade_exponent);
+        s.battery_capacity_wh = (s.battery_capacity_wh - wear * ctx.battery_capacity_wh).max(0.0);
     }
 
     // ---- Power: generation against use, and the battery through the eclipse
@@ -281,14 +316,34 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
     let generation_w = ctx.generation_w * output(SOLAR);
     let power_ratio = if ctx.consumption_w > 0.0 { (generation_w / ctx.consumption_w).min(1.0) } else { 1.0 };
     let capacity_wh = s.battery_capacity_wh * output(BATTERY);
-    let (battery_ratio, battery_charge) = if ctx.eclipse_energy_wh <= 0.0 {
-        (1.0, 1.0)
-    } else if capacity_wh <= 0.0 {
-        (0.0, 0.0)
+    // Share of each eclipse the battery carries; the Instruments are off for the rest of it.
+    let (eclipse_covered, battery_charge, battery_state) = if ctx.eclipse_energy_wh <= 0.0 {
+        (1.0, 1.0, GaugeState::Ok)
     } else {
-        let depth = ctx.eclipse_energy_wh / capacity_wh;
-        ((1.0 / depth).min(1.0), (1.0 - depth).clamp(0.0, 1.0))
+        let depth = if capacity_wh > 0.0 { ctx.eclipse_energy_wh / capacity_wh } else { f64::INFINITY };
+        let state = if depth > 1.0 {
+            GaugeState::Violated
+        } else if depth > ctx.battery_max_depth {
+            GaugeState::Thin
+        } else {
+            GaugeState::Ok
+        };
+        ((1.0 / depth).min(1.0), (1.0 - depth).clamp(0.0, 1.0), state)
     };
+    // Uncovered part of each eclipse, plus the reboot and re-pointing after every brown-out.
+    let battery_ratio = if battery_state == GaugeState::Violated {
+        let recovery = ctx.rules.brownout_recovery_minutes * ctx.cycles_per_day / (24.0 * 60.0);
+        (1.0 - ctx.eclipse_fraction * (1.0 - eclipse_covered) - recovery).max(0.0)
+    } else {
+        1.0
+    };
+    if battery_state == GaugeState::Violated && !s.battery_short && !s.ended {
+        s.battery_short = true;
+        if let Some(battery) = &ctx.parts[BATTERY] {
+            let worn = s.battery_capacity_wh < ctx.battery_capacity_wh;
+            day_events.push(events::battery_shortfall(&battery.id, &battery.name, ctx.eclipse_minutes, worn));
+        }
+    }
     let safe_mode = s.safe_mode_days_left > 0;
     let operating_fraction = if safe_mode || s.ended { 0.0 } else { power_ratio * battery_ratio };
 
@@ -320,6 +375,7 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
     DaySnapshot {
         day: s.day,
         battery_charge: battery_charge * power_ratio,
+        battery_state,
         in_eclipse_fraction: ctx.eclipse_fraction,
         operating_fraction,
         stored_data_mb: s.stored_mb,

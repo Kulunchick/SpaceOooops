@@ -63,8 +63,8 @@ pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
 
             <h3>"Launch Vehicles"</h3>
             <p>
-                "Launch Vehicles in the game are generic classes (small launcher, rideshare, medium vehicle). Each tooltip "
-                "names a real example, for instance Rocket Lab Electron or SpaceX Falcon 9. The operators' own pages and "
+                "Launch Vehicles in the game are generic classes, such as a rideshare slot or a small launcher. Each tooltip "
+                "names a real example of its class. The operators' own pages and "
                 "payload user's guides are the primary sources, but they could not be opened reliably when this page was "
                 "written, so the secondary sources below were used for the figures."
             </p>

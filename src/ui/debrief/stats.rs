@@ -12,8 +12,8 @@ pub fn StatsSection() -> impl IntoView {
         <div class="panel">
             <h3>"Key numbers"</h3>
             {move || stats().map(|s| {
-                let science_ok = s.science_value >= s.required_science_value;
-                let lifetime_ok = s.days_survived >= s.min_lifetime_days;
+                let science_ok = s.science_met;
+                let lifetime_ok = s.lifetime_met;
                 let lost_any = s.lost_data_fraction > 0.0;
                 view! {
                     <dl class="stats">

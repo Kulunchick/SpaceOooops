@@ -28,7 +28,12 @@ pub fn RunScreen() -> impl IntoView {
                 <h2>"Run: " {scenario_name}</h2>
                 <PlaybackControls speed=speed />
             </div>
-            <OrbitView />
+<OrbitView />
+            <Show when=move || state.playback_finished()>
+                <p class="run-ending" aria-live="polite">
+                    {move || state.run_result.with(|r| r.as_ref().map(|r| r.debrief.ending.clone()).unwrap_or_default())}
+                </p>
+            </Show>
             <Dashboards />
             <EventLog />
         </section>
