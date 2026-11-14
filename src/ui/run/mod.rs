@@ -2,6 +2,7 @@
 //! Layout: playback controls, the orbit animation slot, live dashboards, the event log.
 mod dashboards;
 mod event_log;
+mod orbit_view;
 mod playback;
 
 use leptos::prelude::*;
@@ -9,6 +10,7 @@ use leptos::prelude::*;
 use super::state::AppState;
 use dashboards::Dashboards;
 use event_log::EventLog;
+use orbit_view::OrbitView;
 use playback::{PlaybackControls, PlaybackDriver};
 
 #[component]
@@ -26,10 +28,7 @@ pub fn RunScreen() -> impl IntoView {
                 <h2>"Run: " {scenario_name}</h2>
                 <PlaybackControls speed=speed />
             </div>
-            // ---- ORBIT ANIMATION SLOT (ticket 07) ----
-            // Put the SVG orbit animation component here. It must read `AppState::playback`
-            // (days elapsed, fractional) so it stays in sync with the dashboards and the event log.
-            <div class="run-orbit-slot"></div>
+<OrbitView />
             <Show when=move || state.playback_finished()>
                 <p class="run-ending" aria-live="polite">
                     {move || state.run_result.with(|r| r.as_ref().map(|r| r.debrief.ending.clone()).unwrap_or_default())}
