@@ -1,0 +1,173 @@
+# Real missions for the Real-Mission Match in the Debrief. `sim` picks the closest one to the player's Design:
+# objective first (shared purpose tags), then Orbit class, then spacecraft size.
+# Every fact here was checked against the page in `url` (opened in November 2026). `verified` says whether
+# that page is the operator / NASA (primary) or a reference catalogue or news site (secondary).
+# No logos or mission insignia are used: names in plain text only.
+
+# Which purposes each Scenario's objective counts as, keyed by scenario id.
+[scenario_purposes]
+crop-watch = ["agriculture", "earth-observation"]
+connect-the-villages = ["remote-connectivity", "communications"]
+space-weather-sentinel = ["space-weather", "ionosphere", "radiation"]
+
+# Plain words for each purpose tag, used in the "why this match" line.
+[purpose_words]
+agriculture = "farm monitoring"
+earth-observation = "imaging the ground"
+remote-connectivity = "connecting remote places"
+communications = "communications"
+store-and-forward = "store-and-forward messaging"
+space-weather = "space weather"
+ionosphere = "the ionosphere"
+radiation = "space radiation"
+
+# Orbit classes (orbits.toml gives each Orbit one).
+[orbit_classes]
+leo = "low Earth orbit"
+sso = "sun-synchronous orbit"
+geo = "geostationary orbit"
+
+# Spacecraft classes, smallest first (`rank`); components.toml gives each Structure one.
+[spacecraft_classes.cubesat]
+name = "a CubeSat"
+rank = 0
+[spacecraft_classes.smallsat]
+name = "a SmallSat"
+rank = 1
+[spacecraft_classes.large]
+name = "a large satellite"
+rank = 2
+
+# ---------------------------------------------------------------- Earth observation / agriculture
+
+[[real_missions]]
+name = "Planet Dove (Flock 3p)"
+operator = "Planet"
+year = 2017
+orbit_class = "sso"
+spacecraft_class = "cubesat"
+size_u = 3.0
+mass_kg = 5.0
+size_note = "3U CubeSat, about 5 kg"
+purposes = ["earth-observation", "agriculture"]
+blurb = "In 2017 Planet launched 88 Dove 3U CubeSats at once into sun-synchronous orbit, enough to image all of Earth's land every day, for uses such as agriculture."
+url = "https://www.eoportal.org/satellite-missions/planet"
+# secondary (eoPortal, ESA-run catalogue); ~5 kg is stated for the Flock 1 Doves.
+verified = "secondary"
+
+[[real_missions]]
+name = "EOS SAT-1"
+operator = "EOS Data Analytics (EOSDA)"
+year = 2023
+orbit_class = "sso"
+spacecraft_class = "smallsat"
+mass_kg = 178.0
+size_note = "SmallSat, about 178 kg"
+purposes = ["agriculture", "earth-observation"]
+blurb = "EOS SAT-1 is an agriculture-focused satellite in a 540 km sun-synchronous orbit that tracks soil moisture, expected harvests and crop growth."
+url = "https://www.eoportal.org/satellite-missions/eos-sat-1"
+# secondary (eoPortal); the operator's blog https://eos.com/blog/eosda-sent-its-first-agro-satellite-on-jan-3-to-orbit/ confirms the purpose.
+verified = "secondary"
+
+# ---------------------------------------------------------------- communications for remote places
+
+[[real_missions]]
+name = "Arcturus (Astranis MicroGEO)"
+operator = "Astranis, for Pacific Dataport"
+year = 2023
+orbit_class = "geo"
+spacecraft_class = "smallsat"
+mass_kg = 350.0
+size_note = "small geostationary satellite, about 350 kg"
+purposes = ["communications", "remote-connectivity"]
+blurb = "Arcturus is a small geostationary satellite built to bring internet to Alaska, where 39% of the state lacked affordable, reliable broadband."
+url = "https://www.astranis.com/blog/first-astranis-satellite-successfully-deployed-to-geo-beams-first-signals-down-to-alaska-257ba"
+# primary; year from https://www.astranis.com/spacecraft, mass from Via Satellite (satellitetoday.com, 16 March 2022).
+verified = "primary"
+
+[[real_missions]]
+name = "AngoSat-2"
+operator = "Republic of Angola"
+year = 2022
+orbit_class = "geo"
+spacecraft_class = "large"
+mass_kg = 2000.0
+size_note = "geostationary communications satellite, about 2 t"
+purposes = ["communications", "remote-connectivity"]
+blurb = "AngoSat-2, Angola's second communications satellite, was launched in 2022 into geostationary orbit to cover the whole of Africa, with an emphasis on Southern Africa."
+url = "https://spaceinafrica.com/?p=19185"
+# secondary (Space in Africa news): launch on 12 October 2022, geostationary, "weighing two tons", coverage.
+verified = "secondary"
+
+[[real_missions]]
+name = "Amazonas Nexus"
+operator = "Hispasat"
+year = 2023
+orbit_class = "geo"
+spacecraft_class = "large"
+mass_kg = 4500.0
+size_note = "large geostationary satellite, about 4.5 t"
+purposes = ["communications", "remote-connectivity"]
+blurb = "Amazonas Nexus is a geostationary satellite that brings internet to places as remote as Greenland and the Amazon rainforest, and to aircraft and ships."
+url = "https://www.hispasat.com/en/press-room/press-releases/archivo-2023/455/amazonas-nexus-is-launched-this-sunday-from-the-cape-canaveral-space-force-station"
+# primary; the 4.5 t launch mass is on https://www.hispasat.com/en/fleet-and-infrastructure/amazonas-nexus
+verified = "primary"
+
+[[real_missions]]
+name = "Swarm SpaceBEE"
+operator = "Swarm Technologies"
+year = 2020
+orbit_class = "leo"
+spacecraft_class = "cubesat"
+size_u = 0.25
+mass_kg = 0.4
+size_note = "0.25U CubeSat, about 400 g"
+purposes = ["store-and-forward", "communications"]
+blurb = "SpaceBEEs are tiny 0.25U satellites of about 400 g that pick up short messages from devices on the ground and pass them on later."
+url = "https://en.wikipedia.org/wiki/Swarm_Technologies"
+# secondary (Wikipedia); the operator's site no longer resolves.
+verified = "secondary"
+
+# ---------------------------------------------------------------- space weather
+
+[[real_missions]]
+name = "Dellingr"
+operator = "NASA Goddard Space Flight Center"
+year = 2017
+orbit_class = "leo"
+spacecraft_class = "cubesat"
+size_u = 6.0
+size_note = "6U CubeSat"
+purposes = ["ionosphere", "space-weather"]
+blurb = "Dellingr, a shoebox-sized NASA CubeSat deployed from the International Space Station in 2017, studied how the ionosphere interacts with the Sun."
+url = "https://svs.gsfc.nasa.gov/12602"
+# primary; 6U from https://www.nasa.gov/feature/goddard/2017/nasa-set-to-launch-dellingr-cubesat-purposely-designed-to-improve-reliability-of-small-0
+verified = "primary"
+
+[[real_missions]]
+name = "CSSWE (Colorado Student Space Weather Experiment)"
+operator = "University of Colorado Boulder"
+year = 2012
+orbit_class = "leo"
+spacecraft_class = "cubesat"
+size_u = 3.0
+mass_kg = 3.5
+size_note = "3U CubeSat, about 3.5 kg"
+purposes = ["space-weather", "radiation"]
+blurb = "Built by students at the University of Colorado, CSSWE measured fast electrons in Earth's radiation belts and protons from solar flares."
+url = "https://eoportal.org/satellite-missions/csswe"
+# secondary (eoPortal); the LASP page could not be reached.
+verified = "secondary"
+
+[[real_missions]]
+name = "MinXSS-1 (Miniature X-ray Solar Spectrometer)"
+operator = "University of Colorado Boulder (LASP)"
+year = 2016
+orbit_class = "leo"
+spacecraft_class = "cubesat"
+size_u = 3.0
+size_note = "3U CubeSat"
+purposes = ["space-weather"]
+blurb = "MinXSS-1, a 3U CubeSat deployed from the International Space Station in 2016, measured the soft X-rays coming from the Sun."
+url = "https://science.nasa.gov/technology/technology-highlights/high-precision-pointing-on-a-cubesat-enables-new-science"
+verified = "primary"

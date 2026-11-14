@@ -58,7 +58,7 @@ pub(crate) struct DebriefContext<'a> {
 }
 
 /// The Debrief of a Design that did not pass Launch Review: it never flew, so it scores nothing.
-pub(crate) fn not_launched(stats: RunStats) -> Debrief {
+pub(crate) fn not_launched(stats: RunStats, causes: Vec<Cause>) -> Debrief {
     Debrief {
         success: false,
         ending: "Not launched: the Design does not pass Launch Review, so it never flew.".to_string(),
@@ -67,7 +67,7 @@ pub(crate) fn not_launched(stats: RunStats) -> Debrief {
             label: "Not launched: no Science Value and no bonuses".to_string(),
             points: 0.0,
         }]),
-        causes: Vec::new(),
+        causes,
         objectives: Vec::new(),
         real_mission_match: None,
         decisions: Vec::new(),

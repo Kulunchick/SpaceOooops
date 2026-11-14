@@ -5,6 +5,8 @@ id = "leo-400"
 name = "Low Earth Orbit, 400 km (LEO)"
 why = "The space station's Orbit, tilted 52 degrees to the equator. Close to the ground and inside the ionosphere, so it is cheap to reach and good for measuring the upper atmosphere, but air drag pulls a CubeSat down within about a year, and each pass over a ground station is short."
 altitude_km = 400.0
+# Orbit class for the Real-Mission Match (real_missions.toml).
+orbit_class = "leo"
 # source: the International Space Station orbits at 51.6 degrees inclination.
 inclination_deg = 51.6
 # source: Kepler's third law for a 400 km circular orbit gives ~92.6 min.
@@ -26,6 +28,7 @@ id = "sso-600"
 name = "Sun-synchronous Orbit, 600 km (SSO)"
 why = "A near-polar Orbit that passes over every place at the same local time each day, so lighting is the same in every image. It still spends about a third of each orbit in Earth's shadow."
 altitude_km = 600.0
+orbit_class = "sso"
 # source: a sun-synchronous orbit at 600 km needs an inclination of ~97.8 degrees (retrograde, near-polar).
 inclination_deg = 97.8
 # source: Kepler's third law for a 600 km circular orbit gives ~96.7 min.
@@ -44,6 +47,7 @@ id = "geo"
 name = "Geostationary Orbit, 35,786 km (GEO)"
 why = "So high that one orbit takes a whole day: the satellite hangs over the same spot on the equator, always in view of Angola and of its ground station. Almost always in sunlight, but very far away and expensive to reach."
 altitude_km = 35_786.0
+orbit_class = "geo"
 # source: a geostationary orbit lies in the equatorial plane.
 inclination_deg = 0.0
 # source: one sidereal day, ~1436 min.

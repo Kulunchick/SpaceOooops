@@ -12,6 +12,8 @@ why = "Three 10 cm cubes stacked: about the size of a loaf of bread. Cheap to bu
 mass_kg = 1.5
 cost_usd = 40_000.0
 size_u = 3.0
+# Spacecraft class for the Real-Mission Match (real_missions.toml).
+spacecraft_class = "cubesat"
 # Power board, wiring and deployment switches take about 0.6U.
 usable_volume_u = 2.4
 
@@ -23,6 +25,7 @@ why = "Six cubes in a 2 x 3 block: room for a real camera and a pointing system,
 mass_kg = 4.0
 cost_usd = 60_000.0
 size_u = 6.0
+spacecraft_class = "cubesat"
 usable_volume_u = 5.5
 
 [[structures]]
@@ -33,6 +36,7 @@ why = "Twelve cubes in a 2 x 2 x 3 block, about the size of a small suitcase. Ro
 mass_kg = 6.0
 cost_usd = 100_000.0
 size_u = 12.0
+spacecraft_class = "cubesat"
 usable_volume_u = 11.0
 
 [[structures]]
@@ -44,6 +48,7 @@ mass_kg = 50.0
 cost_usd = 1_500_000.0
 # Outer wall area about that of a 60U CubeSat, for body-mounted solar cells.
 size_u = 60.0
+spacecraft_class = "smallsat"
 usable_volume_u = 50.0
 
 # ---------------------------------------------------------------- Solar panels
