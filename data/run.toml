@@ -16,3 +16,15 @@ battery_fade_exponent = 3
 # the spacecraft re-points before work resumes, which costs this many minutes per orbit.
 # source: game-tuned; real spacecraft that brown out drop to safe mode and need minutes to hours to recover.
 brownout_recovery_minutes = 30.0
+
+# Interactive Random Events (ticket 10): the player is asked how to react; with no answer the default applies.
+# The defaults (safe mode, wait for the ground station) are what the spacecraft does on its own.
+[run.decisions]
+# Riding out a solar flare with everything switched on: on the flare day each Component is this many times more
+# likely to fail than in safe mode (on top of the Scenario's flare multiplier).
+# source: game-tuned; safe mode powers down sensitive electronics, which is why real spacecraft enter it on a flare warning.
+flare_ride_out_failure_multiplier = 10.0
+# Renting time on another ground station for the whole outage, so Data keeps coming down.
+# source: commercial ground-station-as-a-service passes cost roughly US$100-1,000 each (e.g. AWS Ground Station,
+# KSAT Lite list prices); game-tuned for a few days of several passes a day plus setup.
+outage_station_time_cost_usd = 30000.0

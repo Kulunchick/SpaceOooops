@@ -3,6 +3,7 @@
 mod catalog;
 mod causes;
 mod debrief;
+mod decisions;
 mod design;
 mod events;
 mod objectives;
@@ -17,6 +18,7 @@ mod share;
 pub use catalog::*;
 pub use causes::{Cause, CauseKind};
 pub use debrief::{Debrief, RunStats};
+pub use decisions::{Decision, DecisionOption, DecisionPrompt};
 pub use design::*;
 pub use events::{EventKind, RandomEvent};
 pub use objectives::{
@@ -24,7 +26,7 @@ pub use objectives::{
 };
 pub use real_mission::RealMissionMatch;
 pub use review::*;
-pub use run::{DaySnapshot, RunResult, run};
+pub use run::{DaySnapshot, RunResult, run, run_with_decisions};
 pub use score::{Score, ScoreLine, ScoreLineKind};
 pub use share::{ShareError, decode_design, encode_design};
 

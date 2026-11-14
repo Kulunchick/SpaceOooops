@@ -2,6 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::catalog::EventTuning;
+use super::decisions::DecisionPrompt;
 use super::rng::Rng;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -21,6 +22,9 @@ pub struct RandomEvent {
     pub text: String,
     /// Catalog id of the Component involved, if any.
     pub component: Option<String>,
+    /// Set when this event asked the player a question before its day played out (interactive events).
+    #[serde(default)]
+    pub prompt: Option<DecisionPrompt>,
 }
 
 /// The Component kinds that carry a Reliability Tier and can fail, in their fixed draw order.
@@ -77,6 +81,28 @@ pub(crate) fn solar_flare(tuning: &EventTuning) -> RandomEvent {
             days(tuning.flare_safe_mode_days)
         ),
         component: None,
+        prompt: None,
+    }
+}
+
+pub(crate) fn solar_flare_ridden_out() -> RandomEvent {
+    RandomEvent {
+        kind: EventKind::SolarFlare,
+        text: "A solar flare hit. The spacecraft rode it out with its Instruments running.".to_string(),
+        component: None,
+        prompt: None,
+    }
+}
+
+pub(crate) fn ground_station_outage_covered(tuning: &EventTuning) -> RandomEvent {
+    RandomEvent {
+        kind: EventKind::GroundStationOutage,
+        text: format!(
+            "The ground station went offline for {}. Time bought on another station kept the Data coming down.",
+            days(tuning.outage_days)
+        ),
+        component: None,
+        prompt: None,
     }
 }
 
@@ -88,6 +114,7 @@ pub(crate) fn ground_station_outage(tuning: &EventTuning) -> RandomEvent {
             days(tuning.outage_days)
         ),
         component: None,
+        prompt: None,
     }
 }
 
@@ -98,7 +125,7 @@ pub(crate) fn component_failure(kind: ComponentKind, id: &str, name: &str, fatal
     } else {
         format!("{cause} {name} failed. The spacecraft carries on with less {}.", kind.lost_capability())
     };
-    RandomEvent { kind: EventKind::ComponentFailure, text, component: Some(id.to_string()) }
+    RandomEvent { kind: EventKind::ComponentFailure, text, component: Some(id.to_string()), prompt: None }
 }
 
 pub(crate) fn battery_shortfall(id: &str, name: &str, eclipse_minutes: f64, worn: bool) -> RandomEvent {
@@ -113,9 +140,10 @@ pub(crate) fn battery_shortfall(id: &str, name: &str, eclipse_minutes: f64, worn
             "{why} carry the spacecraft through the {eclipse_minutes:.0} minutes in Earth's shadow each orbit. The Instruments now switch off for part of every eclipse, so less Data comes down."
         ),
         component: Some(id.to_string()),
+        prompt: None,
     }
 }
 
-fn days(n: u32) -> String {
+pub(crate) fn days(n: u32) -> String {
     if n == 1 { "1 day".to_string() } else { format!("{n} days") }
 }

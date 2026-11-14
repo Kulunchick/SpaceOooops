@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use super::catalog::*;
 use super::debrief::{Debrief, DebriefContext, RunStats, debrief, not_launched};
+use super::decisions::{self, Decision, Taken};
 use super::design::*;
 use super::events::{self, ComponentKind, RandomEvent};
 use super::resources::{Resources, resolve, resources};
@@ -45,7 +46,21 @@ pub struct DaySnapshot {
 
 /// Flies a Design through a Scenario. Same inputs and seed give an identical result.
 /// Never panics. A Design that fails Launch Review never flies: empty timeline, no Success, Score 0.
+/// Interactive Random Events take their default choice; see `run_with_decisions`.
 pub fn run(catalog: &Catalog, design: &Design, scenario_id: &str, seed: u64) -> RunResult {
+    run_with_decisions(catalog, design, scenario_id, seed, &[])
+}
+
+/// Flies a Design like `run`, applying the player's answers to interactive Random Events. A question with no
+/// (valid) answer takes its default choice. Same inputs, seed and decisions give an identical result, and
+/// the days before a question never depend on its answer, so the UI can re-run after each choice and carry on.
+pub fn run_with_decisions(
+    catalog: &Catalog,
+    design: &Design,
+    scenario_id: &str,
+    seed: u64,
+    decisions: &[Decision],
+) -> RunResult {
     let r = resolve(catalog, design, scenario_id);
     let res = resources(catalog, design, &r);
     let required_science_value = r.scenario.map_or(0.0, |s| s.required_science_value);
@@ -64,7 +79,7 @@ pub fn run(catalog: &Catalog, design: &Design, scenario_id: &str, seed: u64) -> 
         };
         return RunResult { timeline: Vec::new(), debrief: not_launched(stats) };
     }
-    let ctx = RunContext::new(catalog, design, scenario_id, &r, &res);
+    let ctx = RunContext::new(catalog, design, scenario_id, &r, &res, decisions);
     let mut state = RunState::new(seed, &ctx);
     let mut timeline = Vec::with_capacity(ctx.planned_days as usize);
     while state.day < ctx.planned_days && !state.ended {
@@ -77,7 +92,7 @@ pub fn run(catalog: &Catalog, design: &Design, scenario_id: &str, seed: u64) -> 
         required_science_value,
         days_survived,
         min_lifetime_days: res.min_lifetime_days,
-        total_cost_usd: res.cost.total_usd,
+        total_cost_usd: res.cost.total_usd + state.extra_cost_usd,
         total_mass_kg: res.mass_kg,
         lost_data_fraction: if state.produced_mb > 0.0 { state.lost_mb / state.produced_mb } else { 0.0 },
         delivered_data_mb: state.delivered_mb,
@@ -109,7 +124,26 @@ pub fn run(catalog: &Catalog, design: &Design, scenario_id: &str, seed: u64) -> 
         budget_usd: res.budget_usd,
         capacity_kg: res.capacity_kg,
     });
+    let mut debrief = debrief;
+    debrief.decisions = decision_notes(&state.taken, &timeline);
     RunResult { timeline, debrief }
+}
+
+/// The Debrief's notes on every question answered (or defaulted) during the Run.
+fn decision_notes(taken: &[Taken], timeline: &[DaySnapshot]) -> Vec<String> {
+    // Cumulative (delivered, lost) Data at the end of `day` (0 = launch), clamped to the timeline.
+    let at = |day: u32| -> (f64, f64) {
+        let day = (day as usize).min(timeline.len());
+        if day == 0 { (0.0, 0.0) } else { (timeline[day - 1].delivered_data_mb, timeline[day - 1].lost_data_mb) }
+    };
+    taken
+        .iter()
+        .map(|t| {
+            let (delivered_before, lost_before) = at(t.day - 1);
+            let (delivered_after, lost_after) = at(t.day + t.days.max(1) - 1);
+            decisions::note(t, delivered_after - delivered_before, lost_after - lost_before)
+        })
+        .collect()
 }
 
 /// A Component on board that can fail.
@@ -130,6 +164,8 @@ struct InstrumentOutput {
 /// Everything about the Run that does not change from day to day.
 struct RunContext<'a> {
     rules: &'a RunRules,
+    /// The player's answers to interactive Random Events.
+    decisions: &'a [Decision],
     tuning: EventTuning,
     planned_days: u32,
     /// Indexed like `ComponentKind::DRAW_ORDER`.
@@ -163,6 +199,7 @@ impl<'a> RunContext<'a> {
         scenario_id: &str,
         r: &super::resources::Resolved,
         res: &Resources,
+        decisions: &'a [Decision],
     ) -> Self {
         let chance = |t: ReliabilityTier| catalog.tier(t).map_or(0.0, |s| s.daily_failure_chance);
         let part = |id: &str, name: &str, tier: ReliabilityTier, critical: bool| Part {
@@ -197,6 +234,7 @@ impl<'a> RunContext<'a> {
         };
         RunContext {
             rules: &catalog.run_rules,
+            decisions,
             tuning: r.scenario.map_or(NO_EVENTS, |s| s.events.clone()),
             planned_days,
             parts,
@@ -239,6 +277,12 @@ pub(crate) struct RunState {
     failed: [bool; 5],
     safe_mode_days_left: u32,
     outage_days_left: u32,
+    /// Time on another ground station was bought for the current outage, so Data still comes down.
+    station_bought: bool,
+    /// Money spent on decisions during the Run, on top of the Design's cost.
+    extra_cost_usd: f64,
+    /// Questions answered so far, for the Debrief.
+    taken: Vec<Taken>,
     /// A fatal failure ended the Mission.
     ended: bool,
     /// The battery has stopped covering the eclipse (reported once).
@@ -260,6 +304,9 @@ impl RunState {
             failed: [false; 5],
             safe_mode_days_left: 0,
             outage_days_left: 0,
+            station_bought: false,
+            extra_cost_usd: 0.0,
+            taken: Vec::new(),
             ended: false,
             battery_short: false,
         }
@@ -273,16 +320,53 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
     let draws = events::draw_day(&mut s.rng, tuning);
     let mut day_events = Vec::new();
 
-    // ---- Random Events
+    // ---- Random Events. Flares and outages ask the player first; the answer (or the default) applies today.
+    let choices = &ctx.rules.decisions;
+    let mut multiplier = 1.0;
+    let mut flare_taken = None;
     if draws.flare {
-        day_events.push(events::solar_flare(tuning));
-        s.safe_mode_days_left = s.safe_mode_days_left.max(tuning.flare_safe_mode_days);
+        let prompt = decisions::flare_prompt(s.day, tuning, choices);
+        let (choice, by_player) = decisions::chosen(&prompt, ctx.decisions);
+        let mut event = if choice == decisions::RIDE_OUT {
+            multiplier = tuning.flare_failure_multiplier * choices.flare_ride_out_failure_multiplier;
+            events::solar_flare_ridden_out()
+        } else {
+            multiplier = tuning.flare_failure_multiplier;
+            s.safe_mode_days_left = s.safe_mode_days_left.max(tuning.flare_safe_mode_days);
+            events::solar_flare(tuning)
+        };
+        flare_taken = Some(Taken {
+            day: s.day,
+            choice: choice.to_string(),
+            by_player,
+            failed_names: Vec::new(),
+            days: tuning.flare_safe_mode_days,
+            cost_usd: 0.0,
+        });
+        event.prompt = Some(prompt);
+        day_events.push(event);
     }
     if draws.outage && s.outage_days_left == 0 {
-        day_events.push(events::ground_station_outage(tuning));
+        let prompt = decisions::outage_prompt(s.day, tuning, choices);
+        let (choice, by_player) = decisions::chosen(&prompt, ctx.decisions);
+        let buy = choice == decisions::BUY_STATION_TIME;
+        let cost_usd = if buy { choices.outage_station_time_cost_usd } else { 0.0 };
+        let mut event =
+            if buy { events::ground_station_outage_covered(tuning) } else { events::ground_station_outage(tuning) };
+        s.taken.push(Taken {
+            day: s.day,
+            choice: choice.to_string(),
+            by_player,
+            failed_names: Vec::new(),
+            days: tuning.outage_days,
+            cost_usd,
+        });
+        event.prompt = Some(prompt);
+        day_events.push(event);
         s.outage_days_left = tuning.outage_days;
+        s.station_bought = buy;
+        s.extra_cost_usd += cost_usd;
     }
-    let multiplier = if draws.flare { tuning.flare_failure_multiplier } else { 1.0 };
     for (i, kind) in ComponentKind::DRAW_ORDER.into_iter().enumerate() {
         let Some(part) = &ctx.parts[i] else { continue };
         if s.failed[i] || draws.component_rolls[i] >= part.daily_failure_chance * multiplier {
@@ -290,7 +374,16 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
         }
         s.failed[i] = true;
         s.ended |= part.critical;
+        if let Some(t) = &mut flare_taken {
+            t.failed_names.push(part.name.clone());
+        }
         day_events.push(events::component_failure(kind, &part.id, &part.name, part.critical, draws.flare));
+    }
+
+    if let Some(t) = flare_taken {
+        // Keep the notes in day order, the flare before an outage on the same day.
+        let at = s.taken.iter().position(|o| o.day == s.day).unwrap_or(s.taken.len());
+        s.taken.insert(at, t);
     }
 
     // ---- battery wear: deeper discharges than the healthy depth wear the battery out fast. Wear only
@@ -357,7 +450,7 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
     s.stored_mb += produced_mb;
     s.stored_value += produced_value;
 
-    let ground_up = s.outage_days_left == 0 && !s.ended;
+    let ground_up = (s.outage_days_left == 0 || s.station_bought) && !s.ended;
     let downlink_mb = if ground_up { ctx.downlink_mb_per_day * output(COMMS) } else { 0.0 };
     let sent = take(s, downlink_mb.min(s.stored_mb));
     s.delivered_mb += sent.0;
@@ -371,6 +464,7 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
 
     s.safe_mode_days_left = s.safe_mode_days_left.saturating_sub(1);
     s.outage_days_left = s.outage_days_left.saturating_sub(1);
+    s.station_bought &= s.outage_days_left > 0;
 
     DaySnapshot {
         day: s.day,

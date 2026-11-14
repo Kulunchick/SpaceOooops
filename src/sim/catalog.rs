@@ -207,6 +207,18 @@ pub struct RunRules {
     /// Minutes of each orbit lost to rebooting and re-pointing after the battery browns out in an eclipse.
     #[serde(default)]
     pub brownout_recovery_minutes: f64,
+    /// Numbers behind the choices of interactive Random Events.
+    pub decisions: DecisionRules,
+}
+
+/// Tuning of the choices the player is offered during the Run (`[run.decisions]` in run.toml).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DecisionRules {
+    /// Riding out a solar flare: each Component's failure chance on the flare day is multiplied by this
+    /// (on top of the Scenario's flare multiplier).
+    pub flare_ride_out_failure_multiplier: f64,
+    /// Buying time on another ground station for one whole outage.
+    pub outage_station_time_cost_usd: f64,
 }
 
 fn yes() -> bool {
