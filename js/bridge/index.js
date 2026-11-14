@@ -4,7 +4,7 @@
 //   init(canvas, quality) -> Promise<boolean>   true when WebGL is available and the renderer is running
 //   apply(sceneSpec)                            the latest Scene Spec (parsed JSON, camelCase)
 //   setQuality('low' | 'high'), setReducedMotion(bool)
-//   play(cue), setMusic(track), setVolumes(music, sfx)   audio (ticket 04); no-ops until then
+//   play(cue), setMusic(track), setVolumes(music, sfx, muted)   audio (audio.js, loaded separately by Rust)
 import * as THREE from '../../vendor/three/three.module.js';
 import { palette } from './palette.js';
 import { createEarth, EARTH_RADIUS } from './earth.js';
@@ -152,7 +152,5 @@ export function setReducedMotion(on) {
   world?.hangar.setReducedMotion(reducedMotion);
 }
 
-// Audio: ticket 04 implements these in audio.js and re-exports them here.
-export function play(_cue) {}
-export function setMusic(_track) {}
-export function setVolumes(_music, _sfx) {}
+// Audio lives in audio.js and is loaded by Rust directly (it must work without WebGL); re-exported for the contract.
+export { play, setMusic, setVolumes, getState as getAudioState } from './audio.js';

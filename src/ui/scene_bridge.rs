@@ -11,6 +11,7 @@ use spaceooops::scene::{self, SceneInputs};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 
+use super::audio_bridge;
 use super::state::AppState;
 
 #[wasm_bindgen(inline_js = r#"
@@ -91,6 +92,22 @@ pub fn SceneLayer() -> impl IntoView {
         })
     });
     Effect::new(move |_| spec.with(|s| scene_apply(&scene::to_json(s))));
+    // Audio: the music track from the spec, and one-shot Cues from the change since the previous spec.
+    // Audio is independent of the renderer, so this runs with or without WebGL.
+    let previous = StoredValue::new(None::<scene::SceneSpec>);
+    Effect::new(move |_| {
+        spec.with(|s| {
+            audio_bridge::audio_set_music(s.music.name());
+            previous.with_value(|prev| {
+                if let Some(prev) = prev {
+                    for cue in scene::one_shots(prev, s) {
+                        audio_bridge::audio_play(cue.name());
+                    }
+                }
+            });
+            previous.set_value(Some(s.clone()));
+        })
+    });
 
     view! {
         <div

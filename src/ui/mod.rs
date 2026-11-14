@@ -1,5 +1,6 @@
 //! UI root. One file per screen/component; shared app state lives in `state.rs`.
 //! The UI holds no game rules: it renders what `sim` returns.
+mod audio_bridge;
 mod brief;
 mod budget_comms_tab;
 mod cost_table;
@@ -21,6 +22,7 @@ mod scenario_select;
 mod scene_bridge;
 mod science_tab;
 mod seed;
+mod settings_widget;
 mod share;
 mod sources;
 mod spacecraft_tab;
@@ -59,6 +61,7 @@ pub fn App() -> impl IntoView {
     let screen = state.screen;
     view! {
         <scene_bridge::SceneLayer />
+        <settings_widget::SettingsWidget />
         <main class="app">
             {move || match screen.get() {
                 Screen::Title => view! {

@@ -5,6 +5,7 @@
 //!
 //! Each concern lives in its own file (see the low-poly overhaul architecture contract). Every field added
 //! to `SceneSpec` after the first version is optional or has a default, so an older renderer ignores it.
+mod cues;
 mod hangar;
 mod markers;
 mod shot;
@@ -14,6 +15,7 @@ use serde::Serialize;
 
 use crate::sim::{Catalog, Design};
 
+pub use cues::{one_shots, Cue, Track};
 pub use hangar::{HangarPreview, OrbitPreview, RocketPreview};
 pub use markers::Marker;
 pub use shot::Shot;
@@ -81,6 +83,8 @@ pub struct SceneSpec {
     /// Scenario pins on the globe; empty except on Scenario select and Brief.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub markers: Vec<Marker>,
+    /// The music track that should be playing now (the bridge crossfades when it changes).
+    pub music: Track,
 }
 
 /// Builds the Scene Spec for the given inputs.
@@ -91,6 +95,7 @@ pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
         spacecraft: spacecraft::for_inputs(inputs),
         hangar: hangar::for_inputs(inputs),
         markers: markers::markers(inputs.screen, inputs.scenarios, inputs.chosen),
+        music: cues::track_for(inputs.screen),
     }
 }
 

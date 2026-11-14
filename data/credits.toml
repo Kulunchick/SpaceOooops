@@ -34,3 +34,33 @@ files = [
   "assets/fonts/atkinson-hyperlegible/atkinson-hyperlegible-latin-400-normal.woff2",
   "assets/fonts/atkinson-hyperlegible/atkinson-hyperlegible-latin-700-normal.woff2",
 ]
+
+[[asset]]
+name = "Kenney UI SFX Set (click and snap sounds)"
+author = "Kenney Vleugels (Kenney.nl)"
+source = "https://kenney.nl/assets/ui-audio (click1.ogg, switch1.ogg)"
+licence = "CC0 1.0"
+licence_file = "assets/audio/LICENSE-kenney-ui-audio.txt"
+kind = "sound"
+ai_generated = false
+files = ["assets/audio/click.ogg", "assets/audio/snap.ogg"]
+
+[[asset]]
+name = "Outer Space Loop (menu music)"
+author = "wipics"
+source = "https://opengameart.org/content/outer-space-loop"
+licence = "CC0 1.0"
+licence_file = "assets/audio/LICENSE-wipics-cc0.txt"
+kind = "music"
+ai_generated = false
+files = ["assets/audio/music-menu.mp3"]
+
+[[asset]]
+name = "Space Flight (Run music)"
+author = "wipics"
+source = "https://opengameart.org/content/space-flight"
+licence = "CC0 1.0"
+licence_file = "assets/audio/LICENSE-wipics-cc0.txt"
+kind = "music"
+ai_generated = false
+files = ["assets/audio/music-run.mp3"]
