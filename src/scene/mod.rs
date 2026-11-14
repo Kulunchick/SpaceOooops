@@ -6,6 +6,7 @@
 //! Each concern lives in its own file (see the low-poly overhaul architecture contract). Every field added
 //! to `SceneSpec` after the first version is optional or has a default, so an older renderer ignores it.
 mod cues;
+pub mod effects;
 mod hangar;
 mod markers;
 pub mod orbit;
@@ -18,6 +19,7 @@ use serde::Serialize;
 use crate::sim::{Catalog, Design};
 
 pub use cues::{one_shots, Cue, Track};
+pub use effects::{Effect, EffectKind, Station};
 pub use hangar::{HangarPreview, OrbitPreview, RocketPreview};
 pub use markers::Marker;
 pub use orbit::OrbitView;
@@ -111,6 +113,12 @@ pub struct SceneSpec {
     /// The Run's orbit view: the Orbit, the spacecraft's place on it and Earth's shadow (Run screen only).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub orbit: Option<OrbitView>,
+    /// Run-scene effects of Random Events and Decisions active at the playback position (Run screen only).
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub effects: Vec<Effect>,
+    /// Ground stations on the globe during the Run (their beacons, outages and contact beams).
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub stations: Vec<Station>,
     /// The music track that should be playing now (the bridge crossfades when it changes).
     pub music: Track,
 }
@@ -128,6 +136,8 @@ pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
         pad: pad::for_inputs(inputs),
         markers: markers::markers(inputs.screen, inputs.scenarios, inputs.chosen),
         orbit,
+        effects: effects::for_inputs(inputs),
+        stations: effects::stations_for(inputs),
         music: cues::track_for(inputs.screen),
     }
 }

@@ -10,7 +10,7 @@ use std::collections::BTreeSet;
 
 use serde::Serialize;
 
-use super::{PadVote, SceneSpec, Screen, SpacecraftModel};
+use super::{EffectKind, PadVote, SceneSpec, Screen, SpacecraftModel};
 
 /// The looping music tracks.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize)]
@@ -50,6 +50,14 @@ pub enum Cue {
     NoGo,
     /// Launch was pressed: the launch sequence starts (the countdown ticks are timed by the renderer).
     Launch,
+    /// Run: a solar flare hits (an alarm).
+    Flare,
+    /// Run: the ground station goes offline.
+    Outage,
+    /// Run: a Component fails.
+    Failure,
+    /// Run: the battery stops covering the eclipse.
+    BatteryShortfall,
 }
 
 impl Cue {
@@ -60,6 +68,10 @@ impl Cue {
             Cue::Go => "go",
             Cue::NoGo => "nogo",
             Cue::Launch => "launch",
+            Cue::Flare => "flare",
+            Cue::Outage => "outage",
+            Cue::Failure => "failure",
+            Cue::BatteryShortfall => "battery",
         }
     }
 }
@@ -88,6 +100,33 @@ pub fn one_shots(previous: &SceneSpec, current: &SceneSpec) -> Vec<Cue> {
         }
         if after.launching && !before.launching {
             cues.push(Cue::Launch);
+        }
+    }
+    cues.extend(event_cues(previous, current));
+    cues
+}
+
+/// A step longer than this is a skip, not playback: whatever it jumped into is not announced.
+const MAX_HEARD_STEP_DAYS: f64 = 5.0;
+
+/// Random Event Cues: one for each Random Event effect the playback entered since the previous spec.
+fn event_cues(previous: &SceneSpec, current: &SceneSpec) -> Vec<Cue> {
+    let (Some(before), Some(now)) = (&previous.orbit, &current.orbit) else { return Vec::new() };
+    let (from, to) = (before.playback, now.playback);
+    if to <= from || to - from > MAX_HEARD_STEP_DAYS {
+        return Vec::new();
+    }
+    let mut cues = Vec::new();
+    for e in current.effects.iter().filter(|e| from <= e.start && e.start < to) {
+        let cue = match e.kind {
+            EffectKind::Flare => Cue::Flare,
+            EffectKind::StationDark { .. } => Cue::Outage,
+            EffectKind::Failure { .. } => Cue::Failure,
+            EffectKind::BatteryShortfall { .. } => Cue::BatteryShortfall,
+            EffectKind::SafeMode | EffectKind::Contact { .. } => continue,
+        };
+        if !cues.contains(&cue) {
+            cues.push(cue);
         }
     }
     cues

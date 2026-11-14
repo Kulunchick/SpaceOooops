@@ -14,6 +14,7 @@ import { createHangar } from './hangar.js';
 import { createMarkers } from './markers.js';
 import { createOrbitScene } from './orbit.js';
 import { createPad } from './pad.js';
+import { createEffects } from './effects.js';
 
 let renderer = null;
 let scene = null;
@@ -52,14 +53,17 @@ function buildWorld() {
   if (spec) hangar.apply(spec, reducedMotion);
   const run = createOrbitScene({ scene, camera, earth, sunLight, ambient: skyLight, canvas: canvasEl });
   if (spec) run.apply(spec, reducedMotion);
+  const effects = createEffects({ scene, run, canvas: canvasEl, camera });
+  if (spec) effects.apply(spec);
   const pad = createPad({ scene, camera, canvas: canvasEl });
   if (spec) pad.apply(spec, reducedMotion);
-  return { earth, clouds, stars, craft, orbit, hangar, run, pad };
+  return { earth, clouds, stars, craft, orbit, hangar, run, effects, pad };
 }
 
 function disposeWorld() {
   if (!world) return;
   world.hangar.dispose();
+  world.effects.dispose();
   world.run.dispose();
   world.pad.dispose();
   for (const obj of [world.earth, world.stars, world.orbit]) {
@@ -100,6 +104,7 @@ function frame(dt, seconds) {
   renderer.domElement.dataset.flying = String(rig.flying);
   world.hangar.frame(dt, t);
   world.run.frame(dt);
+  world.effects.frame();
   world.pad.frame(dt, t);
   renderer.render(scene, camera);
 }
@@ -147,6 +152,7 @@ export function apply(sceneSpec) {
   if (rig) rig.setShot(sceneSpec.shot);
   world?.hangar.apply(sceneSpec, reducedMotion);
   world?.run.apply(sceneSpec, reducedMotion);
+  world?.effects.apply(sceneSpec);
   world?.pad.apply(sceneSpec, reducedMotion);
   markers?.set(sceneSpec.markers);
 }

@@ -134,22 +134,8 @@ export function createOrbitScene({ scene, camera, earth, sunLight, ambient, canv
   const halo = new THREE.Mesh(new THREE.RingGeometry(0.92, 1, 24), haloMat);
   root.add(halo);
 
-  // The run craft's own copies of the shared part materials, so it can darken in eclipse without touching
-  // the hangar's model.
-  const own = new Map(); // original material -> { mat, color, emissive }
-  const owned = new Set();
-  function adoptMaterials() {
-    craft.group.traverse((o) => {
-      if (!o.isMesh || owned.has(o.material)) return;
-      const original = o.material;
-      if (!own.has(original)) {
-        const mat = original.clone();
-        own.set(original, { mat, color: original.color.clone(), emissive: original.emissive?.clone() });
-        owned.add(mat);
-      }
-      o.material = own.get(original).mat;
-    });
-  }
+  // The run craft darkens in eclipse through its condition (`craft.setCondition`), which gives it its own copies
+  // of the part materials, so the hangar's model is untouched. effects.js sets the rest of the condition.
 
   const sunHome = sunLight.position.clone();
   const ambientHome = ambient.intensity;
@@ -230,7 +216,6 @@ export function createOrbitScene({ scene, camera, earth, sunLight, ambient, canv
     if (parts && key !== partsKey) {
       partsKey = key;
       craft.update(parts, true);
-      adoptMaterials();
     }
     canvas.dataset.orbitTarget = next.angle.toFixed(3);
     canvas.dataset.inShadow = String(next.inShadow);
@@ -261,11 +246,7 @@ export function createOrbitScene({ scene, camera, earth, sunLight, ambient, canv
     // Darken in Earth's shadow (the spec decides when; the change itself is eased).
     const wantDark = view.inShadow ? 1 : 0;
     dark += (wantDark - dark) * (reduced ? 1 : 1 - Math.exp(-dt * 10));
-    const light = 1 - 0.82 * dark;
-    for (const { mat, color, emissive } of own.values()) {
-      mat.color.copy(color).multiplyScalar(light);
-      if (emissive) mat.emissive.copy(emissive).multiplyScalar(light);
-    }
+    craft.setCondition({ light: 1 - 0.82 * dark });
     haloMat.color.setHex(palette.accent).lerp(new THREE.Color(SHADOW_COLOUR), dark);
     canvas.dataset.inShadow = String(view.inShadow);
 
@@ -317,6 +298,8 @@ export function createOrbitScene({ scene, camera, earth, sunLight, ambient, canv
     carrier,
     craft,
     sun,
+    /** The ring round the spacecraft; its colour is reset every frame, so effects may tint it after `frame`. */
+    halo,
     earthFixed: earth,
     dispose() {
       earth.rotation.y = 0;
@@ -325,7 +308,6 @@ export function createOrbitScene({ scene, camera, earth, sunLight, ambient, canv
       scene.remove(root);
       carrier.remove(craft.group);
       craft.dispose();
-      for (const { mat } of own.values()) mat.dispose();
       root.traverse((o) => {
         o.geometry?.dispose();
         o.material?.dispose?.();

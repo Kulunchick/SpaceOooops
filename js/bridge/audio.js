@@ -18,7 +18,8 @@ const SAMPLES = {
   engine: 'launch-engine.ogg',
   ignition: 'launch-ignition.ogg',
   // 'launch' (the Cue when Launch is pressed) and 'countdown' (one tick per second, played by pad.js) have no
-  // sample: they are the synthesised tone.
+  // sample: they are the synthesised tone. The Random Event Cues (flare, outage, failure, battery) are synthesised
+  // too, each with its own sound (SYNTHS below).
 };
 const TRACKS = {
   menu: 'music-menu.mp3',
@@ -152,11 +153,78 @@ function playTone(name) {
   sourcesStarted += 1;
 }
 
+/** One enveloped oscillator note on the effects bus: `at` and `length` in seconds from now. */
+function note(type, freqFrom, freqTo, at, length, level = 0.35) {
+  const osc = ctx.createOscillator();
+  const env = ctx.createGain();
+  osc.type = type;
+  const t = ctx.currentTime + at;
+  osc.frequency.setValueAtTime(freqFrom, t);
+  if (freqTo !== freqFrom) osc.frequency.exponentialRampToValueAtTime(freqTo, t + length);
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(level, t + 0.015);
+  env.gain.setValueAtTime(level, t + Math.max(0.02, length - 0.04));
+  env.gain.exponentialRampToValueAtTime(0.0001, t + length);
+  osc.connect(env).connect(sfxBus);
+  osc.start(t);
+  osc.stop(t + length + 0.02);
+  sourcesStarted += 1;
+}
+
+/** A short burst of filtered noise (crackle of a failing part). */
+function crackle(at, length, level = 0.4) {
+  const frames = Math.max(1, Math.floor(ctx.sampleRate * length));
+  const buf = ctx.createBuffer(1, frames, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  let seed = 12345;
+  for (let i = 0; i < frames; i++) {
+    seed = (seed * 1103515245 + 12345) >>> 0;
+    // Spiky noise that thins out: sparks, not hiss.
+    const spike = (seed >>> 16) % 7 === 0 ? 1 : 0.15;
+    data[i] = ((seed / 0xffffffff) * 2 - 1) * spike * (1 - i / frames);
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'highpass';
+  filter.frequency.value = 900;
+  const env = ctx.createGain();
+  env.gain.value = level;
+  src.connect(filter).connect(env).connect(sfxBus);
+  src.start(ctx.currentTime + at);
+  sourcesStarted += 1;
+}
+
+// Random Event Cues have no sample: each is synthesised here so it is recognisable (not checked by ear).
+const SYNTHS = {
+  // Solar flare: a two-tone alarm, three cycles.
+  flare: () => {
+    for (let i = 0; i < 3; i++) {
+      note('square', 880, 880, i * 0.36, 0.17, 0.16);
+      note('square', 660, 660, i * 0.36 + 0.18, 0.17, 0.16);
+    }
+  },
+  // Ground station outage: a falling power-down sweep.
+  outage: () => note('sawtooth', 520, 90, 0, 0.7, 0.18),
+  // Component failure: a crackle of sparks over a low thud.
+  failure: () => {
+    crackle(0, 0.45, 0.5);
+    note('sine', 140, 55, 0, 0.35, 0.4);
+  },
+  // Battery shortfall: two short low beeps.
+  battery: () => {
+    note('triangle', 392, 392, 0, 0.12, 0.3);
+    note('triangle', 294, 294, 0.16, 0.18, 0.3);
+  },
+};
+
 export function play(cue) {
   if (unlocked) lastCue = String(cue);
   if (unlocked && effective('sfx') > 0) {
     const file = SAMPLES[cue];
-    if (!file) {
+    if (!file && SYNTHS[cue]) {
+      SYNTHS[cue]();
+    } else if (!file) {
       playTone(String(cue));
     } else {
       loadBuffer(assetUrl(file)).then((buf) => {

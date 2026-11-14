@@ -3,6 +3,7 @@
 use std::time::Duration;
 
 use leptos::prelude::*;
+use spaceooops::scene;
 
 use crate::ui::state::{AppState, Screen};
 
@@ -10,6 +11,8 @@ use crate::ui::state::{AppState, Screen};
 const PLAYBACK_SECONDS: f64 = 30.0;
 const TICK_MS: u64 = 50;
 const SPEEDS: [f64; 2] = [1.0, 4.0];
+/// Seconds a day with a Random Event takes at 1x when the 3D scene shows its effect (see `scene::effects::advance`).
+const EVENT_DAY_SECONDS: f64 = 1.5;
 /// Pause on the last day before moving to the Debrief by itself.
 const END_HOLD_MS: u64 = 1500;
 
@@ -30,7 +33,16 @@ pub fn PlaybackDriver(speed: RwSignal<f64>) -> impl IntoView {
             // Stop before a day that asks the player a question until it is answered (ticket 10).
             let limit = super::decision_prompt::pause_at(&state).map_or(days, |at| at.min(days));
             if now < limit {
-                playback.set((now + step).min(limit));
+                // With the 3D scene, a day with a Random Event plays slowly enough for its effect to be seen.
+                let next = if state.scene_live.get_untracked() {
+                    let event_step = speed.get_untracked() * TICK_MS as f64 / 1000.0 / EVENT_DAY_SECONDS;
+                    run_result.with_untracked(|r| {
+                        r.as_ref().map_or(now + step, |r| scene::effects::advance(r, now, step, event_step))
+                    })
+                } else {
+                    now + step
+                };
+                playback.set(next.min(limit));
                 return;
             }
             if now < days {

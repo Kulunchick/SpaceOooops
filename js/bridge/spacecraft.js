@@ -130,7 +130,7 @@ function buildBodyPanels({ size, finish }) {
   return g;
 }
 
-/** Two wings on hinges at +x and -x. Each wing is a pivot group named 'wing+' / 'wing-' (rotate .y to feather). */
+/** Two wings on hinges at +x and -x. Each wing is a pivot group named 'wing+' / 'wing-' (`setCondition({ feather })` turns them edge-on about .x). */
 function buildSolarWings({ size, count, finish }, bus) {
   const [height, span] = size;
   const f = finishOf(finish);
@@ -473,10 +473,164 @@ export function createSpacecraft() {
     }
   }
 
+  // ---------------------------------------------------------------- condition (Run effects, Debrief failure shots)
+  // A craft that is given a condition owns copies of its materials, one per part, so a single part can go dark
+  // without touching the shared materials (the hangar's model keeps its own look). The condition is plain data and
+  // carries no clock: the caller says how far each change has gone.
+  const condition = { light: 1, dark: [], dim: 0, feather: 0, warn: 0, warnParts: [], spark: null, flash: 0 };
+  const partMats = new Map(); // `${partId}|${original uuid}` -> { mat, partId, color, emissive }
+  const ownedMats = new Set();
+  let lamps = null;
+  let sparks = null;
+
+  function partIdOf(o) {
+    for (let p = o; p && p !== group; p = p.parent) if (p.userData?.partId) return p.userData.partId;
+    return null;
+  }
+
+  function adoptMaterials() {
+    const used = new Set();
+    for (const holder of live.values()) {
+      holder.traverse((o) => {
+        if (!o.isMesh || !o.material?.color) return;
+        if (ownedMats.has(o.material)) {
+          used.add(o.material);
+          return;
+        }
+        const id = partIdOf(o);
+        const key = `${id}|${o.material.uuid}`;
+        if (!partMats.has(key)) {
+          const mat = o.material.clone();
+          partMats.set(key, { mat, partId: id, color: o.material.color.clone(), emissive: o.material.emissive?.clone() ?? null });
+          ownedMats.add(mat);
+        }
+        o.material = partMats.get(key).mat;
+        used.add(o.material);
+      });
+    }
+    // Copies of parts that were removed or rebuilt (their meshes disposed them already).
+    for (const [key, entry] of partMats) {
+      if (!used.has(entry.mat)) {
+        partMats.delete(key);
+        ownedMats.delete(entry.mat);
+      }
+    }
+  }
+
+  /** Two small running lights on top of the bus; they only exist on a craft that has a condition. */
+  function ensureLamps() {
+    if (!lamps) {
+      lamps = new THREE.Group();
+      lamps.name = 'running-lights';
+      for (const [s, colour] of [[1, 0x7dffa0], [-1, 0xff6b6b]]) {
+        const lamp = new THREE.Mesh(
+          new THREE.OctahedronGeometry(0.012, 0),
+          new THREE.MeshBasicMaterial({ color: colour }),
+        );
+        lamp.userData = { colour: new THREE.Color(colour), side: s };
+        lamps.add(lamp);
+      }
+      group.add(lamps);
+    }
+    lamps.children.forEach((lamp) => {
+      lamp.position.set((lamp.userData.side * busSize[0]) / 2, busSize[1] / 2 + 0.014, busSize[2] / 2);
+    });
+  }
+
+  /** A burst of low-poly sparks, built once and placed on the failing part. */
+  function ensureSparks() {
+    if (sparks) return sparks;
+    sparks = new THREE.Group();
+    sparks.name = 'sparks';
+    const geo = new THREE.TetrahedronGeometry(0.03, 0);
+    for (let i = 0; i < 14; i++) {
+      const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+        color: i % 3 ? 0xffb030 : 0xfff6d0, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+      }));
+      const a = i * 2.399963; // golden angle: an even spray in every direction
+      const y = 1 - (2 * (i + 0.5)) / 14;
+      const r = Math.sqrt(1 - y * y);
+      m.userData.dir = new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r);
+      sparks.add(m);
+    }
+    group.add(sparks);
+    return sparks;
+  }
+
+  const tmpBox = new THREE.Box3();
+  const tmpV = new THREE.Vector3();
+  const tmpC = new THREE.Color();
+
+  /**
+   * Puts the craft into a state; any keys left out keep their value. All amounts are 0..1.
+   *   light      overall brightness (Earth's shadow darkens the craft)
+   *   dark       part ids that are dead: drawn nearly black, their lights out
+   *   dim        safe mode: the craft's lights (running lights, status LEDs) dim
+   *   feather    safe mode: the solar wings turn edge-on
+   *   warn       blink level of `warnParts` (an amber warning glow)
+   *   spark      { id, amount } a part sparking as it fails, `amount` from 0 (start) to 1 (spent); null for none
+   *   flash      a white-hot hit (the solar flare reaching the craft)
+   */
+  function setCondition(next = {}) {
+    Object.assign(condition, next);
+    adoptMaterials();
+    ensureLamps();
+    const dark = new Set(condition.dark ?? []);
+    const warned = new Set(condition.warnParts ?? []);
+    const sparkId = condition.spark?.id ?? null;
+    const sparkAmount = condition.spark ? Math.min(1, Math.max(0, condition.spark.amount)) : 0;
+    const flicker = sparkId ? 0.5 + 0.5 * Math.abs(Math.sin(sparkAmount * 57)) : 0;
+    const light = condition.light;
+    const dim = condition.dim;
+    for (const { mat, partId, color, emissive } of partMats.values()) {
+      const dead = dark.has(partId);
+      mat.color.copy(color).multiplyScalar(light * (dead ? 0.16 : 1) * (1 - 0.25 * dim));
+      if (!mat.emissive) continue;
+      if (emissive) mat.emissive.copy(emissive).multiplyScalar(dead ? 0 : light * (1 - 0.92 * dim));
+      if (warned.has(partId)) mat.emissive.add(tmpC.setRGB(1, 0.55, 0.05).multiplyScalar(0.9 * condition.warn));
+      if (partId === sparkId) mat.emissive.add(tmpC.setRGB(1, 0.6, 0.2).multiplyScalar(1.2 * flicker * (1 - sparkAmount)));
+      if (condition.flash > 0) mat.emissive.add(tmpC.setRGB(1, 0.75, 0.45).multiplyScalar(0.8 * condition.flash));
+    }
+    for (const lamp of lamps.children) {
+      const off = dark.has(busId()) ? 0 : 1;
+      lamp.material.color.copy(lamp.userData.colour).multiplyScalar(off * (1 - 0.85 * dim) + 0.08);
+      lamp.scale.setScalar(1 - 0.4 * dim);
+    }
+    for (const pivot of ['wing+', 'wing-']) {
+      const wing = group.getObjectByName(pivot);
+      if (wing) wing.rotation.x = condition.feather * 1.4;
+    }
+    // Sparks fly out of the failing part and burn out.
+    const part = sparkId ? live.get(sparkId) : null;
+    if (part && sparkAmount < 1) {
+      const s = ensureSparks();
+      s.visible = true;
+      tmpBox.setFromObject(part);
+      group.worldToLocal(tmpBox.getCenter(tmpV));
+      s.position.copy(tmpV);
+      const reach = 0.05 + 0.4 * sparkAmount;
+      s.children.forEach((m, i) => {
+        m.position.copy(m.userData.dir).multiplyScalar(reach * (0.6 + 0.4 * ((i * 7) % 5) / 4));
+        m.material.opacity = (1 - sparkAmount) * (0.6 + 0.4 * Math.abs(Math.sin(sparkAmount * 40 + i)));
+        m.scale.setScalar(1.6 - sparkAmount);
+      });
+    } else if (sparks) {
+      sparks.visible = false;
+    }
+  }
+
+  function busId() {
+    for (const [id, h] of live) if (h.userData.kind === 'bus') return id;
+    return null;
+  }
+
   return {
     group,
     update,
     tick,
+    setCondition,
+    /** The current condition (see setCondition). */
+    condition: () => ({ ...condition }),
     part: (id) => live.get(id) ?? null,
     partsOfKind: (kind) => [...live.values()].filter((h) => h.userData.kind === kind),
     ids: () => [...live.keys()],
@@ -486,8 +640,10 @@ export function createSpacecraft() {
     animating: () => leaving.size > 0 || [...live.values()].some((h) => h.userData.anim),
     dispose() {
       for (const h of [...live.values(), ...leaving]) disposeTree(h);
+      for (const extra of [lamps, sparks]) if (extra) disposeTree(extra);
       live.clear();
       leaving.clear();
+      partMats.clear();
     },
   };
 }
