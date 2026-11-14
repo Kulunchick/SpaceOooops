@@ -1,0 +1,134 @@
+# "Why it matters" tooltips for Design parameters, gauges and Component categories, in simple English.
+# `key` is the label shown on screen; `aliases` are other labels for the same idea. Matched ignoring case.
+# Option cards carry their own `why` text in the other data files; these explain the parameters themselves.
+
+# ---------------------------------------------------------------- resources and gauges
+
+[[terms]]
+key = "Budget"
+why = "All the money for the Mission: building the spacecraft, the Instruments, the launch and the ground stations. Go over it and the Mission is cancelled. Money you do not spend earns a bonus on a Success."
+
+[[terms]]
+key = "Cost"
+aliases = ["Mission cost"]
+why = "What this choice adds to the Mission's bill. Flight-proven parts cost more than Basic ones. Every dollar counts against the Budget."
+
+[[terms]]
+key = "Mass"
+why = "How heavy the spacecraft is. Every kilogram must be lifted by the Launch Vehicle, and each one can carry only so much to each Orbit. Spare capacity earns a bonus on a Success."
+
+[[terms]]
+key = "Power"
+why = "Electricity, in watts. Solar panels make it only in sunlight; everything on board uses it all the time. If the spacecraft uses more than it makes, it cannot work. The gauge compares the average used with the average made over a whole orbit, shadow included."
+
+[[terms]]
+key = "Data"
+aliases = ["Data delivered"]
+why = "Pictures and measurements the Instruments make each day. Data only earns Science Value once the radio sends it to the ground. If the Instruments make more than the comms link can send, the rest piles up and is lost."
+
+[[terms]]
+key = "Lifetime"
+aliases = ["Lifetime limit"]
+why = "How long the spacecraft keeps working. Each Scenario needs a minimum. Low Orbits are pulled down by air drag, and each critical Component that fails ends the Mission, so the gauge shows the Lifetime you can expect."
+
+[[terms]]
+key = "Volume"
+aliases = ["Room inside"]
+why = "Space inside the spacecraft, in U (one U is a 10 cm cube). Every Component and Instrument needs room, and the Structure has only so much."
+
+[[terms]]
+key = "Science Value"
+why = "The points of scientific return the Mission earns when Instruments work and their Data reaches the ground. Each Scenario needs a minimum for a Success."
+
+[[terms]]
+key = "Data lost"
+why = "The share of all Data made that never reached the ground, because the radio was too slow or the onboard store was full."
+
+# ---------------------------------------------------------------- option numbers
+
+[[terms]]
+key = "Reliability Tier"
+why = "How proven a Component is. Basic parts are cheaper but fail more often in space; Flight-proven parts have already worked in orbit and fail far less often. A critical part that fails ends the Mission."
+
+[[terms]]
+key = "Time in shadow"
+aliases = ["Eclipse"]
+why = "The eclipse: part of every orbit is spent behind Earth, in its shadow, with no sunlight for the solar panels. The battery must carry the whole spacecraft through it, every orbit."
+
+[[terms]]
+key = "Ground contact"
+aliases = ["Contact time"]
+why = "Minutes per day the spacecraft is in view of a ground station. Data can only be sent down during contact, so short contacts need a faster radio."
+
+[[terms]]
+key = "Altitude"
+why = "Height above the ground. Lower is cheaper to reach and closer to the target, but thin air there drags the spacecraft down. Higher Orbits last longer."
+
+[[terms]]
+key = "Scenario coverage"
+why = "How well this Orbit lets the spacecraft see what the Scenario is about. Poor coverage means even good Data earns little Science Value."
+
+[[terms]]
+key = "Scenario fit"
+why = "How well this Instrument suits the Scenario's objective. A poorly suited Instrument makes Data that earns little Science Value here."
+
+[[terms]]
+key = "Pointing"
+why = "Whether the part can hold the spacecraft steady on a target. Sharp cameras need precise pointing, which only reaction wheels give."
+
+[[terms]]
+key = "Capacity"
+why = "The most Mass this Launch Vehicle can carry to each Orbit. An Orbit that is not listed cannot be reached with it."
+
+[[terms]]
+key = "Ground stations"
+why = "Fees for using ground antennas, paid every day of the Mission. Faster comms bands need bigger dishes and cost more per day."
+
+[[terms]]
+key = "Real example"
+why = "A real rocket or service of this class, so you can look it up."
+
+# ---------------------------------------------------------------- Component categories
+
+[[terms]]
+key = "Structure"
+why = "The frame and size of the spacecraft. A bigger Structure has more room and more wall for solar cells, but weighs more and needs a bigger launch."
+
+[[terms]]
+key = "Solar panels"
+why = "Make Power from sunlight. More panel area means more Power for the Instruments, the radio and the battery."
+
+[[terms]]
+key = "Battery"
+why = "Stores energy for the time in Earth's shadow. Too small, and it drains too deep each orbit: it wears out, and the Instruments switch off in the dark."
+
+[[terms]]
+key = "Attitude control"
+why = "Turns and steadies the spacecraft. Without precise pointing a camera cannot stay on its target."
+
+[[terms]]
+key = "Onboard computer"
+aliases = ["Computer"]
+why = "Runs the spacecraft and stores Data until the next ground contact. It is always on board; you choose only its Reliability Tier, and if it fails the Mission ends."
+
+[[terms]]
+key = "Comms band"
+aliases = ["Comms"]
+why = "The radio that sends Data to the ground. Faster bands send more Data in each short pass, but cost more and use more Power."
+
+[[terms]]
+key = "Instruments"
+aliases = ["Instrument"]
+why = "The science payload: what the Mission is for. Each one makes Data and Science Value, but adds Mass, Power, cost and Data to send down."
+
+[[terms]]
+key = "Orbit"
+why = "The path the spacecraft flies. It sets how much it sees of the target, how long it spends in Earth's shadow, how long it can talk to the ground, and how long it lasts."
+
+[[terms]]
+key = "Launch Vehicle"
+why = "The rocket ride to Orbit. Bigger rockets carry more Mass and reach more Orbits, but cost much more."
+
+[[terms]]
+key = "Cost breakdown"
+why = "Where the money goes: the spacecraft, its Instruments, the launch, and ground stations for every day of the Mission."

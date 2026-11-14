@@ -47,12 +47,8 @@ pub fn DesignScreen() -> impl IntoView {
                     .collect_view()}
             </nav>
             <RoleBanner />
-            {(!hints.is_empty()).then(|| view! {
-                <details class="panel hints">
-                    <summary>"Hints"</summary>
-                    <ul>{hints.into_iter().map(|h| view! { <li>{h}</li> }).collect_view()}</ul>
-                </details>
-            })}
+            <super::hints::FirstTimeHints scenario_id=id.clone() hints=hints />
+
             {move || match tab.get() {
                 Role::Science => view! { <ScienceTab /> }.into_any(),
                 Role::Spacecraft => view! { <SpacecraftTab /> }.into_any(),

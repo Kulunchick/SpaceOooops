@@ -25,6 +25,9 @@ pub struct RandomEvent {
     /// Set when this event asked the player a question before its day played out (interactive events).
     #[serde(default)]
     pub prompt: Option<DecisionPrompt>,
+    /// For an event with a prompt: the id of the option that applied (the player's, or the default).
+    #[serde(default)]
+    pub choice: Option<String>,
 }
 
 /// The Component kinds that carry a Reliability Tier and can fail, in their fixed draw order.
@@ -82,6 +85,7 @@ pub(crate) fn solar_flare(tuning: &EventTuning) -> RandomEvent {
         ),
         component: None,
         prompt: None,
+        choice: None,
     }
 }
 
@@ -91,6 +95,7 @@ pub(crate) fn solar_flare_ridden_out() -> RandomEvent {
         text: "A solar flare hit. The spacecraft rode it out with its Instruments running.".to_string(),
         component: None,
         prompt: None,
+        choice: None,
     }
 }
 
@@ -103,6 +108,7 @@ pub(crate) fn ground_station_outage_covered(tuning: &EventTuning) -> RandomEvent
         ),
         component: None,
         prompt: None,
+        choice: None,
     }
 }
 
@@ -115,6 +121,7 @@ pub(crate) fn ground_station_outage(tuning: &EventTuning) -> RandomEvent {
         ),
         component: None,
         prompt: None,
+        choice: None,
     }
 }
 
@@ -125,7 +132,7 @@ pub(crate) fn component_failure(kind: ComponentKind, id: &str, name: &str, fatal
     } else {
         format!("{cause} {name} failed. The spacecraft carries on with less {}.", kind.lost_capability())
     };
-    RandomEvent { kind: EventKind::ComponentFailure, text, component: Some(id.to_string()), prompt: None }
+    RandomEvent { kind: EventKind::ComponentFailure, text, component: Some(id.to_string()), prompt: None, choice: None }
 }
 
 pub(crate) fn battery_shortfall(id: &str, name: &str, eclipse_minutes: f64, worn: bool) -> RandomEvent {
@@ -141,6 +148,7 @@ pub(crate) fn battery_shortfall(id: &str, name: &str, eclipse_minutes: f64, worn
         ),
         component: Some(id.to_string()),
         prompt: None,
+        choice: None,
     }
 }
 

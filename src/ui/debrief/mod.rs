@@ -2,8 +2,10 @@
 //! Later tickets add a section file here and one line in the list below:
 //! causes and Real-Mission Match (04), Personal Objectives (06), comparison with the previous Run (09).
 mod actions;
+mod causes;
 mod compare;
 mod decisions;
+mod real_mission;
 mod objectives;
 mod score;
 mod stats;
@@ -27,12 +29,12 @@ pub fn DebriefScreen() -> impl IntoView {
             <h2>"Debrief"</h2>
             <Show when=has_run fallback=|| view! { <p class="muted">"No Run yet."</p> }>
                 <Verdict />
-                // ticket 04: <CausesSection />
+                <causes::CausesSection />
                 <ScoreSection />
                 <StatsSection />
                 <decisions::DecisionsSection />
                 <objectives::ObjectivesSection />
-                // ticket 04: <RealMissionSection />
+                <real_mission::RealMissionSection />
                 <ComparisonSection />
             </Show>
             <DebriefActions />

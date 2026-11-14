@@ -76,8 +76,8 @@ fn margin_bonuses_are_paid_only_on_success() {
 #[test]
 fn later_ticket_debrief_parts_start_empty() {
     let d = debrief(&crop_watch_known_good(), 1);
-    assert!(d.causes.is_empty());
-    assert!(d.real_mission_match.is_none());
+    // Causes and the Real-Mission Match are filled by ticket 04 (tests/debrief.rs), objectives by ticket 06,
+    // decisions by ticket 10 (tests/decisions.rs).
     assert_eq!(d.stats.min_lifetime_days, 365);
     assert_eq!(d.stats.required_science_value, 100.0);
 }

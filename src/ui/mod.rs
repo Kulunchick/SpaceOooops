@@ -10,6 +10,8 @@ mod gauges;
 mod history;
 mod history_store;
 mod go_no_go;
+mod hints;
+mod info_tip;
 mod launch_orbit_tab;
 mod launch_review;
 mod option_card;

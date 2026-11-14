@@ -1,0 +1,15 @@
+# Debrief causes: thresholds for which causes are worth telling the player, and how many.
+# The sentences themselves are assembled in src/sim/causes.rs from this Run's numbers.
+# All values are game-tuned.
+
+[causes]
+# Show at most this many causes, the ones that cost the most first.
+max_causes = 4
+# Leave out causes that cost less than this share of the Scenario's required Science Value.
+min_impact_share = 0.02
+# An Orbit whose coverage of the Scenario's target is below this is called a poor fit for the objective.
+poor_coverage_below = 0.5
+# An Instrument whose fit to the Scenario is below this is called poorly suited.
+poor_fit_below = 0.6
+# Below this altitude an Orbit's Lifetime limit comes from air drag; above it, from radiation wearing out parts.
+drag_altitude_below_km = 1000.0

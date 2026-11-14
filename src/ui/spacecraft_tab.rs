@@ -13,7 +13,7 @@ pub type CardData = (String, String, String, Vec<(&'static str, String)>);
 /// A row of option cards for one tiered Component slot, followed by its tier chooser.
 pub fn slot_section(state: AppState, title: &'static str, slot: Slot, options: Vec<CardData>) -> impl IntoView {
     view! {
-        <h3>{title}</h3>
+        <h3>{title} <super::info_tip::InfoTip term=title /></h3>
         <div class="option-grid">
             {options
                 .into_iter()
@@ -112,7 +112,7 @@ pub fn SpacecraftTab() -> impl IntoView {
 
     view! {
         <section class="tab-panel">
-            <h3>"Structure"</h3>
+            <h3>"Structure" <super::info_tip::InfoTip term="Structure" /></h3>
             <div class="option-grid">
                 {structures
                     .into_iter()
@@ -143,7 +143,7 @@ pub fn SpacecraftTab() -> impl IntoView {
             {slot_section(state, "Solar panels", Slot::Solar, solar)}
             {slot_section(state, "Battery", Slot::Battery, batteries)}
             {slot_section(state, "Attitude control", Slot::Attitude, attitude)}
-            <h3>{computer.name.clone()}</h3>
+            <h3>{computer.name.clone()} <super::info_tip::InfoTip term=computer.name.clone() /></h3>
             <p class="muted" title=computer.why.clone()>
                 {computer.why.clone()} " "
                 {format!("Mass {} kg \u{00B7} Power {} W \u{00B7} Cost {} \u{00B7} Storage {} MB", num(computer.mass_kg), num(computer.power_w), money(computer.cost_usd), num(computer.storage_mb))}

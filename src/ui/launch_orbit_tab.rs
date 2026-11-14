@@ -14,7 +14,7 @@ pub fn LaunchOrbitTab() -> impl IntoView {
 
     view! {
         <section class="tab-panel">
-            <h3>"Orbit"</h3>
+            <h3>"Orbit" <super::info_tip::InfoTip term="Orbit" /></h3>
             <div class="option-grid">
                 {orbits
                     .into_iter()
@@ -43,7 +43,7 @@ pub fn LaunchOrbitTab() -> impl IntoView {
                     })
                     .collect_view()}
             </div>
-            <h3>"Launch Vehicle"</h3>
+            <h3>"Launch Vehicle" <super::info_tip::InfoTip term="Launch Vehicle" /></h3>
             <div class="option-grid">
                 {vehicles
                     .into_iter()

@@ -165,6 +165,27 @@ fn a_run_without_interactive_events_has_no_decision_notes() {
 }
 
 #[test]
+fn flares_ridden_out_are_not_blamed_on_safe_mode() {
+    let catalog = catalog();
+    let design = crop_watch_known_good();
+    let blames_safe_mode =
+        |r: &RunResult| r.debrief.causes.iter().any(|c| c.kind == CauseKind::RandomEvents && c.text.contains("safe mode"));
+    let defaults = (0..500)
+        .map(|seed| (seed, run(&catalog, &design, CROP_WATCH, seed)))
+        .find(|(_, r)| blames_safe_mode(r))
+        .expect("some Run lists its flares among the causes");
+    let (seed, defaults) = defaults;
+    // Ride out every flare: none of them sends the spacecraft into safe mode any more.
+    let ride_all: Vec<Decision> = prompts(&defaults)
+        .iter()
+        .filter(|p| p.options.iter().any(|o| o.id == "ride-out"))
+        .map(|p| decide(p, "ride-out"))
+        .collect();
+    let ridden = run_with_decisions(&catalog, &design, CROP_WATCH, seed, &ride_all);
+    assert!(!blames_safe_mode(&ridden), "{:#?}", ridden.debrief.causes);
+}
+
+#[test]
 fn unknown_decisions_are_ignored() {
     let catalog = catalog();
     let design = crop_watch_known_good();

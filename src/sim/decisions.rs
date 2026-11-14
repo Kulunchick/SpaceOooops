@@ -102,12 +102,12 @@ pub(crate) fn outage_prompt(day: u32, tuning: &EventTuning, rules: &DecisionRule
 
 /// The option that applies to `prompt`: the player's valid choice, else the default.
 /// Returns the option id and whether the player chose it.
-pub(crate) fn chosen<'a>(prompt: &'a DecisionPrompt, decisions: &'a [Decision]) -> (&'a str, bool) {
+pub(crate) fn chosen(prompt: &DecisionPrompt, decisions: &[Decision]) -> (String, bool) {
     decisions
         .iter()
         .rev()
         .find(|d| d.prompt_id == prompt.id && prompt.options.iter().any(|o| o.id == d.choice))
-        .map_or((prompt.default.as_str(), false), |d| (d.choice.as_str(), true))
+        .map_or((prompt.default.clone(), false), |d| (d.choice.clone(), true))
 }
 
 /// One question answered during the Run, kept for the Debrief.

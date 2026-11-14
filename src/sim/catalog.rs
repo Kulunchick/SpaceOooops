@@ -49,6 +49,9 @@ pub struct Structure {
     pub size_u: f64,
     /// Volume left for Components and Instruments.
     pub usable_volume_u: f64,
+    /// Size class for the Real-Mission Match ("cubesat", "smallsat", "large").
+    #[serde(default)]
+    pub spacecraft_class: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -149,6 +152,9 @@ pub struct Orbit {
     pub name: String,
     pub why: String,
     pub altitude_km: f64,
+    /// Orbit class for the Real-Mission Match ("leo", "sso", "geo").
+    #[serde(default)]
+    pub orbit_class: String,
     /// Tilt of the orbit plane against the equator, in degrees. Only used to draw the Orbit (0 if unknown).
     #[serde(default)]
     pub inclination_deg: f64,
@@ -221,6 +227,69 @@ pub struct DecisionRules {
     pub outage_station_time_cost_usd: f64,
 }
 
+/// A real mission the Debrief can compare the player's Design with (`data/real_missions.toml`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RealMission {
+    pub name: String,
+    pub operator: String,
+    pub year: u32,
+    pub orbit_class: String,
+    pub spacecraft_class: String,
+    /// CubeSat size in units, when it is a CubeSat.
+    #[serde(default)]
+    pub size_u: Option<f64>,
+    #[serde(default)]
+    pub mass_kg: Option<f64>,
+    /// Short human description of its size, e.g. "6U CubeSat".
+    pub size_note: String,
+    pub purposes: Vec<String>,
+    /// One factual sentence.
+    pub blurb: String,
+    /// Public page the facts come from.
+    pub url: String,
+    /// "primary" (operator or space agency page) or "secondary" (catalogue, encyclopedia or news).
+    pub verified: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SpacecraftClass {
+    pub name: String,
+    /// Smallest first.
+    pub rank: u32,
+}
+
+/// The words and groupings the Real-Mission Match works with (`data/real_missions.toml`).
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+pub struct MatchTerms {
+    /// Purpose tags of each Scenario's objective, keyed by scenario id.
+    pub scenario_purposes: BTreeMap<String, Vec<String>>,
+    pub purpose_words: BTreeMap<String, String>,
+    pub orbit_classes: BTreeMap<String, String>,
+    pub spacecraft_classes: BTreeMap<String, SpacecraftClass>,
+}
+
+/// A "why it matters" explanation for a Design parameter, gauge or Component category (`data/glossary.toml`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GlossaryTerm {
+    /// The label as shown on screen, e.g. "Mass".
+    pub key: String,
+    /// Other labels that mean the same, e.g. "Time in shadow" for the eclipse.
+    #[serde(default)]
+    pub aliases: Vec<String>,
+    pub why: String,
+}
+
+/// Which Debrief causes are worth telling, and how many (`data/causes.toml`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CauseRules {
+    pub max_causes: usize,
+    /// Causes costing less than this share of the required Science Value are left out.
+    pub min_impact_share: f64,
+    pub poor_coverage_below: f64,
+    pub poor_fit_below: f64,
+    pub drag_altitude_below_km: f64,
+}
+
 fn yes() -> bool {
     true
 }
@@ -253,6 +322,10 @@ pub struct Catalog {
     pub review: ReviewRules,
     pub run_rules: RunRules,
     pub scoring: ScoringRules,
+    pub cause_rules: CauseRules,
+    pub real_missions: Vec<RealMission>,
+    pub match_terms: MatchTerms,
+    pub glossary: Vec<GlossaryTerm>,
     /// Personal Objectives: one default per Role plus optional Scenario-specific ones.
     pub objectives: Vec<ObjectiveSpec>,
     /// Seed of the trial Run behind the pre-launch objective outlook.
@@ -260,6 +333,14 @@ pub struct Catalog {
 }
 
 impl Catalog {
+    /// The "why it matters" text for an on-screen label (case-insensitive, aliases included).
+    pub fn glossary_why(&self, label: &str) -> Option<&str> {
+        let label = label.trim();
+        self.glossary
+            .iter()
+            .find(|t| t.key.eq_ignore_ascii_case(label) || t.aliases.iter().any(|a| a.eq_ignore_ascii_case(label)))
+            .map(|t| t.why.as_str())
+    }
     pub fn scenario(&self, id: &str) -> Option<&Scenario> {
         self.scenarios.iter().find(|s| s.id == id)
     }
@@ -326,6 +407,28 @@ struct ObjectivesFile {
     objectives: Vec<ObjectiveSpec>,
 }
 
+const CAUSES: (&str, &str) = ("data/causes.toml", include_str!("../../data/causes.toml"));
+
+#[derive(Deserialize)]
+struct CausesFile {
+    causes: CauseRules,
+}
+
+const REAL_MISSIONS: (&str, &str) = ("data/real_missions.toml", include_str!("../../data/real_missions.toml"));
+const GLOSSARY: (&str, &str) = ("data/glossary.toml", include_str!("../../data/glossary.toml"));
+
+#[derive(Deserialize)]
+struct RealMissionsFile {
+    real_missions: Vec<RealMission>,
+    #[serde(flatten)]
+    terms: MatchTerms,
+}
+
+#[derive(Deserialize)]
+struct GlossaryFile {
+    terms: Vec<GlossaryTerm>,
+}
+
 #[derive(Deserialize)]
 struct ScenariosFile {
     scenarios: Vec<Scenario>,
@@ -386,6 +489,9 @@ pub fn load_catalog() -> Result<Catalog, CatalogError> {
     let review: ReviewFile = parse(REVIEW)?;
     let run: RunFile = parse(RUN)?;
     let scoring: ScoringFile = parse(SCORING)?;
+    let causes: CausesFile = parse(CAUSES)?;
+    let real_missions: RealMissionsFile = parse(REAL_MISSIONS)?;
+    let glossary: GlossaryFile = parse(GLOSSARY)?;
     let objectives: ObjectivesFile = parse(OBJECTIVES)?;
     let catalog = Catalog {
         scenarios: scenarios.scenarios,
@@ -402,6 +508,10 @@ pub fn load_catalog() -> Result<Catalog, CatalogError> {
         review: review.review,
         run_rules: run.run,
         scoring: scoring.scoring,
+        cause_rules: causes.causes,
+        real_missions: real_missions.real_missions,
+        match_terms: real_missions.terms,
+        glossary: glossary.terms,
         objectives: objectives.objectives,
         objectives_preview_seed: objectives.preview_seed,
     };

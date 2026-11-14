@@ -3,6 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::catalog::*;
+use super::causes::not_launched_causes;
 use super::debrief::{Debrief, DebriefContext, RunStats, debrief, not_launched};
 use super::decisions::{self, Decision, Taken};
 use super::design::*;
@@ -64,7 +65,8 @@ pub fn run_with_decisions(
     let r = resolve(catalog, design, scenario_id);
     let res = resources(catalog, design, &r);
     let required_science_value = r.scenario.map_or(0.0, |s| s.required_science_value);
-    if !launch_review(catalog, design, scenario_id).can_launch {
+    let review = launch_review(catalog, design, scenario_id);
+    if !review.can_launch {
         let stats = RunStats {
             science_value: 0.0,
             required_science_value,
@@ -77,7 +79,8 @@ pub fn run_with_decisions(
             science_met: false,
             lifetime_met: false,
         };
-        return RunResult { timeline: Vec::new(), debrief: not_launched(stats) };
+        let causes = not_launched_causes(&catalog.cause_rules, &review.violations);
+        return RunResult { timeline: Vec::new(), debrief: not_launched(stats, causes) };
     }
     let ctx = RunContext::new(catalog, design, scenario_id, &r, &res, decisions);
     let mut state = RunState::new(seed, &ctx);
@@ -344,6 +347,7 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
             cost_usd: 0.0,
         });
         event.prompt = Some(prompt);
+        event.choice = Some(choice.to_string());
         day_events.push(event);
     }
     if draws.outage && s.outage_days_left == 0 {
@@ -362,6 +366,7 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
             cost_usd,
         });
         event.prompt = Some(prompt);
+        event.choice = Some(choice.to_string());
         day_events.push(event);
         s.outage_days_left = tuning.outage_days;
         s.station_bought = buy;

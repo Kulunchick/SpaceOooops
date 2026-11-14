@@ -24,7 +24,7 @@ h3 { margin: 1.25rem 0 0.5rem; font-size: 1.05rem; }
 .design-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
 .design-head .actions { margin: 0; }
 .gauges-sticky { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 0.5rem 0; }
-.gauges { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 0.5rem; }
+.gauges { display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 0.5rem; }
 .gauge { background: var(--bg-panel); border: 1px solid var(--border); border-left: 4px solid var(--ok); border-radius: var(--radius); padding: 0.5rem 0.6rem; }
 .gauge-thin { border-left-color: var(--warn); }
 .gauge-violated { border-left-color: var(--danger); }
