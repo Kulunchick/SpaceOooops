@@ -74,6 +74,32 @@ html, body {
 .btn-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
 .btn-primary:hover { filter: brightness(1.1); }
 
+/* ---- Mission-control polish (ticket 07) ---- */
+html, body { overflow-x: hidden; }
+.screen, .panel, .gauge, .dial { min-width: 0; overflow-wrap: anywhere; }
+img, svg, table { max-width: 100%; }
+.title { text-shadow: 0 0 18px rgba(63, 184, 255, 0.55); }
+h2, h3 { font-family: var(--font-mono); letter-spacing: 0.04em; }
+.panel { box-shadow: 0 0 0 1px rgba(63, 184, 255, 0.04), 0 4px 18px rgba(0, 0, 0, 0.35); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn-primary { box-shadow: 0 0 12px rgba(63, 184, 255, 0.4); }
+.gauge-fill, .dial-fill { box-shadow: 0 0 8px currentColor; }
+.gauge-ok .gauge-fill { color: var(--ok); }
+.gauge-thin .gauge-fill { color: var(--warn); }
+.gauge-violated .gauge-fill { color: var(--danger); }
+.dial-fill { color: var(--accent); }
+.dial-warn .dial-fill { color: var(--warn); }
+.dial-value, .gauge-detail, .num, td.num { font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
+@media (max-width: 1024px) {
+  .app { padding: 1rem; }
+  .screen { max-width: 100%; }
+  .design-screen { max-width: 100%; }
+}
+@media (max-width: 800px) {
+  .app { padding: 0.75rem; }
+  .btn { padding: 0.5rem 1rem; }
+}
+
 /* ---- Sources page (ticket 08) ---- */
 .sources-screen { max-width: 46rem; text-align: left; align-items: stretch; }
 .sources-screen h3 { color: var(--accent); margin: 1.2rem 0 0.4rem; }

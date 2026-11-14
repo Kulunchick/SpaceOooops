@@ -148,6 +148,9 @@ pub struct Orbit {
     pub name: String,
     pub why: String,
     pub altitude_km: f64,
+    /// Tilt of the orbit plane against the equator, in degrees. Only used to draw the Orbit (0 if unknown).
+    #[serde(default)]
+    pub inclination_deg: f64,
     pub period_min: f64,
     /// Share of each orbit spent in Earth's shadow.
     pub eclipse_fraction: f64,

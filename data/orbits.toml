@@ -5,6 +5,8 @@ id = "sso-600"
 name = "Sun-synchronous Orbit, 600 km (SSO)"
 why = "A near-polar Orbit that passes over every place at the same local time each day, so lighting is the same in every image. It still spends about a third of each orbit in Earth's shadow."
 altitude_km = 600.0
+# source: a sun-synchronous orbit at 600 km needs an inclination of ~97.8 degrees (retrograde, near-polar).
+inclination_deg = 97.8
 # source: Kepler's third law for a 600 km circular orbit gives ~96.7 min.
 period_min = 96.7
 # source: ~35 min of each orbit in shadow for a 10:30 local-time SSO at 600 km (35/96.7 = 0.36).
