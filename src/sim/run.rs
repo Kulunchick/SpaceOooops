@@ -90,6 +90,11 @@ pub fn run(catalog: &Catalog, design: &Design, scenario_id: &str, seed: u64) -> 
             "The Mission ended on day {} of {} planned days of operations: a critical Component failed.",
             state.day, ctx.planned_days
         )
+    } else if ctx.planned_days < res.min_lifetime_days {
+        format!(
+            "The Orbit gave out after {} days (drag or radiation), before the {} days of operations the Scenario needs.",
+            ctx.planned_days, res.min_lifetime_days
+        )
     } else {
         format!("Planned mission complete: all {} days of operations flown.", ctx.planned_days)
     };
