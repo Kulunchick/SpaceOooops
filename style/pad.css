@@ -49,10 +49,8 @@
 }
 .vote-row.go { --flash: #45e08a; }
 .vote-row.no-go { --flash: #ff4b4b; }
-@media (prefers-reduced-motion: reduce) {
-  .vote-row.go, .vote-row.no-go { animation: none; }
-  .launch-review > :not(.launch-sequence) { transition: none; }
-}
+:root[data-motion="reduced"] .vote-row.go, :root[data-motion="reduced"] .vote-row.no-go { animation: none; }
+:root[data-motion="reduced"] .launch-review > :not(.launch-sequence) { transition: none; }
 
 @media (max-width: 900px) {
   .screen.launch-review { max-width: 100%; margin-left: 0; margin-top: 55vh; }

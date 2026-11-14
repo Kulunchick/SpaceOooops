@@ -143,11 +143,9 @@ export async function init(canvas, initialQuality = 'high') {
     renderer = null;
     return false;
   }
-  const motionQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-  reducedMotion = motionQuery?.matches ?? false;
+  // Motion is the player's own setting (Rust puts it on <html data-motion>); the OS preference is not followed.
+  reducedMotion = document.documentElement.dataset.motion === 'reduced';
   canvas.dataset.reducedMotion = String(reducedMotion);
-  // The player can switch the system setting while the game is open.
-  motionQuery?.addEventListener?.('change', (e) => setReducedMotion(e.matches));
   scene = new THREE.Scene();
   scene.background = new THREE.Color(palette.space);
   camera = new THREE.PerspectiveCamera(40, 1, 0.05, 200);

@@ -1,7 +1,7 @@
 // Ticket 10, with WebGL: quality toggle and its default, reduced motion, and the first panel before the scene.
 // The canvas exposes data-quality and data-reduced-motion; the settings panel is #settings-panel.
 import { test, expect } from '@playwright/test';
-import { collectErrors, flyCropWatch, CROP_WATCH_SHARE } from './helpers.js';
+import { collectErrors, flyCropWatch, chooseReducedMotion, CROP_WATCH_SHARE } from './helpers.js';
 
 const canvas = (page) => page.locator('canvas.scene-canvas');
 const SETTINGS_KEY = 'spaceooops.settings.v1';
@@ -98,7 +98,7 @@ test('a quality change during the launch animation waits for it, and nothing bre
 
 test('reduced motion: the scene knows, the camera cuts, and a full Mission completes', async ({ page }) => {
   const errors = collectErrors(page);
-  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await chooseReducedMotion(page);
   await page.goto('./');
   await expect(canvas(page)).toHaveAttribute('data-reduced-motion', 'true');
   await page.getByRole('button', { name: 'Start' }).click();
@@ -109,11 +109,16 @@ test('reduced motion: the scene knows, the camera cuts, and a full Mission compl
   expect(errors).toEqual([]);
 });
 
-test('switching reduced motion on while the game is open reaches the scene', async ({ page }) => {
+test('the OS preference alone changes nothing; switching Motion while the game is open reaches the scene', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./');
   await expect(canvas(page)).toHaveAttribute('data-reduced-motion', 'false');
-  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await openSettings(page);
+  await page.locator('#settings-motion-reduced').click();
   await expect(canvas(page)).toHaveAttribute('data-reduced-motion', 'true');
+  expect(await page.evaluate((k) => localStorage.getItem(k), SETTINGS_KEY)).toContain('motion=reduced');
+  await page.locator('#settings-motion-full').click();
+  await expect(canvas(page)).toHaveAttribute('data-reduced-motion', 'false');
 });
 
 test('a quality change by clicking during the launch ends it and the Run carries on at the new level', async ({ page }) => {

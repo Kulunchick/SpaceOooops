@@ -30,7 +30,7 @@
 .orbit-state-shadow { color: #9d8cff; }
 .orbit-event { flex-basis: 100%; min-height: 1.3em; color: var(--danger); }
 .orbit-event-live { font-weight: 600; }
-@media (prefers-reduced-motion: reduce) { .event-flash { animation-duration: 0.01s; } }
+:root[data-motion="reduced"] .event-flash { animation-duration: 0.01s; }
 
 .dashboards { display: grid; gap: 0.6rem; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 1rem 0; }
 @media (max-width: 1024px) { .dashboards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

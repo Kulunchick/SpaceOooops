@@ -1,10 +1,10 @@
 // Ticket 10, without WebGL: the settings control still works and a full Mission completes with reduced motion.
 import { test, expect } from '@playwright/test';
-import { collectErrors, flyCropWatch } from './helpers.js';
+import { collectErrors, flyCropWatch, chooseReducedMotion } from './helpers.js';
 
 test('a full Crop Watch Mission completes with reduced motion and no WebGL', async ({ page }) => {
   const errors = collectErrors(page);
-  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await chooseReducedMotion(page);
   await flyCropWatch(page);
   await expect(page.locator('.scene-layer')).toHaveAttribute('data-scene', 'fallback');
   expect(errors).toEqual([]);

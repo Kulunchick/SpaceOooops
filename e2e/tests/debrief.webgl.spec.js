@@ -4,7 +4,7 @@
 // The canvas exposes data-shot, data-debrief (the fate drawn) and data-debrief-spin (the craft's rotation this frame).
 // Set DEBRIEF_SHOTS=<dir> to save a screenshot of each verdict.
 import { test, expect } from '@playwright/test';
-import { collectErrors, CROP_WATCH_SHARE, pressLaunch } from './helpers.js';
+import { collectErrors, chooseReducedMotion, CROP_WATCH_SHARE, pressLaunch } from './helpers.js';
 
 const LEO_SHARE = CROP_WATCH_SHARE.replace('.sso-600.cubesat-rideshare', '.leo-400.station-deploy');
 
@@ -19,7 +19,7 @@ const canvas = (page) => page.locator('canvas.scene-canvas');
 
 /** Flies the share link's Design with a fixed seed (one that asks no question) and skips to the Debrief. */
 async function flyToDebrief(page, share, k, { reducedMotion = false } = {}) {
-  if (reducedMotion) await page.emulateMedia({ reducedMotion: 'reduce' });
+  if (reducedMotion) await chooseReducedMotion(page);
   await seedRuns(page, k);
   await page.goto(`./#share=${share}`);
   await page.getByRole('button', { name: 'Launch Review' }).click();

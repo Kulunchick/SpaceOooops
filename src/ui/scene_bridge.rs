@@ -9,7 +9,7 @@
 use leptos::html::Canvas;
 use leptos::prelude::*;
 use spaceooops::scene::{self, SceneInputs};
-use spaceooops::settings::{DeviceHints, Graphics};
+use spaceooops::settings::{DeviceHints, Graphics, Motion};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 
@@ -35,7 +35,11 @@ export async function scene_init(canvas, quality) {
     }
 }
 export function scene_reduced_motion() {
-    return Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    return document.documentElement.dataset.motion === 'reduced';
+}
+export function scene_set_motion(reduced) {
+    document.documentElement.dataset.motion = reduced ? 'reduced' : 'full';
+    if (bridge) bridge.setReducedMotion(reduced);
 }
 export function scene_apply(json) {
     latest = json;
@@ -71,8 +75,10 @@ extern "C" {
     fn scene_init(canvas: &web_sys::HtmlCanvasElement, graphics: &str) -> js_sys::Promise;
     /// Hands the bridge the latest Scene Spec as JSON (kept until the bridge is ready).
     fn scene_apply(json: &str);
-    /// The player asked the browser for reduced motion.
+    /// The player chose Reduced motion (the `data-motion` attribute on `<html>`).
     fn scene_reduced_motion() -> bool;
+    /// Sets `data-motion` on `<html>` (for CSS and the scene) and tells a running scene.
+    fn scene_set_motion(reduced: bool);
 }
 
 /// What this browser says about the machine, for the Low graphics default.
@@ -92,7 +98,12 @@ pub fn set_graphics(graphics: Graphics) {
     scene_set_quality(graphics.name());
 }
 
-/// Reduced motion skips the launch sequence, as it cuts every camera move.
+/// Applies the player's Motion choice everywhere at once: the `<html>` attribute CSS reads and the scene.
+pub fn set_motion(motion: Motion) {
+    scene_set_motion(motion.is_reduced());
+}
+
+/// Reduced motion (the player's setting, never the OS preference) skips the launch sequence, as it cuts every camera move.
 pub fn reduced_motion() -> bool {
     scene_reduced_motion()
 }
@@ -124,6 +135,7 @@ pub fn SceneLayer() -> impl IntoView {
 
     canvas.on_load(move |el| {
         leptos::task::spawn_local(async move {
+            set_motion(super::settings_widget::initial_motion());
             let live = JsFuture::from(scene_init(&el, super::settings_widget::initial_graphics().name())).await.ok().and_then(|v| v.as_bool()).unwrap_or(false);
             state.scene_live.set(live);
             mode.set(if live { SceneMode::Live } else { SceneMode::Fallback });

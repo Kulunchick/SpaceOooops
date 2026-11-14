@@ -2,7 +2,7 @@
 //! level (Low/High), remembered between visits in local storage (same style as the run history store).
 //! Further settings add a row inside `.settings-panel`.
 use leptos::prelude::*;
-use spaceooops::settings::{Graphics, Settings};
+use spaceooops::settings::{Graphics, Motion, Settings};
 
 use super::{audio_bridge, scene_bridge, storage};
 
@@ -25,6 +25,11 @@ pub fn initial_graphics() -> Graphics {
     INITIAL.with(|cell| *cell.get_or_init(|| Graphics::choose(load().graphics, &scene_bridge::device_hints())))
 }
 
+/// The Motion choice at start-up: the saved one, else Full (the OS preference is not consulted).
+pub fn initial_motion() -> Motion {
+    load().motion
+}
+
 fn percent(v: f64) -> u32 {
     (v * 100.0).round() as u32
 }
@@ -39,6 +44,7 @@ pub fn SettingsWidget() -> impl IntoView {
     Effect::new(move |_| {
         let s = settings.get();
         audio_bridge::audio_set_volumes(s.music, s.effects, s.muted);
+        scene_bridge::set_motion(s.motion);
         save(&s);
     });
     Effect::new(move |_| scene_bridge::set_graphics(graphics.get()));
@@ -55,6 +61,21 @@ pub fn SettingsWidget() -> impl IntoView {
                     graphics.set(level);
                     settings.update(|s| s.graphics = Some(level));
                 }
+            >
+                {label}
+            </button>
+        }
+    };
+
+    let motion_button = move |label: &'static str, id: &'static str, choice: Motion| {
+        view! {
+            <button
+                id=id
+                type="button"
+                class="lp-btn settings-quality-option"
+                class:selected=move || settings.get().motion == choice
+                aria-pressed=move || (settings.get().motion == choice).to_string()
+                on:click=move |_| settings.update(|s| s.motion = choice)
             >
                 {label}
             </button>
@@ -111,6 +132,13 @@ pub fn SettingsWidget() -> impl IntoView {
                     <span class="settings-quality-options">
                         {graphics_button("Low", "settings-quality-low", Graphics::Low)}
                         {graphics_button("High", "settings-quality-high", Graphics::High)}
+                    </span>
+                </div>
+                <div class="settings-row settings-quality" role="group" aria-label="Motion">
+                    <span>"Motion"</span>
+                    <span class="settings-quality-options">
+                        {motion_button("Full", "settings-motion-full", Motion::Full)}
+                        {motion_button("Reduced", "settings-motion-reduced", Motion::Reduced)}
                     </span>
                 </div>
             </div>

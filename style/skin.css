@@ -84,9 +84,7 @@
 }
 .scene-layer.dimmed::after { opacity: 0.9; }
 .app { position: relative; z-index: 1; }
-@media (prefers-reduced-motion: reduce) {
-  .scene-canvas, .scene-layer::after { transition: none; }
-}
+:root[data-motion="reduced"] .scene-canvas, :root[data-motion="reduced"] .scene-layer::after { transition: none; }
 
 /* ---- Primitives ---- */
 .lp-panel {
@@ -131,12 +129,11 @@
 .lp-btn.pulse { animation: lp-pulse 1.2s ease-in-out infinite; }
 @keyframes lp-pulse { 50% { filter: brightness(1.25); } }
 
-/* Reduced motion: no animation or transition anywhere (state changes still show, they just do not move). */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+/* Reduced motion (the Motion setting, <html data-motion="reduced">; the OS preference is not followed):
+   no animation or transition anywhere (state changes still show, they just do not move). */
+:root[data-motion="reduced"] *, :root[data-motion="reduced"] *::before, :root[data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }

@@ -1,5 +1,5 @@
 //! Player settings: the text kept in local storage (low-poly ticket 04).
-use spaceooops::settings::Settings;
+use spaceooops::settings::{Motion, Settings};
 
 #[test]
 fn defaults_keep_music_well_below_effects_and_are_not_muted() {
@@ -10,7 +10,7 @@ fn defaults_keep_music_well_below_effects_and_are_not_muted() {
 
 #[test]
 fn settings_survive_a_round_trip_through_text() {
-    let s = Settings { music: 0.25, effects: 0.8, muted: true, graphics: None };
+    let s = Settings { music: 0.25, effects: 0.8, muted: true, graphics: None, motion: Motion::Reduced };
     assert_eq!(Settings::from_text(&s.to_text()), s);
 }
 
@@ -86,4 +86,30 @@ fn a_saved_choice_always_beats_the_device_rule() {
     assert_eq!(Graphics::choose(Some(Graphics::Low), &strong()), Graphics::Low);
     assert_eq!(Graphics::choose(None, &weak), Graphics::Low);
     assert_eq!(Graphics::choose(None, &strong()), Graphics::High);
+}
+
+// ---- Motion (the player's own choice; the OS preference is not followed) ----
+
+#[test]
+fn motion_is_full_by_default_and_remembered() {
+    assert_eq!(Settings::default().motion, Motion::Full);
+    let s = Settings { motion: Motion::Reduced, ..Settings::default() };
+    assert_eq!(Settings::from_text(&s.to_text()).motion, Motion::Reduced);
+    let s = Settings { motion: Motion::Full, ..Settings::default() };
+    assert_eq!(Settings::from_text(&s.to_text()).motion, Motion::Full);
+}
+
+#[test]
+fn an_unreadable_motion_is_full() {
+    assert_eq!(Settings::from_text("motion=sideways").motion, Motion::Full);
+    assert_eq!(Settings::from_text("motion=").motion, Motion::Full);
+}
+
+#[test]
+fn text_stored_before_the_motion_setting_loads_as_full() {
+    let s = Settings::from_text("music=0.5
+effects=0.6
+muted=1
+quality=low");
+    assert_eq!((s.music, s.muted, s.motion), (0.5, true, Motion::Full));
 }

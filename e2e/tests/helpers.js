@@ -15,11 +15,16 @@ export function collectErrors(page) {
 export const CROP_WATCH_SHARE =
   'v1.crop-watch.multispectral-imager.cubesat-6u.solar-deployable~f.battery-m~f.reaction-wheels~f.comms-s-band~f.f.sso-600.cubesat-rideshare';
 
+/** Starts every page load with Motion set to Reduced in the stored settings (the OS preference is not followed). */
+export async function chooseReducedMotion(page) {
+  await page.addInitScript(() => localStorage.setItem('spaceooops.settings.v1', 'motion=reduced'));
+}
+
 /** Presses Launch and, when the 3D launch sequence starts, skips it, so the Run begins at once. */
 export async function pressLaunch(page) {
   await page.getByRole('button', { name: 'Launch', exact: true }).click();
   // With reduced motion there is no launch sequence to skip.
-  if (await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  if (await page.evaluate(() => document.documentElement.dataset.motion === 'reduced')) return;
   if (await page.locator('.scene-layer[data-scene="live"]').count()) {
     const skip = page.getByRole('button', { name: 'Skip launch' });
     if (await skip.waitFor({ state: 'visible', timeout: 5000 }).then(() => true, () => false)) await skip.click();

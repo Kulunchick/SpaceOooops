@@ -1,6 +1,6 @@
 // Scenario select and Brief over the 3D scene: markers, fly-to, skipping the flight, reduced motion.
 import { test, expect } from '@playwright/test';
-import { collectErrors } from './helpers.js';
+import { collectErrors, chooseReducedMotion } from './helpers.js';
 
 async function openScenarioSelect(page) {
   await page.goto('./');
@@ -57,7 +57,7 @@ test('the flight ends by itself', async ({ page }) => {
 });
 
 test('with reduced motion the camera cuts instead of flying', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await chooseReducedMotion(page);
   await openScenarioSelect(page);
   const canvas = page.locator('canvas.scene-canvas');
   await page.locator('.scenario-card', { hasText: 'Connect the Villages' }).getByRole('button', { name: 'Select' }).click();

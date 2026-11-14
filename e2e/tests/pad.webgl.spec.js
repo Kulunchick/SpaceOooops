@@ -1,7 +1,7 @@
 // Launch Review beside the launch pad and the launch sequence (low-poly ticket 07). The canvas exposes
 // data-shot / data-pad-phase / data-pad-votes / data-pad-rocket / data-pad-craft; audio state is on <html data-audio-*>.
 import { test, expect } from '@playwright/test';
-import { collectErrors, CROP_WATCH_SHARE } from './helpers.js';
+import { collectErrors, chooseReducedMotion, CROP_WATCH_SHARE } from './helpers.js';
 
 const canvas = (page) => page.locator('canvas.scene-canvas');
 const html = (page) => page.locator('html');
@@ -91,8 +91,26 @@ test('a click anywhere during the launch ends it', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Launch Review' })).toHaveCount(0, { timeout: 3000 });
 });
 
-test('with reduced motion Launch goes straight to the Run', async ({ page }) => {
+test('with the OS asking for reduced motion but no saved choice, the launch sequence still plays', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await openLaunchReview(page);
+  await page.getByRole('button', { name: 'Launch', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Skip launch' })).toBeVisible({ timeout: 5000 });
+  await expect(html(page)).toHaveAttribute('data-motion', 'full');
+});
+
+test('switching Motion to Reduced in the panel makes Launch go straight to the Run', async ({ page }) => {
+  await openLaunchReview(page);
+  await page.getByRole('button', { name: 'Sound and graphics settings' }).click();
+  await page.locator('#settings-motion-reduced').click();
+  await expect(html(page)).toHaveAttribute('data-motion', 'reduced');
+  await page.getByRole('button', { name: 'Launch', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Launch Review' })).toHaveCount(0, { timeout: 3000 });
+  await expect(page.getByRole('button', { name: 'Skip launch' })).toBeHidden();
+});
+
+test('with reduced motion chosen Launch goes straight to the Run', async ({ page }) => {
+  await chooseReducedMotion(page);
   await openLaunchReview(page);
   await page.getByRole('button', { name: 'Launch', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Launch Review' })).toHaveCount(0, { timeout: 3000 });

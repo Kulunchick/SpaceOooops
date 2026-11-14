@@ -11,6 +11,36 @@ pub enum Graphics {
     High,
 }
 
+/// Whether the scene and the page animate (shown to the player as "Motion"). Full is the default on every device:
+/// the operating system's `prefers-reduced-motion` is deliberately not read; Reduced is the player's own choice.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum Motion {
+    #[default]
+    Full,
+    Reduced,
+}
+
+impl Motion {
+    pub fn name(self) -> &'static str {
+        match self {
+            Motion::Full => "full",
+            Motion::Reduced => "reduced",
+        }
+    }
+
+    pub fn from_name(name: &str) -> Option<Self> {
+        match name.trim() {
+            "full" => Some(Motion::Full),
+            "reduced" => Some(Motion::Reduced),
+            _ => None,
+        }
+    }
+
+    pub fn is_reduced(self) -> bool {
+        self == Motion::Reduced
+    }
+}
+
 /// What the browser tells us about the machine, gathered by the UI (any hint may be missing).
 #[derive(Clone, PartialEq, Debug, Default)]
 pub struct DeviceHints {
@@ -66,12 +96,14 @@ pub struct Settings {
     pub muted: bool,
     /// The player's own Graphics choice; `None` until they make one (then the device default applies).
     pub graphics: Option<Graphics>,
+    /// Full or Reduced motion; Full until the player chooses.
+    pub motion: Motion,
 }
 
 impl Default for Settings {
     /// Music sits well below effects so it never drowns a click.
     fn default() -> Self {
-        Settings { music: 0.3, effects: 0.8, muted: false, graphics: None }
+        Settings { music: 0.3, effects: 0.8, muted: false, graphics: None, motion: Motion::Full }
     }
 }
 
@@ -80,6 +112,10 @@ impl Settings {
         let mut text = format!("music={}\neffects={}\nmuted={}", self.music, self.effects, u8::from(self.muted));
         if let Some(q) = self.graphics {
             text.push_str(&format!("\nquality={}", q.name()));
+        }
+        if self.motion == Motion::Reduced {
+            text.push_str("
+motion=reduced");
         }
         text
     }
@@ -95,6 +131,7 @@ impl Settings {
                 "effects" => s.effects = volume(value).unwrap_or(s.effects),
                 "muted" => s.muted = value.trim() == "1",
                 "quality" => s.graphics = Graphics::from_name(value),
+                "motion" => s.motion = Motion::from_name(value).unwrap_or_default(),
                 _ => {}
             }
         }

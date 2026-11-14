@@ -8,6 +8,10 @@ A web game where players design a small Earth-orbit space mission, launch it, wa
 A predefined mission brief: the objective to achieve, the Science Value required, the minimum Lifetime, and the constraints the Design must respect.
 _Avoid_: Level, quest
 
+**Target Country**:
+The country a Scenario serves: it holds the Scenario's pin and ground stations, and is outlined and highlighted on the globe while that Scenario is hovered or selected. Angola for the original three Scenarios.
+_Avoid_: Region, area, target (alone)
+
 **Mission**:
 One attempt at a Scenario: a Design, a Launch Review, a Run and a Debrief.
 _Avoid_: Game, session
@@ -122,6 +126,10 @@ _Avoid_: Sound event, trigger
 **Graphics**:
 The player's Low/High setting for how much the 3D scene draws (face count and pixel ratio). Stored under the key `quality` for old saves.
 _Avoid_: Quality (reads as Reliability Tier)
+
+**Motion**:
+The player's Full/Reduced setting for animation. Full is the default on every device; Reduced skips the launch sequence, cuts camera moves, stops idle drift and turns CSS animations off. The operating system's reduced-motion preference is not followed.
+_Avoid_: Animation setting, reduce-motion
 
 **Model part**:
 One drawn piece of the 3D spacecraft model (`Part` in the Scene Spec): the bus, a Component's hardware or an Instrument, identified by its catalog option id. A rendering term only; the game rules speak of Components and Instruments.

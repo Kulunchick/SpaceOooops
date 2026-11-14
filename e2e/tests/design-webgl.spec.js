@@ -1,7 +1,7 @@
 // Design screen over the 3D hangar: the spacecraft is assembled from the Design, follows every change, and turns
 // when dragged on the stage (and only there). The canvas exposes data-shot / data-parts / data-yaw for these checks.
 import { test, expect } from '@playwright/test';
-import { collectErrors, CROP_WATCH_SHARE } from './helpers.js';
+import { collectErrors, chooseReducedMotion, CROP_WATCH_SHARE } from './helpers.js';
 
 const CROP_WATCH_PARTS = [
   'cubesat-6u', 'solar-deployable', 'comms-s-band', 'reaction-wheels', 'battery-m', 'computer-obc', 'multispectral-imager',
@@ -36,7 +36,7 @@ test('adding and removing an Instrument adds and removes its part', async ({ pag
 });
 
 test('dragging on the stage turns the model; the panels stay clickable', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' }); // no idle turn, so only the drag moves it
+  await chooseReducedMotion(page); // no idle turn, so only the drag moves it
   await page.goto(`./#share=${CROP_WATCH_SHARE}`);
   const canvas = page.locator('canvas.scene-canvas');
   await expect(canvas).toHaveAttribute('data-shot', 'hangar', { timeout: 20_000 });
