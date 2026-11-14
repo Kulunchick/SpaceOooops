@@ -12,6 +12,7 @@ mod review;
 mod rng;
 mod run;
 mod score;
+mod share;
 
 pub use catalog::*;
 pub use causes::{Cause, CauseKind};
@@ -23,6 +24,7 @@ pub use real_mission::RealMissionMatch;
 pub use review::*;
 pub use run::{DaySnapshot, RunResult, run};
 pub use score::{Score, ScoreLine, ScoreLineKind};
+pub use share::{ShareError, decode_design, encode_design};
 
 /// One-line game pitch shown on the title screen.
 pub fn tagline() -> &'static str {

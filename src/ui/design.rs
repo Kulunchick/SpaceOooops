@@ -25,6 +25,7 @@ pub fn DesignScreen() -> impl IntoView {
                 <div class="actions">
                     <button class="btn" on:click=move |_| state.go(Screen::Brief)>"Scenario brief"</button>
                     <button class="btn btn-primary" on:click=move |_| state.go(Screen::LaunchReview)>"Launch Review"</button>
+                    <super::share::ShareButton />
                 </div>
             </header>
             <div class="gauges-sticky"><Gauges /></div>

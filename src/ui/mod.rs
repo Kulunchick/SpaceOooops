@@ -7,6 +7,8 @@ mod debrief;
 mod design;
 mod format;
 mod gauges;
+mod history;
+mod history_store;
 mod launch_orbit_tab;
 mod launch_review;
 mod option_card;
@@ -14,9 +16,11 @@ mod run;
 mod scenario_select;
 mod science_tab;
 mod seed;
+mod share;
 mod sources;
 mod spacecraft_tab;
 mod state;
+mod storage;
 mod tier_select;
 mod title;
 
@@ -43,6 +47,7 @@ pub fn App() -> impl IntoView {
     };
     let state = AppState::new(catalog);
     provide_context(state);
+    share::open_link_from_url(state);
     let screen = state.screen;
     view! {
         <main class="app">
@@ -56,6 +61,7 @@ pub fn App() -> impl IntoView {
                 Screen::Design => view! { <design::DesignScreen /> }.into_any(),
                 Screen::LaunchReview => view! { <launch_review::LaunchReviewScreen /> }.into_any(),
                 Screen::Run => view! { <run::RunScreen /> }.into_any(),
+                Screen::History => view! { <history::HistoryScreen /> }.into_any(),
                 Screen::Debrief => view! { <debrief::DebriefScreen /> }.into_any(),
             }}
         </main>

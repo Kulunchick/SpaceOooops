@@ -3,6 +3,7 @@
 use leptos::prelude::*;
 use spaceooops::sim::{self, Catalog, Design, LaunchReview, Pick, ReliabilityTier, Role, RunResult};
 
+use super::history_store::{self, HistoryRecord};
 use super::seed::new_seed;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -15,6 +16,7 @@ pub enum Screen {
     LaunchReview,
     Run,
     Debrief,
+    History,
 }
 
 #[derive(Clone, Copy)]
@@ -33,6 +35,10 @@ pub struct AppState {
     /// The single source of truth for everything that animates with the Run (dashboards, event log,
     /// orbit animation); read it, and only the playback driver in `run/playback.rs` writes it.
     pub playback: RwSignal<f64>,
+    /// Past Runs, newest first; mirrored to local storage (ticket 09).
+    pub history: RwSignal<Vec<HistoryRecord>>,
+    /// A friendly message for the title screen, e.g. when a share link could not be opened (ticket 09).
+    pub notice: RwSignal<Option<String>>,
 }
 
 impl AppState {
@@ -54,6 +60,8 @@ impl AppState {
             run_result: RwSignal::new(None),
             seed: RwSignal::new(0),
             playback: RwSignal::new(0.0),
+            history: RwSignal::new(history_store::load()),
+            notice: RwSignal::new(None),
         }
     }
 
@@ -68,6 +76,18 @@ impl AppState {
         let result = self
             .design
             .with_untracked(|d| self.catalog.with_value(|c| sim::run(c, d, &scenario_id, seed)));
+        let record = HistoryRecord::from_run(
+            &self.design.get_untracked(),
+            &scenario_id,
+            seed,
+            &result,
+            leptos::web_sys::js_sys::Date::now(),
+        );
+        self.history.update(|h| {
+            h.insert(0, record);
+            h.truncate(history_store::MAX_RECORDS);
+        });
+        self.history.with_untracked(|h| history_store::save(h));
         self.seed.set(seed);
         self.run_result.set(Some(result));
         self.playback.set(0.0);

@@ -2,6 +2,7 @@
 //! Later tickets add a section file here and one line in the list below:
 //! causes and Real-Mission Match (04), Personal Objectives (06), comparison with the previous Run (09).
 mod actions;
+mod compare;
 mod score;
 mod stats;
 mod verdict;
@@ -10,6 +11,7 @@ use leptos::prelude::*;
 
 use super::state::AppState;
 use actions::DebriefActions;
+use compare::ComparisonSection;
 use score::ScoreSection;
 use stats::StatsSection;
 use verdict::Verdict;
@@ -28,7 +30,7 @@ pub fn DebriefScreen() -> impl IntoView {
                 <StatsSection />
                 // ticket 06: <ObjectivesSection />
                 // ticket 04: <RealMissionSection />
-                // ticket 09: <ComparisonSection />
+                <ComparisonSection />
             </Show>
             <DebriefActions />
         </section>
