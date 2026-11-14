@@ -8,6 +8,11 @@ degraded_output_fraction = 0.5
 # Battery wear: share of the original capacity lost per eclipse cycle when the battery is drained exactly to
 # the healthy depth in review.toml; deeper discharges wear it faster (to the power below).
 # source: Li-ion cycle life collapses as depth of discharge grows (NASA battery handbooks); game-tuned so a
-# battery drained past the healthy depth every orbit wears out within a year in low Earth orbit.
-battery_fade_per_cycle_at_max_depth = 0.000045
+# battery drained past the healthy depth every orbit can no longer cover the eclipse within months in low Earth orbit.
+battery_fade_per_cycle_at_max_depth = 0.0001
 battery_fade_exponent = 3
+# A battery that cannot carry the spacecraft through an eclipse costs operating time, never the Mission: the
+# Instruments are off for the uncovered part of the eclipse, and after each brown-out the computer reboots and
+# the spacecraft re-points before work resumes, which costs this many minutes per orbit.
+# source: game-tuned; real spacecraft that brown out drop to safe mode and need minutes to hours to recover.
+brownout_recovery_minutes = 30.0

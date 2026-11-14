@@ -97,14 +97,25 @@ impl AppState {
         self.run_result.with(|r| r.as_ref().map_or(0, |r| r.timeline.len()))
     }
 
-    /// Index into the timeline of the day the playback is showing (`None` before any Run).
-    pub fn playback_index(&self) -> Option<usize> {
+    /// The day the playback is showing, 1-based: 0 at launch, then day k while the playback is within it.
+    /// Dashboards, the day counter and the event log all read this, so they always agree.
+    pub fn shown_day(&self) -> usize {
         let days = self.run_days();
-        if days == 0 {
+        let playback = self.playback.get();
+        if playback <= 0.0 { 0 } else { (playback.ceil() as usize).min(days) }
+    }
+
+    /// The playback has reached the end of the timeline.
+    pub fn playback_finished(&self) -> bool {
+        self.playback.get() >= self.run_days() as f64
+    }
+
+    /// Index into the timeline of the snapshot the dashboards show (day 1 at launch; `None` before any Run).
+    pub fn playback_index(&self) -> Option<usize> {
+        if self.run_days() == 0 {
             return None;
         }
-        let shown_day = (self.playback.get().ceil() as usize).clamp(1, days);
-        Some(shown_day - 1)
+        Some(self.shown_day().max(1) - 1)
     }
 
     /// Reason why an option clashes with the current choices, if it does.

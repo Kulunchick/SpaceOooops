@@ -8,5 +8,7 @@ points_per_science_value = 1.0
 budget_margin_points = 100.0
 # Bonus for spare Launch Vehicle capacity: this many points for a fully empty slot, proportionally less otherwise.
 mass_margin_points = 50.0
+# Pay the Budget and Mass margin bonuses only on a Success, so a cheap Design that achieves nothing never wins.
+margin_bonuses_need_success = true
 # Penalty for a Run that ends before the minimum Lifetime: this many points times the share of days missed.
 early_end_penalty_points = 100.0

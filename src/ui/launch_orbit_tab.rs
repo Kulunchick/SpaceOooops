@@ -27,7 +27,7 @@ pub fn LaunchOrbitTab() -> impl IntoView {
                             ("Altitude", format!("{} km", num(o.altitude_km))),
                             ("Time in shadow", format!("{} of each orbit ({} min)", percent(o.eclipse_fraction), num(o.period_min * o.eclipse_fraction))),
                             ("Ground contact", format!("{} min/day", num(o.contact_minutes_per_day))),
-                            ("Lifetime limit", format!("{} days", num(o.lifetime_cap_days))),
+                            ("Lifetime limit", o.lifetime_cap_days.map_or("none".to_string(), |d| format!("{} days", num(d)))),
                             ("Scenario coverage", percent(coverage)),
                         ];
                         view! {

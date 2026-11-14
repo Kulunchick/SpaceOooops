@@ -21,12 +21,18 @@ pub struct RunStats {
     /// Share of all Data produced that never reached the ground (0..=1).
     pub lost_data_fraction: f64,
     pub delivered_data_mb: f64,
+    /// The required Science Value was reached.
+    pub science_met: bool,
+    /// The Run lasted the minimum Lifetime.
+    pub lifetime_met: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Debrief {
     /// Required Science Value reached AND the minimum Lifetime survived.
     pub success: bool,
+    /// One plain-language sentence on how the Run ended ("Planned mission complete: ...").
+    pub ending: String,
     pub score: Score,
     pub causes: Vec<Cause>,
     pub objectives: Vec<ObjectiveResult>,
@@ -45,9 +51,28 @@ pub(crate) struct DebriefContext<'a> {
     pub timeline: &'a [DaySnapshot],
     pub stats: &'a RunStats,
     pub success: bool,
+    pub ending: String,
     /// Budget of the Scenario and Launch Vehicle capacity to the Orbit, for margin bonuses.
     pub budget_usd: f64,
     pub capacity_kg: Option<f64>,
+}
+
+/// The Debrief of a Design that did not pass Launch Review: it never flew, so it scores nothing.
+pub(crate) fn not_launched(stats: RunStats) -> Debrief {
+    Debrief {
+        success: false,
+        ending: "Not launched: the Design does not pass Launch Review, so it never flew.".to_string(),
+        score: Score::from_lines(vec![ScoreLine {
+            kind: ScoreLineKind::Penalty,
+            label: "Not launched: no Science Value and no bonuses".to_string(),
+            points: 0.0,
+        }]),
+        causes: Vec::new(),
+        objectives: Vec::new(),
+        real_mission_match: None,
+        decisions: Vec::new(),
+        stats,
+    }
 }
 
 pub(crate) fn debrief(ctx: &DebriefContext) -> Debrief {
@@ -63,6 +88,7 @@ pub(crate) fn debrief(ctx: &DebriefContext) -> Debrief {
             capacity_kg: ctx.capacity_kg,
             days_survived: s.days_survived,
             min_lifetime_days: s.min_lifetime_days,
+            success: ctx.success,
         },
     );
     lines.extend(objectives.iter().filter(|o| o.met).map(|o| ScoreLine {
@@ -72,6 +98,7 @@ pub(crate) fn debrief(ctx: &DebriefContext) -> Debrief {
     }));
     Debrief {
         success: ctx.success,
+        ending: ctx.ending.clone(),
         score: Score::from_lines(lines),
         causes: causes(ctx),
         objectives,
