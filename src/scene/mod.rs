@@ -5,11 +5,15 @@
 //!
 //! Each concern lives in its own file (see the low-poly overhaul architecture contract). Every field added
 //! to `SceneSpec` after the first version is optional or has a default, so an older renderer ignores it.
+mod markers;
 mod shot;
 
 use serde::Serialize;
 
+pub use markers::Marker;
 pub use shot::Shot;
+
+use crate::sim::Scenario;
 
 /// The screen the player is on. The UI's screen state is this type, so every screen has a Shot.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -29,13 +33,17 @@ pub enum Screen {
 /// Everything the Scene Spec is built from. Construct with `SceneInputs::on(screen)` and override fields
 /// with struct-update syntax, so new inputs added by later tickets do not break existing callers.
 #[derive(Clone, Debug)]
-pub struct SceneInputs {
+pub struct SceneInputs<'a> {
     pub screen: Screen,
+    /// The catalog's Scenarios, for the markers on Scenario select and Brief.
+    pub scenarios: &'a [Scenario],
+    /// The id of the chosen Scenario (empty or unknown means none).
+    pub chosen: Option<&'a str>,
 }
 
-impl SceneInputs {
+impl SceneInputs<'static> {
     pub fn on(screen: Screen) -> Self {
-        SceneInputs { screen }
+        SceneInputs { screen, scenarios: &[], chosen: None }
     }
 }
 
@@ -46,11 +54,18 @@ pub struct SceneSpec {
     pub shot: Shot,
     /// The scene is dimmed behind the screen's panels (the UI draws the veil; the renderer may ignore it).
     pub dimmed: bool,
+    /// Scenario pins on the globe; empty except on Scenario select and Brief.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub markers: Vec<Marker>,
 }
 
 /// Builds the Scene Spec for the given inputs.
-pub fn build(inputs: &SceneInputs) -> SceneSpec {
-    SceneSpec { shot: shot::for_screen(inputs.screen), dimmed: shot::dims(inputs.screen) }
+pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
+    SceneSpec {
+        shot: markers::shot(inputs.screen, inputs.scenarios, inputs.chosen).unwrap_or_else(|| shot::for_screen(inputs.screen)),
+        dimmed: shot::dims(inputs.screen),
+        markers: markers::markers(inputs.screen, inputs.scenarios, inputs.chosen),
+    }
 }
 
 /// The JSON the bridge's `apply(sceneSpec)` receives.

@@ -1,0 +1,67 @@
+// Scenario select and Brief over the 3D scene: markers, fly-to, skipping the flight, reduced motion.
+import { test, expect } from '@playwright/test';
+import { collectErrors } from './helpers.js';
+
+async function openScenarioSelect(page) {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Start' }).click();
+  await page.getByRole('button', { name: 'Choose a Scenario' }).click();
+  await expect(page.getByRole('heading', { name: 'Choose a Scenario' })).toBeVisible();
+}
+
+test('Scenario select shows three cards with illustrations over the clear scene', async ({ page }) => {
+  const errors = collectErrors(page);
+  await openScenarioSelect(page);
+  await expect(page.locator('.scenario-card')).toHaveCount(3);
+  await expect(page.locator('.scenario-card .illustration-slot img')).toHaveCount(3);
+  for (const img of await page.locator('.scenario-card img').all()) {
+    await expect.poll(() => img.evaluate((i) => i.complete && i.naturalWidth > 0)).toBe(true);
+  }
+  for (const name of ['Crop Watch', 'Connect the Villages', 'Space Weather Sentinel']) {
+    const card = page.locator('.scenario-card', { hasText: name });
+    await expect(card.locator('.difficulty')).toBeVisible();
+    await expect(card.locator('.constraints li').first()).toBeVisible();
+    await expect(card).toContainText('Budget');
+  }
+  await expect(page.locator('.scene-layer')).toHaveAttribute('data-scene', 'live');
+  await expect(page.locator('.scene-layer')).not.toHaveClass(/dimmed/);
+  await page.waitForTimeout(2500);
+  await page.screenshot({ path: 'test-results/scenario-select.png' });
+  expect(errors).toEqual([]);
+});
+
+test('choosing a Scenario flies the camera and a click skips the flight', async ({ page }) => {
+  const errors = collectErrors(page);
+  await openScenarioSelect(page);
+  const canvas = page.locator('canvas.scene-canvas');
+  await page.waitForTimeout(2500);
+  await expect(canvas).toHaveAttribute('data-flying', 'false');
+  await page.locator('.scenario-card', { hasText: 'Crop Watch' }).getByRole('button', { name: 'Select' }).click();
+  await expect(page.getByRole('heading', { name: 'Crop Watch' })).toBeVisible();
+  await expect(canvas).toHaveAttribute('data-flying', 'true');
+  await page.waitForTimeout(400);
+  await page.mouse.click(900, 400);
+  await expect(canvas).toHaveAttribute('data-flying', 'false', { timeout: 2000 });
+  await page.screenshot({ path: 'test-results/brief.png' });
+  await page.getByRole('button', { name: 'Start Design' }).click();
+  await expect(page.locator('.scene-layer')).toHaveClass(/dimmed/);
+  expect(errors).toEqual([]);
+});
+
+test('the flight ends by itself', async ({ page }) => {
+  await openScenarioSelect(page);
+  await page.locator('.scenario-card', { hasText: 'Space Weather Sentinel' }).getByRole('button', { name: 'Select' }).click();
+  await expect(page.locator('canvas.scene-canvas')).toHaveAttribute('data-flying', 'false', { timeout: 15000 });
+});
+
+test('with reduced motion the camera cuts instead of flying', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await openScenarioSelect(page);
+  const canvas = page.locator('canvas.scene-canvas');
+  await page.locator('.scenario-card', { hasText: 'Connect the Villages' }).getByRole('button', { name: 'Select' }).click();
+  await expect(page.getByRole('heading', { name: 'Connect the Villages' })).toBeVisible();
+  for (let i = 0; i < 10; i++) {
+    await expect(canvas).toHaveAttribute('data-flying', 'false');
+    await page.waitForTimeout(50);
+  }
+});

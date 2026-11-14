@@ -75,7 +75,13 @@ pub fn SceneLayer() -> impl IntoView {
     });
 
     // The one place the Scene Spec is built from the app state. Later tickets add inputs to `SceneInputs` here.
-    let spec = Memo::new(move |_| scene::build(&SceneInputs::on(state.screen.get())));
+    let spec = Memo::new(move |_| {
+        let screen = state.screen.get();
+        let chosen = state.scenario_id.get();
+        state.catalog.with_value(|c| {
+            scene::build(&SceneInputs { scenarios: &c.scenarios, chosen: Some(&chosen), ..SceneInputs::on(screen) })
+        })
+    });
     Effect::new(move |_| spec.with(|s| scene_apply(&scene::to_json(s))));
 
     view! {

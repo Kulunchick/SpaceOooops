@@ -24,7 +24,7 @@ fn the_title_shows_the_scene_clearly() {
 
 #[test]
 fn screens_still_laid_out_as_full_pages_dim_the_scene_behind_them() {
-    for screen in [Screen::ScenarioSelect, Screen::Brief, Screen::Design, Screen::LaunchReview, Screen::Run, Screen::Debrief] {
+    for screen in [Screen::Design, Screen::LaunchReview, Screen::Run, Screen::Debrief] {
         assert!(scene::build(&SceneInputs::on(screen)).dimmed, "{screen:?} should dim the scene");
     }
 }
