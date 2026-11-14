@@ -2,6 +2,7 @@
 //! The module root only declares and re-exports; one file per concern.
 mod catalog;
 mod design;
+mod resources;
 mod review;
 
 pub use catalog::*;
