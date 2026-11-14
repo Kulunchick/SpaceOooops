@@ -259,3 +259,11 @@ fn obvious_cheap_and_max_designs_are_not_clean() {
     let r = review(&max);
     assert!(!r.can_launch);
 }
+
+#[test]
+fn an_empty_design_never_shows_negative_zero_in_a_gauge() {
+    let g = launch_review(&load_catalog().unwrap(), &Design::default(), CROP_WATCH).gauges;
+    for gauge in [&g.budget, &g.mass, &g.power, &g.data, &g.lifetime] {
+        assert!(!gauge.detail.contains("-0"), "{}", gauge.detail);
+    }
+}

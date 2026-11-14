@@ -42,7 +42,7 @@ fn GaugeView(label: &'static str, floor: bool, gauge: Signal<Gauge>) -> impl Int
     view! {
         <div class=state_class>
             <div class="gauge-top">
-                <span class="gauge-label">{label}</span>
+                <span class="gauge-label">{label} <super::info_tip::InfoTip term=label /></span>
                 <span class="gauge-badge">{badge}</span>
             </div>
             <div class="gauge-bar" class:gauge-floor=floor><div class="gauge-fill" style=fill></div></div>

@@ -27,7 +27,7 @@ pub fn BudgetCommsTab() -> impl IntoView {
     view! {
         <section class="tab-panel">
             {slot_section(state, "Comms band", Slot::Comms, comms)}
-            <h3>"Cost breakdown"</h3>
+            <h3>"Cost breakdown" <super::info_tip::InfoTip term="Cost breakdown" /></h3>
             <CostTable />
         </section>
     }

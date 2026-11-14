@@ -225,10 +225,16 @@ fn data_lost(f: &Facts) -> Option<Weighed> {
     if lost_mb <= 0.0 {
         return None;
     }
-    let impact = lost_mb * f.value_per_mb;
     let (comms, _) = f.r.comms?;
     let made = f.res.data_mb_per_day;
     let down = f.res.downlink_mb_per_day;
+    // A band too slow for the Instruments is a design choice: it costs its share every day of the planned
+    // Mission, even if bad luck ended the Run sooner. Store overflows cost only what was actually lost.
+    let impact = if made > down {
+        (1.0 - down / made) * f.value_per_day_all * f64::from(f.planned_days)
+    } else {
+        lost_mb * f.value_per_mb
+    };
     let contact = f.r.orbit.map_or(0.0, |o| o.contact_minutes_per_day);
     let text = if made > down {
         let fix = f
@@ -460,9 +466,10 @@ fn flares(f: &Facts) -> Option<Weighed> {
     let flown = f.days_flown();
     let safe: Vec<&u32> = f.safe_mode_days.iter().filter(|&&d| d <= flown).collect();
     let impact = safe.len() as f64 * f.value_per_day;
-    let count = if days.len() == 1 { "A solar flare".to_string() } else { format!("{} solar flares", days.len()) };
+    let (count, day_word) =
+        if days.len() == 1 { ("A solar flare".to_string(), "day") } else { (format!("{} solar flares", days.len()), "days") };
     let text = format!(
-        "{count} (day {}) put the spacecraft in safe mode for {} days in all, costing about {} Science Value. No \
+        "{count} ({day_word} {}) put the spacecraft in safe mode for {} days in all, costing about {} Science Value. No \
          Design can stop a flare: a margin above the required Science Value absorbs it.",
         list(&days),
         safe.len(),

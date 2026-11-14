@@ -16,7 +16,7 @@ pub fn TierSelect(
     view! {
         <Show when=move || current.get().is_some()>
             <div class="tier-select" role="radiogroup" aria-label="Reliability Tier">
-                <span class="tier-label">"Reliability Tier:"</span>
+                <span class="tier-label">"Reliability Tier" <super::info_tip::InfoTip term="Reliability Tier" /> ":"</span>
                 {tiers
                     .iter()
                     .map(|spec| {

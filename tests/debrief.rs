@@ -48,12 +48,14 @@ fn data_above_downlink_produces_a_lost_data_cause_naming_the_band_the_share_and_
 }
 
 #[test]
-fn a_uhf_radio_on_an_imager_puts_lost_data_first() {
+fn a_uhf_radio_on_an_imager_puts_lost_data_first_even_when_bad_luck_also_strikes() {
     let mut design = crop_watch_known_good();
     design.comms = Some(Pick::new("comms-uhf", FlightProven));
-    let d = fly(&design, CROP_WATCH, 1);
-    assert_eq!(d.causes[0].kind, CauseKind::DataLost, "{}", texts(&d));
-    assert!(d.causes[0].text.contains("UHF radio"), "{}", texts(&d));
+    for seed in 0..100 {
+        let d = fly(&design, CROP_WATCH, seed);
+        assert_eq!(d.causes[0].kind, CauseKind::DataLost, "seed {seed}:\n{}", texts(&d));
+        assert!(d.causes[0].text.contains("UHF radio"), "{}", texts(&d));
+    }
 }
 
 // ---------------------------------------------------------------- Component failure

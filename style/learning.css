@@ -1,0 +1,54 @@
+/* Learning layer (ticket 04): "why it matters" tips, first-time hints, Debrief causes and Real-Mission Match. */
+
+/* ---- "?" tips: open on hover, keyboard focus or tap */
+.infotip { position: relative; display: inline-block; vertical-align: middle; }
+.infotip-btn {
+  font: inherit; font-size: 0.7rem; font-weight: 700; line-height: 1;
+  width: 1.5em; height: 1.5em; padding: 0; margin-left: 0.25em;
+  border-radius: 50%; border: 1px solid var(--border); background: var(--bg-raised); color: var(--accent);
+  cursor: help;
+}
+.infotip-btn:hover, .infotip-btn:focus-visible { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px var(--accent); }
+.infotip-text {
+  display: none; position: absolute; z-index: 30; left: -0.5rem; top: calc(100% + 6px);
+  width: max-content; max-width: min(18rem, 80vw);
+  padding: 0.5rem 0.65rem; border-radius: var(--radius); border: 1px solid var(--accent);
+  background: var(--bg-panel); color: var(--text);
+  font-size: 0.8rem; font-weight: 400; line-height: 1.35; text-align: left; text-transform: none; letter-spacing: normal;
+  white-space: normal; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+.infotip:hover .infotip-text, .infotip:focus-within .infotip-text, .infotip.open .infotip-text { display: block; }
+/* Phones: show the explanation as a sheet along the bottom of the screen, never cut off at an edge. */
+@media (max-width: 600px) {
+  .infotip-text { position: fixed; left: 16px; right: 16px; top: auto; bottom: 16px; width: auto; max-width: none; font-size: 0.9rem; }
+}
+
+/* ---- option cards: a div holding the select button, so the "?" tips can be real buttons too */
+.option-main {
+  font: inherit; color: inherit; text-align: left; background: none; border: 0; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 0.4rem; width: 100%; cursor: pointer;
+}
+.option-main:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+.option-stats .stat { white-space: nowrap; }
+
+/* ---- first-time hints (Scenarios with tutorial hints, i.e. Crop Watch) */
+.first-hints { border-color: var(--accent); }
+.first-hints-head { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: space-between; }
+.first-hints-head h3 { margin: 0; }
+.first-hints ol { margin: 0.5rem 0; padding-left: 1.4rem; }
+.first-hints li { margin: 0.25rem 0; }
+
+/* ---- Debrief: causes */
+.cause-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.cause { display: flex; gap: 0.6rem; align-items: flex-start; line-height: 1.45; }
+.cause-icon { flex: none; font-weight: 700; min-width: 1.2em; }
+.cause-good .cause-icon { color: var(--ok); }
+.cause-bad .cause-icon { color: var(--warn); }
+.cause-day {
+  display: inline-block; font-size: 0.75rem; font-family: var(--font-mono); padding: 0 0.35rem;
+  border: 1px solid var(--border); border-radius: 3px; color: var(--text-muted);
+}
+
+/* ---- Debrief: Real-Mission Match */
+.real-mission p { margin: 0.35rem 0; }
+.real-mission a { color: var(--accent); }

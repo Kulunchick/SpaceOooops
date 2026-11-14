@@ -412,5 +412,6 @@ pub(crate) fn money(usd: f64) -> String {
 }
 
 fn mb(value: f64) -> String {
+    let value = value + 0.0; // an empty sum is -0.0; adding +0.0 makes it +0.0, so "-0.0" is never shown
     if value < 10.0 { format!("{value:.1}") } else { format!("{value:.0}") }
 }

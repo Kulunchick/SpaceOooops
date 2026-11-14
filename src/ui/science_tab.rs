@@ -12,7 +12,7 @@ pub fn ScienceTab() -> impl IntoView {
     let instruments = state.catalog.with_value(|c| c.instruments.clone());
     view! {
         <section class="tab-panel">
-            <h3>"Instruments"</h3>
+            <h3>"Instruments" <super::info_tip::InfoTip term="Instruments" /></h3>
             <p class="muted">"Pick one or more. Each one adds Mass, Power, cost and Data."</p>
             <div class="option-grid">
                 {instruments
