@@ -44,6 +44,9 @@ flare_failure_multiplier = 20.0
 # Ground-station outages (weather, maintenance, network faults): about twice a year.
 outage_daily_chance = 0.006
 outage_days = 3
+# New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
+new_events_min = 2
+new_events_max = 3
 
 [[scenarios]]
 id = "connect-the-villages"
@@ -78,6 +81,9 @@ flare_safe_mode_days = 2
 flare_failure_multiplier = 30.0
 outage_daily_chance = 0.006
 outage_days = 3
+# New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
+new_events_min = 2
+new_events_max = 3
 
 [[scenarios]]
 id = "space-weather-sentinel"
@@ -113,3 +119,6 @@ flare_failure_multiplier = 20.0
 # A single university ground station: outages about three to four times a year.
 outage_daily_chance = 0.01
 outage_days = 3
+# New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
+new_events_min = 2
+new_events_max = 3

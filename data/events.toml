@@ -1,0 +1,90 @@
+# New Random Events: one entry per event. A Run picks a few of them (how many: `new_events_min` and
+# `new_events_max` in each Scenario's [scenarios.events]), each at most once, on distinct days.
+#
+# Fields (see src/sim/event_catalog.rs):
+#   id          kebab-case, unique
+#   group       real | fantasy | lucky        (fantasy shows the "Unexplained" mark)
+#   title       short name
+#   log         the event-log sentence of a passive event
+#   scene       fly-by | hit | link-interference | panel-shading | bonus-glow | visitor
+#   real_life   how this happens in real life (required for real, forbidden for fantasy)
+#   effects     what it does: { mechanic, strength, days | to_end, delay, when }
+#               strength is a signed share: -0.5 = half as much; downlink -1.0 = no downlink
+# Texts state durations and percentages: change them together with the numbers.
+# Each ticket appends its events under its own banner of three comment lines.
+
+# ==== 01: first events, passive =============================================
+# Power, Instruments off and downlink only.
+# ============================================================================
+
+[[events]]
+id = "station-looks-into-the-sun"
+group = "real"
+title = "The station looks straight into the Sun"
+log = "The spacecraft passed right in front of the Sun as seen from the ground station. The Sun's radio noise drowned the signal: no downlink for 1 day."
+scene = "link-interference"
+real_life = "Twice a year a ground antenna sees its satellite cross the Sun's disc; the Sun is a loud radio source, so operators plan these 'sun outages' in advance."
+effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]
+
+[[events]]
+id = "anti-satellite-test-debris"
+group = "real"
+title = "Someone else's anti-satellite weapon test"
+log = "Someone blew up an old satellite to show they can. The debris cloud kept the operators busy plotting dodges: Instruments off for 2 days."
+scene = "fly-by"
+real_life = "Destructive anti-satellite tests have left thousands of tracked fragments in low Orbit, and operators still steer around them years later."
+effects = [{ mechanic = "instruments-off", days = 2 }]
+
+[[events]]
+id = "inches-instead-of-centimetres"
+group = "real"
+title = "Inches instead of centimetres"
+log = "A pointing command was written in inches and read in centimetres. The spacecraft spent 2 days staring at the wrong patch of sky: no useful Data."
+scene = "link-interference"
+real_life = "Unit mix-ups between teams have lost real spacecraft; modern flight software checks units and limits before a command is accepted."
+effects = [{ mechanic = "instruments-off", days = 2 }]
+
+[[events]]
+id = "scared-of-its-own-shadow"
+group = "real"
+title = "The spacecraft got scared of its own shadow"
+log = "A sensor glitch convinced the spacecraft that something was badly wrong. It went into safe mode for no reason at all: Instruments off for 1 day."
+scene = "panel-shading"
+real_life = "Safe mode is designed to trigger too easily rather than too late, so most real safe-mode entries turn out to be false alarms."
+effects = [{ mechanic = "instruments-off", days = 1 }]
+
+[[events]]
+id = "earth-taken-for-the-sun"
+group = "real"
+title = "A sensor took Earth for the Sun"
+log = "A Sun sensor mistook bright sunlight reflected off Earth for the Sun itself and turned the panels the wrong way: half the Power for 1 day."
+scene = "panel-shading"
+real_life = "Sunlight reflected by Earth's clouds and oceans (albedo) can fool coarse Sun sensors, so attitude software cross-checks several sensors."
+effects = [{ mechanic = "power", strength = -0.5, days = 1 }]
+
+[[events]]
+id = "intern-commanded-the-wrong-satellite"
+group = "real"
+title = "The intern commanded the wrong satellite"
+log = "The intern sent today's command plan to the wrong satellite. Untangling it took the whole day: Instruments off for 1 day."
+scene = "link-interference"
+real_life = "Ground systems now check a spacecraft's identity before every command, after real cases of commands sent to the wrong satellite."
+effects = [{ mechanic = "instruments-off", days = 1 }]
+
+[[events]]
+id = "thunderstorm-over-the-station"
+group = "real"
+title = "Thunderstorm over the station"
+log = "A thunderstorm parked over the ground station. The antenna was stowed for safety: no downlink for 1 day."
+scene = "link-interference"
+real_life = "Heavy rain absorbs high-frequency radio signals, and stations stow their dishes in strong wind and lightning."
+effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]
+
+[[events]]
+id = "control-room-key-on-holiday"
+group = "real"
+title = "The control-room key went on holiday"
+log = "The only key to the control room went on holiday with the engineer who had it in a pocket. The pass was missed: no downlink for 1 day."
+scene = "link-interference"
+real_life = "Small missions often run on a handful of people, and a missed pass because nobody could reach the console is a classic of university ground stations."
+effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]

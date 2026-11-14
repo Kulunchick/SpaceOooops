@@ -205,6 +205,8 @@ const NO_EVENTS: EventTuning = EventTuning {
     flare_failure_multiplier: 1.0,
     outage_daily_chance: 0.0,
     outage_days: 0,
+    new_events_min: 0,
+    new_events_max: 0,
 };
 
 impl<'a> RunContext<'a> {

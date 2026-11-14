@@ -5,6 +5,12 @@ mod causes;
 mod debrief;
 mod decisions;
 mod design;
+mod design_facts;
+mod event_catalog;
+mod event_debrief;
+mod event_effects;
+mod event_flow;
+mod event_plan;
 mod events;
 mod objectives;
 mod real_mission;
@@ -20,6 +26,8 @@ pub use causes::{Cause, CauseKind};
 pub use debrief::{Debrief, RunStats};
 pub use decisions::{Decision, DecisionOption, DecisionPrompt};
 pub use design::*;
+pub use design_facts::DesignFact;
+pub use event_catalog::*;
 pub use events::{EventKind, RandomEvent};
 pub use objectives::{
     ObjectiveOutlook, ObjectiveResult, ObjectiveRule, ObjectiveSpec, objective_outlook, scenario_objectives,

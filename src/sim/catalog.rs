@@ -5,6 +5,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 use super::design::ReliabilityTier;
+use super::event_catalog::{EventSpec, EVENTS_FILE, parse_events};
 use super::objectives::ObjectiveSpec;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -41,6 +42,11 @@ pub struct EventTuning {
     pub flare_failure_multiplier: f64,
     pub outage_daily_chance: f64,
     pub outage_days: u32,
+    /// How many new Random Events (`data/events.toml`) a Run gets, at least and at most. 0 and 0 = none.
+    #[serde(default)]
+    pub new_events_min: u32,
+    #[serde(default)]
+    pub new_events_max: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -161,6 +167,9 @@ pub struct Instrument {
     /// Visual only: the shape the Instrument has on the 3D model.
     #[serde(default)]
     pub shape: InstrumentShape,
+    /// An imager: makes the Design fact `camera` hold for new Random Events.
+    #[serde(default)]
+    pub optical: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -432,6 +441,9 @@ pub struct Catalog {
     pub objectives: Vec<ObjectiveSpec>,
     /// Seed of the trial Run behind the pre-launch objective outlook.
     pub objectives_preview_seed: u64,
+    /// The new Random Events (`data/events.toml`).
+    #[serde(default)]
+    pub events: Vec<EventSpec>,
 }
 
 impl Catalog {
@@ -509,6 +521,7 @@ struct ObjectivesFile {
     objectives: Vec<ObjectiveSpec>,
 }
 
+const EVENTS: (&str, &str) = (EVENTS_FILE, include_str!("../../data/events.toml"));
 const CAUSES: (&str, &str) = ("data/causes.toml", include_str!("../../data/causes.toml"));
 
 #[derive(Deserialize)]
@@ -595,6 +608,7 @@ pub fn load_catalog() -> Result<Catalog, CatalogError> {
     let real_missions: RealMissionsFile = parse(REAL_MISSIONS)?;
     let glossary: GlossaryFile = parse(GLOSSARY)?;
     let objectives: ObjectivesFile = parse(OBJECTIVES)?;
+    let events = parse_events(EVENTS.1)?;
     let catalog = Catalog {
         scenarios: scenarios.scenarios,
         structures: components.structures,
@@ -616,6 +630,7 @@ pub fn load_catalog() -> Result<Catalog, CatalogError> {
         glossary: glossary.terms,
         objectives: objectives.objectives,
         objectives_preview_seed: objectives.preview_seed,
+        events,
     };
     validate(&catalog)?;
     Ok(catalog)
@@ -658,6 +673,14 @@ fn validate(c: &Catalog) -> Result<(), CatalogError> {
     for o in &c.objectives {
         if let Some(key) = o.scenario.as_ref().filter(|k| !scenario_ids.contains(k.as_str())) {
             return Err(CatalogError::Invalid(format!("objective '{}' is for unknown scenario '{key}'", o.id)));
+        }
+    }
+    for s in &c.scenarios {
+        if s.events.new_events_min > s.events.new_events_max {
+            return Err(CatalogError::Invalid(format!(
+                "scenario '{}': new_events_min is more than new_events_max",
+                s.id
+            )));
         }
     }
     for tier in [ReliabilityTier::Basic, ReliabilityTier::FlightProven] {
