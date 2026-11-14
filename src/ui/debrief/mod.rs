@@ -25,8 +25,8 @@ pub fn DebriefScreen() -> impl IntoView {
     let state = expect_context::<AppState>();
     let has_run = move || state.run_result.with(|r| r.is_some());
     view! {
-        <section class="screen debrief">
-            <h2>"Debrief"</h2>
+        <section class="screen debrief lp-panel">
+            <h2 class="lp-display">"Debrief"</h2>
             <Show when=has_run fallback=|| view! { <p class="muted">"No Run yet."</p> }>
                 <Verdict />
                 <causes::CausesSection />

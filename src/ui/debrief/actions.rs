@@ -8,8 +8,8 @@ pub fn DebriefActions() -> impl IntoView {
     let state = expect_context::<AppState>();
     view! {
         <div class="actions">
-            <button class="btn" on:click=move |_| state.go(Screen::Design)>"Modify design"</button>
-            <button class="btn btn-primary" on:click=move |_| state.launch()>"Fly again"</button>
+            <button class="lp-btn" on:click=move |_| state.go(Screen::Design)>"Modify design"</button>
+            <button class="lp-btn lp-btn-primary" on:click=move |_| state.launch()>"Fly again"</button>
             <crate::ui::share::ShareButton />
         </div>
     }

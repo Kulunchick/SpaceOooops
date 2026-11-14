@@ -15,6 +15,7 @@ import { createMarkers } from './markers.js';
 import { createOrbitScene } from './orbit.js';
 import { createPad } from './pad.js';
 import { createEffects } from './effects.js';
+import { createDebrief } from './debrief.js';
 
 let renderer = null;
 let scene = null;
@@ -57,7 +58,9 @@ function buildWorld() {
   if (spec) effects.apply(spec);
   const pad = createPad({ scene, camera, canvas: canvasEl });
   if (spec) pad.apply(spec, reducedMotion);
-  return { earth, clouds, stars, craft, orbit, hangar, run, effects, pad };
+  const debrief = createDebrief({ scene, camera, earth, sunLight, canvas: canvasEl });
+  if (spec) debrief.apply(spec, reducedMotion);
+  return { earth, clouds, stars, craft, orbit, hangar, run, effects, pad, debrief };
 }
 
 function disposeWorld() {
@@ -66,6 +69,7 @@ function disposeWorld() {
   world.effects.dispose();
   world.run.dispose();
   world.pad.dispose();
+  world.debrief.dispose();
   for (const obj of [world.earth, world.stars, world.orbit]) {
     scene.remove(obj);
     obj.traverse((o) => {
@@ -98,7 +102,7 @@ function frame(dt, seconds) {
   world.craft.rotation.y = angle;
   world.clouds.rotation.y = t * 0.01;
   // The title craft gives way to the Design's own spacecraft during the Run.
-  world.orbit.visible = !world.run.active;
+  world.orbit.visible = !world.run.active && !world.debrief.active;
   rig.update(dt, seconds, reducedMotion);
   markers?.update(seconds, reducedMotion);
   renderer.domElement.dataset.flying = String(rig.flying);
@@ -106,6 +110,7 @@ function frame(dt, seconds) {
   world.run.frame(dt);
   world.effects.frame();
   world.pad.frame(dt, t);
+  world.debrief.frame(dt, t);
   renderer.render(scene, camera);
 }
 
@@ -154,6 +159,7 @@ export function apply(sceneSpec) {
   world?.run.apply(sceneSpec, reducedMotion);
   world?.effects.apply(sceneSpec);
   world?.pad.apply(sceneSpec, reducedMotion);
+  world?.debrief.apply(sceneSpec, reducedMotion);
   markers?.set(sceneSpec.markers);
 }
 
@@ -175,6 +181,7 @@ export function setReducedMotion(on) {
   world?.hangar.setReducedMotion(reducedMotion);
   world?.run.setReducedMotion(reducedMotion);
   world?.pad.setReducedMotion(reducedMotion);
+  world?.debrief.setReducedMotion(reducedMotion);
 }
 
 // Audio lives in audio.js and is loaded by Rust directly (it must work without WebGL); re-exported for the contract.

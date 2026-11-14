@@ -1,7 +1,7 @@
 //! Shot: the camera framing the scene uses on each screen.
 use serde::Serialize;
 
-use super::Screen;
+use super::{DebriefScene, Fate, Screen};
 
 /// A named camera target. Serialised as `{"kind": "titleOrbit"}`; variants that need data (a globe target,
 /// say) carry it as extra fields next to `kind`.
@@ -23,6 +23,10 @@ pub enum Shot {
     /// The Run: Earth, its shadow and the whole orbit in view, the spacecraft flying round it. `radius` is the
     /// orbit's display radius in Earth radii (as in the Scene Spec's orbit view), so the camera can fit it.
     Orbit { radius: f64 },
+    /// Debrief after a Success: the spacecraft holds calmly against Earth.
+    DebriefHero,
+    /// Debrief after a failure: the spacecraft shows what went wrong (`fate`: tumbling, dark, reentry, adrift).
+    DebriefFailure { fate: Fate },
 }
 
 /// Whether the scene is dimmed behind the screen's panels. Screens still laid out as full-page documents dim it so
@@ -55,4 +59,9 @@ pub(super) fn for_screen(screen: Screen) -> Shot {
             Shot::TitleOrbit
         }
     }
+}
+
+/// The Debrief's Shot, from its scene: the hero shot on Success, else the failure shot of its visual.
+pub(super) fn for_debrief(d: &DebriefScene) -> Shot {
+    if d.success { Shot::DebriefHero } else { Shot::DebriefFailure { fate: d.fate } }
 }
