@@ -3,18 +3,22 @@
 use leptos::prelude::*;
 use spaceooops::sim::{self, Catalog, Design, LaunchReview, Pick, ReliabilityTier, Role, RunResult};
 
+use super::history_store::{self, HistoryRecord};
 use super::seed::new_seed;
+use super::team::{Team, Votes};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Screen {
     Title,
     Sources,
+    TeamSetup,
     ScenarioSelect,
     Brief,
     Design,
     LaunchReview,
     Run,
     Debrief,
+    History,
 }
 
 #[derive(Clone, Copy)]
@@ -33,6 +37,14 @@ pub struct AppState {
     /// The single source of truth for everything that animates with the Run (dashboards, event log,
     /// orbit animation); read it, and only the playback driver in `run/playback.rs` writes it.
     pub playback: RwSignal<f64>,
+    /// Past Runs, newest first; mirrored to local storage (ticket 09).
+    pub history: RwSignal<Vec<HistoryRecord>>,
+    /// A friendly message for the title screen, e.g. when a share link could not be opened (ticket 09).
+    pub notice: RwSignal<Option<String>>,
+    /// Solo or team play, player names and Role owners (ticket 06).
+    pub team: RwSignal<Team>,
+    /// Go/No-Go votes per Role at Launch Review; any Design change clears them.
+    pub votes: RwSignal<Votes>,
 }
 
 impl AppState {
@@ -44,7 +56,14 @@ impl AppState {
             let id = scenario_id.get();
             design.with(|d| catalog.with_value(|c| sim::launch_review(c, d, &id)))
         });
+        let votes = RwSignal::new(Votes::default());
+        Effect::new(move |_| {
+            design.track();
+            votes.set(Votes::default());
+        });
         AppState {
+            team: RwSignal::new(Team::default()),
+            votes,
             catalog,
             screen: RwSignal::new(Screen::Title),
             scenario_id,
@@ -54,7 +73,14 @@ impl AppState {
             run_result: RwSignal::new(None),
             seed: RwSignal::new(0),
             playback: RwSignal::new(0.0),
+            history: RwSignal::new(history_store::load()),
+            notice: RwSignal::new(None),
         }
+    }
+
+    /// Launch may proceed as far as voting goes: solo play skips it, team play needs every Role on Go.
+    pub fn all_roles_go(&self) -> bool {
+        self.team.with(|t| t.solo) || self.votes.with(|v| v.iter().all(|x| *x == Some(true)))
     }
 
     pub fn go(&self, screen: Screen) {
@@ -68,6 +94,18 @@ impl AppState {
         let result = self
             .design
             .with_untracked(|d| self.catalog.with_value(|c| sim::run(c, d, &scenario_id, seed)));
+        let record = HistoryRecord::from_run(
+            &self.design.get_untracked(),
+            &scenario_id,
+            seed,
+            &result,
+            leptos::web_sys::js_sys::Date::now(),
+        );
+        self.history.update(|h| {
+            h.insert(0, record);
+            h.truncate(history_store::MAX_RECORDS);
+        });
+        self.history.with_untracked(|h| history_store::save(h));
         self.seed.set(seed);
         self.run_result.set(Some(result));
         self.playback.set(0.0);

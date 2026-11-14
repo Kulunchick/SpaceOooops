@@ -4,13 +4,14 @@ use spaceooops::sim::Finding;
 
 use super::cost_table::CostTable;
 use super::gauges::Gauges;
+use super::go_no_go::GoNoGo;
 use super::state::{AppState, Screen};
 
 #[component]
 pub fn LaunchReviewScreen() -> impl IntoView {
     let state = expect_context::<AppState>();
     let review = state.review;
-    let can_launch = move || review.with(|r| r.can_launch);
+    let can_launch = move || review.with(|r| r.can_launch) && state.all_roles_go();
     view! {
         <section class="screen launch-review">
             <h2>"Launch Review"</h2>
@@ -27,6 +28,7 @@ pub fn LaunchReviewScreen() -> impl IntoView {
                 </h3>
                 {move || findings(review.with(|r| r.warnings.clone()), "finding thin")}
             </div>
+            <GoNoGo />
             <div class="panel">
                 <h3>"Cost breakdown"</h3>
                 <CostTable />

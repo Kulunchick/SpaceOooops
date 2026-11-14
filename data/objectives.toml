@@ -1,0 +1,53 @@
+# Personal Objectives: one bonus goal per Role, each pulling against the other Roles.
+# A Role's default objective has no `scenario`; an entry with a `scenario` replaces that Role's default there.
+# Bonuses only count on a successful Run (same rule as the Budget and Mass margin bonuses).
+# Rule kinds (threshold is a fraction 0..=1 unless noted):
+#   cost_share_of_budget_at_most     total cost / Budget <= threshold
+#   mass_margin_at_least             unused Launch Vehicle capacity / capacity >= threshold
+#   science_above_required_at_least  Science Value >= required * (1 + threshold)
+#   lost_data_at_most                share of Data produced that never reached the ground <= threshold
+#   battery_charge_never_below       lowest end-of-day battery charge over the Run >= threshold
+
+# Seed of the fixed trial Run behind the pre-launch outlook shown at Go/No-Go.
+preview_seed = 1
+
+# Science wants more Instruments, which costs Mass and Budget.
+[[objectives]]
+id = "science-overdeliver"
+role = "science"
+description = "Beat the Science Value target by at least 40%"
+bonus = 25.0
+rule = { kind = "science_above_required_at_least", threshold = 0.4 }
+
+# Spacecraft wants a fat battery and panels, which costs Mass and Budget.
+[[objectives]]
+id = "spacecraft-battery-health"
+role = "spacecraft"
+description = "Never let the battery drop below 85% charge"
+bonus = 20.0
+rule = { kind = "battery_charge_never_below", threshold = 0.85 }
+
+# Launch & Orbit wants a light spacecraft, against Science and Spacecraft.
+[[objectives]]
+id = "launch-light"
+role = "launch_orbit"
+description = "Leave at least 25% of the Launch Vehicle's capacity unused"
+bonus = 20.0
+rule = { kind = "mass_margin_at_least", threshold = 0.25 }
+
+# Budget & Comms wants to spend little, against a bigger radio, Flight-proven Components and more Instruments.
+[[objectives]]
+id = "budget-frugal"
+role = "budget_comms"
+description = "Spend under 70% of the Budget"
+bonus = 25.0
+rule = { kind = "cost_share_of_budget_at_most", threshold = 0.7 }
+
+# Space Weather Sentinel produces heavy Data, so Science's goal there is to get all of it down.
+[[objectives]]
+id = "sentinel-lose-nothing"
+role = "science"
+scenario = "space-weather-sentinel"
+description = "Lose no Data: every megabyte reaches the ground"
+bonus = 25.0
+rule = { kind = "lost_data_at_most", threshold = 0.0 }

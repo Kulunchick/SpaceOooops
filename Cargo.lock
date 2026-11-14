@@ -1312,6 +1312,8 @@ dependencies = [
  "leptos",
  "serde",
  "toml",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]

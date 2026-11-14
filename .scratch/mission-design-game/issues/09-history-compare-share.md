@@ -6,8 +6,8 @@
 
 **Status:** ready-for-agent
 
-- [ ] Run history survives a page reload (browser local storage) and can be viewed
-- [ ] The Debrief shows the change from the previous Run of the same Scenario
-- [ ] The Share link round-trips: opening it loads exactly the same Design and Scenario
-- [ ] A broken or outdated Share link shows a friendly message instead of crashing
-- [ ] Test: a Design survives serialization and deserialization through the `sim` public interface
+- [x] Run history survives a page reload (browser local storage) and can be viewed
+- [x] The Debrief shows the change from the previous Run of the same Scenario
+- [x] The Share link round-trips: opening it loads exactly the same Design and Scenario
+- [x] A broken or outdated Share link shows a friendly message instead of crashing
+- [x] Test: a Design survives serialization and deserialization through the `sim` public interface

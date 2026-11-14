@@ -1,0 +1,39 @@
+/* Team play (ticket 06): setup screen, Role banner, Go/No-Go, Debrief objectives. */
+.team-setup { max-width: 760px; }
+.mode-switch { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.mode-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+.field { display: flex; align-items: center; gap: 0.6rem; margin: 0.4rem 0; flex-wrap: wrap; }
+.text-input, .select {
+  font: inherit; color: var(--text); background: var(--bg-raised);
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 0.4rem 0.6rem;
+}
+.text-input:focus-visible, .select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.role-owners { list-style: none; padding: 0; margin: 0; }
+.role-owners .role-name { min-width: 9rem; }
+.role-name { font-family: var(--font-mono); font-weight: 700; color: var(--accent); }
+
+.role-banner { display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: baseline; padding: 0.6rem 0.9rem; }
+.objective-tag { font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; color: var(--warn); }
+.objective-bonus { color: var(--text-muted); }
+
+.vote-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
+.vote-row {
+  display: grid; grid-template-columns: 11rem 1fr auto; gap: 0.8rem; align-items: center;
+  background: var(--bg-raised); border: 1px solid var(--border); border-left: 4px solid var(--border);
+  border-radius: var(--radius); padding: 0.6rem 0.8rem;
+}
+.vote-row.go { border-left-color: var(--ok); }
+.vote-row.no-go { border-left-color: var(--danger); }
+.vote-who { display: flex; flex-direction: column; }
+.outlook.at-risk { color: var(--warn); font-weight: 700; }
+.outlook.on-track { color: var(--ok); font-weight: 700; }
+.objection { margin-top: 0.25rem; }
+.vote-buttons { display: flex; gap: 0.4rem; }
+.vote-go.active { background: var(--ok); color: var(--bg); border-color: var(--ok); font-weight: 700; }
+.vote-nogo.active { background: var(--danger); color: var(--bg); border-color: var(--danger); font-weight: 700; }
+@media (max-width: 640px) { .vote-row { grid-template-columns: 1fr; } }
+
+.objective-results { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
+.objective-result { display: grid; grid-template-columns: 1.5rem 1fr auto; gap: 0.6rem; align-items: start; }
+.objective-result.met .objective-mark, .objective-result.met .objective-points { color: var(--ok); }
+.objective-result.missed .objective-mark, .objective-result.missed .objective-points { color: var(--danger); }
