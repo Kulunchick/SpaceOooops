@@ -31,6 +31,25 @@ jobs:
           tool: trunk
       - name: Build
         run: trunk build --release --public-url /SpaceOooops/
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+      - name: Install Playwright
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Browser smoke tests (Playwright against the built site)
+        working-directory: e2e
+        run: npx playwright test
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: e2e/test-results
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

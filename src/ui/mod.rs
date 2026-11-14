@@ -18,6 +18,7 @@ mod option_card;
 mod role_banner;
 mod run;
 mod scenario_select;
+mod scene_bridge;
 mod science_tab;
 mod seed;
 mod share;
@@ -57,6 +58,7 @@ pub fn App() -> impl IntoView {
     share::listen_for_links(state);
     let screen = state.screen;
     view! {
+        <scene_bridge::SceneLayer />
         <main class="app">
             {move || match screen.get() {
                 Screen::Title => view! {

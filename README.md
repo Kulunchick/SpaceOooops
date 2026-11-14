@@ -38,6 +38,8 @@ The terms above are defined in `GLOSSARY.md`. The plan is in `.scratch/mission-d
 - Leptos 0.8 (client-side rendered UI)
 - Trunk (build and dev server)
 - A pure-Rust `sim` module holds all game rules and is tested natively with `cargo test`
+- A low-poly 3D scene behind the UI, drawn with three.js 0.186.1 (vendored, MIT) through a small JS bridge; without
+  WebGL the game falls back to a static background (ADR 0003)
 - Static hosting on GitHub Pages, no backend
 
 ## NASA resources used
@@ -70,13 +72,18 @@ prepared by the project team. This is also stated on the in-game Sources page.
 
 ## Test
 
-    cargo test         # runs natively, no browser needed (tests the `sim` module)
+    cargo test         # runs natively, no browser needed (tests the `sim` and `scene` modules)
+
+Browser smoke tests (Playwright, Node 24) run against the release build in `dist/`, served under `/SpaceOooops/`:
+
+    trunk build --release --public-url /SpaceOooops/
+    cd e2e && npm ci && npx playwright install chromium && npx playwright test
 
 ## Build and deploy
 
     trunk build --release --public-url /SpaceOooops/
 
-Pushing to `main` runs `.github/workflows/deploy.yml`: `cargo test`, the release build, then a deploy to GitHub Pages
+Pushing to `main` runs `.github/workflows/deploy.yml`: `cargo test`, the release build, the Playwright smoke tests, then a deploy to GitHub Pages
 (https://kulunchick.github.io/SpaceOooops/). In the repo settings, set Pages source to "GitHub Actions".
 
 ## Layout
@@ -86,8 +93,13 @@ Pushing to `main` runs `.github/workflows/deploy.yml`: `cargo test`, the release
 - `src/ui/` Leptos UI, one file per screen or component (binary `spaceooops-app`); `src/ui/run/` and `src/ui/debrief/`
   hold the Run and Debrief screens
 - `data/*.toml` every game number and catalog entry, with sources noted next to the values
+- `src/scene/` the Scene Spec: what the 3D scene shows, as plain data (library crate, no web dependencies)
+- `js/bridge/` the three.js renderer the UI drives through `src/ui/scene_bridge.rs`; `vendor/three/` the pinned three.js
+- `data/credits.toml` every external asset (library, fonts) with its source and licence
+- `e2e/` Playwright browser smoke tests (dev only)
 - `tests/` integration tests of the `sim` module through its public interface (`tests/sweep.rs` checks properties over
   a sweep of random Designs)
-- `style/*.css` dark mission-control styles: `main.css` (base and colour tokens), `design.css`, `run.css`,
+- `style/*.css` styles: `skin.css` (low-poly palette, fonts, scene layer, panel and button primitives), `title.css`,
+  `main.css` (base and colour tokens), `design.css`, `run.css`,
   `decisions.css`, `learning.css`, `team.css`, `history.css`
 - `GLOSSARY.md` the game's terms; `docs/adr/` design decisions

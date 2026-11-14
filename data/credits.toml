@@ -1,0 +1,36 @@
+# Every external asset shipped with the game: one [[asset]] entry each.
+# Fields: name, author, source (URL), licence, licence_file (path in this repo), kind, ai_generated, files.
+# The Sources page and the README list these; keep them in step when adding an asset.
+
+[[asset]]
+name = "three.js r186 (0.186.1)"
+author = "three.js authors (mrdoob and contributors)"
+source = "https://www.npmjs.com/package/three/v/0.186.1"
+licence = "MIT"
+licence_file = "vendor/three/LICENSE"
+kind = "library"
+ai_generated = false
+files = ["vendor/three/three.module.js", "vendor/three/three.core.js"]
+
+[[asset]]
+name = "Russo One (display font)"
+author = "Jovanny Lemonad"
+source = "https://fonts.google.com/specimen/Russo+One (via https://www.npmjs.com/package/@fontsource/russo-one 5.3.0)"
+licence = "SIL Open Font License 1.1"
+licence_file = "assets/fonts/russo-one/LICENSE"
+kind = "font"
+ai_generated = false
+files = ["assets/fonts/russo-one/russo-one-latin-400-normal.woff2"]
+
+[[asset]]
+name = "Atkinson Hyperlegible (body font)"
+author = "Braille Institute of America"
+source = "https://fonts.google.com/specimen/Atkinson+Hyperlegible (via https://www.npmjs.com/package/@fontsource/atkinson-hyperlegible 5.3.0)"
+licence = "SIL Open Font License 1.1"
+licence_file = "assets/fonts/atkinson-hyperlegible/LICENSE"
+kind = "font"
+ai_generated = false
+files = [
+  "assets/fonts/atkinson-hyperlegible/atkinson-hyperlegible-latin-400-normal.woff2",
+  "assets/fonts/atkinson-hyperlegible/atkinson-hyperlegible-latin-700-normal.woff2",
+]

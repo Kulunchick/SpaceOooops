@@ -1,0 +1,31 @@
+//! Shot: the camera framing the scene uses on each screen.
+use serde::Serialize;
+
+use super::Screen;
+
+/// A named camera target. Serialised as `{"kind": "titleOrbit"}`; variants that need data (a globe target,
+/// say) carry it as extra fields next to `kind`.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+#[serde(tag = "kind", rename_all = "camelCase")]
+pub enum Shot {
+    /// Earth with a small spacecraft circling it, the camera drifting slowly around them.
+    TitleOrbit,
+}
+
+/// Whether the scene is dimmed behind the screen's panels. Screens still laid out as full-page documents dim it so
+/// their text stays readable; a screen designed as panels over the scene (and its own Shot) shows it clearly.
+pub(super) fn dims(screen: Screen) -> bool {
+    screen != Screen::Title
+}
+
+pub(super) fn for_screen(screen: Screen) -> Shot {
+    use Screen::*;
+    match screen {
+        Title => Shot::TitleOrbit,
+        // Screens that have no Shot of their own yet keep the title framing; the UI dims the scene behind
+        // their panels. Later tickets move each screen to its own Shot (globe, hangar, pad, orbit-follow, ...).
+        Sources | TeamSetup | ScenarioSelect | Brief | Design | LaunchReview | Run | Debrief | History => {
+            Shot::TitleOrbit
+        }
+    }
+}

@@ -104,3 +104,17 @@ _Avoid_: Class, seat
 **Personal Objective**:
 A Role's private bonus goal that pulls against other Roles' priorities (e.g. Budget & Comms: spend under 80% of Budget).
 _Avoid_: Side quest, secret goal
+
+## Presentation
+
+**Scene Spec**:
+The plain-data description of what the 3D scene should show and what sound should play right now, built from the game state.
+_Avoid_: Scene state, render state
+
+**Shot**:
+The camera framing the 3D scene uses for a screen (for example the title orbit around Earth).
+_Avoid_: Camera, view
+
+**Cue**:
+A music track or one-shot sound effect the game asks to be played.
+_Avoid_: Sound event, trigger

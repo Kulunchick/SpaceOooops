@@ -7,19 +7,8 @@ use super::history_store::{self, HistoryRecord};
 use super::seed::new_seed;
 use super::team::{Team, Votes};
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Screen {
-    Title,
-    Sources,
-    TeamSetup,
-    ScenarioSelect,
-    Brief,
-    Design,
-    LaunchReview,
-    Run,
-    Debrief,
-    History,
-}
+/// The screens live in the Scene Spec module so that every screen is guaranteed a Shot.
+pub use spaceooops::scene::Screen;
 
 #[derive(Clone, Copy)]
 pub struct AppState {

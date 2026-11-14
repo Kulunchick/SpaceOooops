@@ -15,8 +15,11 @@ path = "src/main.rs"
 leptos = { version = "=0.8.23", features = ["csr"] }
 serde = { version = "1.0.229", features = ["derive"] }
 toml = "1.2.1"
-web-sys = { version = "0.3", features = ["Window", "Storage", "Location", "History", "Navigator", "HtmlInputElement"] }
+web-sys = { version = "0.3", features = ["Window", "Storage", "Location", "History", "Navigator", "HtmlInputElement", "HtmlCanvasElement"] }
 wasm-bindgen-futures = "0.4"
+serde_json = "1"
+wasm-bindgen = "0.2"
+js-sys = "0.3"
 
 [profile.release]
 opt-level = "s"

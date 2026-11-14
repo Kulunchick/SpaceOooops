@@ -7,3 +7,8 @@
 graphify-out/*
 !graphify-out/GRAPH_REPORT.md
 !graphify-out/graph.json
+
+# Playwright (e2e/)
+/e2e/node_modules/
+/e2e/test-results/
+/e2e/playwright-report/
