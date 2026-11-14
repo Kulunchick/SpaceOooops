@@ -1,0 +1,16 @@
+/* ---- Interactive Random Events (ticket 10) ---- */
+.decision-prompt { border: 1px solid var(--warn); border-left: 4px solid var(--warn); margin: 1rem 0; }
+.decision-day { margin: 0; font-family: var(--font-mono); font-size: 0.85rem; color: var(--warn); }
+.decision-question { margin: 0.25rem 0 0.75rem; font-size: 1.05rem; font-weight: 600; }
+.decision-options { display: grid; gap: 0.6rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.decision-option {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem; text-align: left;
+  padding: 0.7rem 0.85rem; background: var(--bg-raised); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; font: inherit;
+}
+.decision-option:hover, .decision-option:focus-visible { border-color: var(--accent); outline: none; }
+.decision-default { border-style: dashed; }
+.decision-label { font-weight: 600; color: var(--accent); }
+.decision-consequence { font-size: 0.9rem; color: var(--text-muted); }
+.decision-notes { margin: 0; padding-left: 1.2rem; }
+.decision-notes li { margin: 0.3rem 0; }

@@ -1,7 +1,7 @@
 //! Shared app state, provided once as context. The Design lives here, so leaving and returning to the
 //! Design screen (e.g. "Modify design" after a Run) finds every choice intact.
 use leptos::prelude::*;
-use spaceooops::sim::{self, Catalog, Design, LaunchReview, Pick, ReliabilityTier, Role, RunResult};
+use spaceooops::sim::{self, Catalog, Decision, Design, LaunchReview, Pick, ReliabilityTier, Role, RunResult};
 
 use super::history_store::{self, HistoryRecord};
 use super::seed::new_seed;
@@ -33,6 +33,8 @@ pub struct AppState {
     /// The last Run's result (timeline + Debrief) and the seed it flew with.
     pub run_result: RwSignal<Option<RunResult>>,
     pub seed: RwSignal<u64>,
+    /// The player's answers to interactive Random Events in the current Run (ticket 10).
+    pub decisions: RwSignal<Vec<Decision>>,
     /// Run playback position in days elapsed, fractional: 0.0 at launch, `timeline.len()` at the end.
     /// The single source of truth for everything that animates with the Run (dashboards, event log,
     /// orbit animation); read it, and only the playback driver in `run/playback.rs` writes it.
@@ -72,6 +74,7 @@ impl AppState {
             review,
             run_result: RwSignal::new(None),
             seed: RwSignal::new(0),
+            decisions: RwSignal::new(Vec::new()),
             playback: RwSignal::new(0.0),
             history: RwSignal::new(history_store::load()),
             notice: RwSignal::new(None),
@@ -107,9 +110,30 @@ impl AppState {
         });
         self.history.with_untracked(|h| history_store::save(h));
         self.seed.set(seed);
+        self.decisions.set(Vec::new());
         self.run_result.set(Some(result));
         self.playback.set(0.0);
         self.go(Screen::Run);
+    }
+
+    /// Answers a question of an interactive Random Event: re-flies the Run with the same seed and every answer
+    /// so far, and updates this Run's history record in place (still one record per Run). The days already
+    /// played back are identical, so the playback carries on from where it is.
+    pub fn decide(&self, decision: Decision) {
+        self.decisions.update(|d| d.push(decision));
+        let seed = self.seed.get_untracked();
+        let scenario_id = self.scenario_id.get_untracked();
+        let design = self.design.get_untracked();
+        let result = self.decisions.with_untracked(|decisions| {
+            self.catalog.with_value(|c| sim::run_with_decisions(c, &design, &scenario_id, seed, decisions))
+        });
+        self.history.update(|h| {
+            if let Some(newest) = h.first_mut().filter(|r| r.seed == seed && r.scenario_id == scenario_id) {
+                *newest = HistoryRecord::from_run(&design, &scenario_id, seed, &result, newest.timestamp_ms);
+            }
+        });
+        self.history.with_untracked(|h| history_store::save(h));
+        self.run_result.set(Some(result));
     }
 
     /// Number of days in the last Run's timeline.

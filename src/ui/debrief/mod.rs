@@ -3,6 +3,7 @@
 //! causes and Real-Mission Match (04), Personal Objectives (06), comparison with the previous Run (09).
 mod actions;
 mod compare;
+mod decisions;
 mod objectives;
 mod score;
 mod stats;
@@ -29,6 +30,7 @@ pub fn DebriefScreen() -> impl IntoView {
                 // ticket 04: <CausesSection />
                 <ScoreSection />
                 <StatsSection />
+                <decisions::DecisionsSection />
                 <objectives::ObjectivesSection />
                 // ticket 04: <RealMissionSection />
                 <ComparisonSection />

@@ -27,8 +27,13 @@ pub fn PlaybackDriver(speed: RwSignal<f64>) -> impl IntoView {
             let days = run_result.with_untracked(|r| r.as_ref().map_or(0, |r| r.timeline.len())) as f64;
             let step = days / ticks_per_run * speed.get_untracked();
             let now = playback.get_untracked();
+            // Stop before a day that asks the player a question until it is answered (ticket 10).
+            let limit = super::decision_prompt::pause_at(&state).map_or(days, |at| at.min(days));
+            if now < limit {
+                playback.set((now + step).min(limit));
+                return;
+            }
             if now < days {
-                playback.set((now + step).min(days));
                 return;
             }
             let held = held_ms.get_value() + TICK_MS;

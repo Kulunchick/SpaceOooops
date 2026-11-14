@@ -1,6 +1,7 @@
 //! Run screen: plays back the timeline `sim::run` returned. It never re-simulates.
 //! Layout: playback controls, the orbit animation slot, live dashboards, the event log.
 mod dashboards;
+mod decision_prompt;
 mod event_log;
 mod orbit_view;
 mod playback;
@@ -28,6 +29,7 @@ pub fn RunScreen() -> impl IntoView {
                 <h2>"Run: " {scenario_name}</h2>
                 <PlaybackControls speed=speed />
             </div>
+            <decision_prompt::DecisionPromptPanel />
 <OrbitView />
             <Show when=move || state.playback_finished()>
                 <p class="run-ending" aria-live="polite">
