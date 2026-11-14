@@ -3,7 +3,7 @@
 // then, in e2e/: npm ci && npx playwright install chromium && npx playwright test
 import { defineConfig } from '@playwright/test';
 
-const PORT = 4173;
+const PORT = Number(process.env.E2E_PORT ?? 4173);
 
 export default defineConfig({
   testDir: './tests',

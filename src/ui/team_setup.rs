@@ -12,15 +12,15 @@ pub fn TeamSetupScreen() -> impl IntoView {
     let solo = move || team.with(|t| t.solo);
     let count = move || team.with(|t| t.players.len());
     view! {
-        <section class="screen team-setup">
-            <h2>"Who is playing?"</h2>
+        <section class="screen team-setup lp-panel">
+            <h2 class="lp-display">"Who is playing?"</h2>
             <div class="panel">
                 <div class="mode-switch" role="group" aria-label="Play mode">
-                    <button class="btn mode-btn" class:active=solo on:click=move |_| team.update(|t| t.set_solo())>
+                    <button class="lp-btn mode-btn" class:active=solo on:click=move |_| team.update(|t| t.set_solo())>
                         "Solo"
                     </button>
                     <button
-                        class="btn mode-btn"
+                        class="lp-btn mode-btn"
                         class:active=move || !solo()
                         on:click=move |_| if solo() { team.update(|t| t.set_team(MIN_TEAM)) }
                     >
@@ -111,9 +111,9 @@ pub fn TeamSetupScreen() -> impl IntoView {
                 </div>
             </Show>
             <div class="actions">
-                <button class="btn" on:click=move |_| state.go(Screen::Title)>"Back"</button>
+                <button class="lp-btn" on:click=move |_| state.go(Screen::Title)>"Back"</button>
                 <button
-                    class="btn btn-primary"
+                    class="lp-btn lp-btn-primary"
                     disabled=move || !team.with(|t| t.is_complete())
                     on:click=move |_| state.go(Screen::ScenarioSelect)
                 >

@@ -34,8 +34,8 @@ pub fn HistoryScreen() -> impl IntoView {
         Err(e) => message.set(Some(format!("That Design can no longer be loaded: {e}."))),
     };
     view! {
-        <section class="screen history-screen">
-            <h2>"History"</h2>
+        <section class="screen history-screen lp-panel">
+            <h2 class="lp-display">"History"</h2>
             {move || message.get().map(|m| view! { <p class="notice" role="alert">{m}</p> })}
             {move || {
                 let records = state.history.get();
@@ -50,7 +50,7 @@ pub fn HistoryScreen() -> impl IntoView {
                             let verdict = if r.success { "Success" } else { "Failed" };
                             let rec = r.clone();
                             view! {
-                                <li class="panel history-item">
+                                <li class="history-item">
                                     <div>
                                         <strong>{name}</strong>
                                         " \u{00B7} " <span class:ok=r.success class:bad=!r.success>{verdict}</span>
@@ -60,7 +60,7 @@ pub fn HistoryScreen() -> impl IntoView {
                                                 num(r.score.round()), r.science_value, money(r.cost_usd), r.mass_kg, r.days_survived)}
                                         </p>
                                     </div>
-                                    <button class="btn" on:click=move |_| load(rec.clone())>"Load this Design"</button>
+                                    <button class="lp-btn" on:click=move |_| load(rec.clone())>"Load this Design"</button>
                                 </li>
                             }
                         }).collect_view()}
@@ -68,8 +68,8 @@ pub fn HistoryScreen() -> impl IntoView {
                 }.into_any()
             }}
             <div class="actions">
-                <button class="btn" on:click=move |_| state.go(Screen::Title)>"Back"</button>
-                <button class="btn" on:click=move |_| { history_store::clear(); state.history.set(Vec::new()); }
+                <button class="lp-btn" on:click=move |_| state.go(Screen::Title)>"Back"</button>
+                <button class="lp-btn" on:click=move |_| { history_store::clear(); state.history.set(Vec::new()); }
                     disabled=move || state.history.with(|h| h.is_empty())>"Clear history"</button>
             </div>
         </section>

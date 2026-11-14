@@ -80,3 +80,82 @@ fn every_file_in_an_external_asset_folder_is_credited() {
         assert!(credited.contains(&rel), "{rel} is not listed in data/credits.toml");
     }
 }
+
+// ---- The shared credits module (Sources page and README) ----
+
+use spaceooops::credits as shared;
+
+fn readme() -> String {
+    std::fs::read_to_string(Path::new(ROOT).join("README.md")).unwrap().replace("\r\n", "\n")
+}
+
+/// The text between two marker comments in the README.
+fn readme_block(start: &str, end: &str) -> String {
+    let text = readme();
+    let from = text.find(start).unwrap_or_else(|| panic!("README has no {start} marker")) + start.len();
+    let to = text.find(end).unwrap_or_else(|| panic!("README has no {end} marker"));
+    text[from..to].trim().to_string()
+}
+
+#[test]
+fn the_credits_module_reads_the_same_entries_as_the_data_file() {
+    let names: Vec<String> = shared::assets().into_iter().map(|a| a.name).collect();
+    let expected: Vec<String> = credits().asset.into_iter().map(|a| a.name).collect();
+    assert_eq!(names, expected);
+}
+
+#[test]
+fn the_readme_asset_list_is_exactly_the_credits_file() {
+    let expected = shared::readme_list(&shared::assets());
+    let found = readme_block("<!-- credits:start -->", "<!-- credits:end -->");
+    assert_eq!(
+        found, expected,
+        "README asset list is out of step with data/credits.toml. Replace the block between the credits markers with:\n{expected}"
+    );
+}
+
+#[test]
+fn the_readme_ai_disclosure_matches_the_credits_file() {
+    let expected = shared::ai_statement(&shared::assets());
+    let found = readme_block("<!-- ai-assets:start -->", "<!-- ai-assets:end -->");
+    assert_eq!(
+        found, expected,
+        "README AI disclosure is out of step with data/credits.toml. Replace the block between the ai-assets markers with:\n{expected}"
+    );
+}
+
+fn asset(name: &str, kind: &str, ai: bool) -> shared::Asset {
+    shared::Asset {
+        name: name.into(),
+        author: "A".into(),
+        source: "https://example.org".into(),
+        licence: "CC0".into(),
+        licence_file: "x".into(),
+        kind: kind.into(),
+        ai_generated: ai,
+        files: vec![],
+    }
+}
+
+#[test]
+fn with_no_ai_assets_the_statement_says_none_were_made_with_ai() {
+    let s = shared::ai_statement(&[asset("Tree", "model", false)]);
+    assert!(s.contains("No image, music or sound"), "{s}");
+}
+
+#[test]
+fn ai_generated_assets_are_named_in_the_statement() {
+    let s = shared::ai_statement(&[
+        asset("Tree", "model", false),
+        asset("Menu theme", "music", true),
+        asset("Skybox", "image", true),
+    ]);
+    assert!(s.contains("Menu theme") && s.contains("Skybox"), "{s}");
+    assert!(!s.contains("Tree"), "{s}");
+    assert!(!s.contains("No image, music or sound"), "{s}");
+}
+
+#[test]
+fn today_no_credited_asset_is_ai_generated() {
+    assert!(shared::assets().iter().all(|a| !a.ai_generated));
+}

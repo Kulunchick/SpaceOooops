@@ -24,8 +24,15 @@ fn the_title_shows_the_scene_clearly() {
 
 #[test]
 fn screens_still_laid_out_as_full_pages_dim_the_scene_behind_them() {
-    for screen in [Screen::Sources, Screen::TeamSetup, Screen::History] {
+    for screen in [Screen::ScenarioSelect, Screen::Brief, Screen::Design, Screen::LaunchReview, Screen::Run, Screen::Debrief] {
         assert!(scene::build(&SceneInputs::on(screen)).dimmed, "{screen:?} should dim the scene");
+    }
+}
+
+#[test]
+fn sources_team_setup_and_history_are_panels_over_a_visible_scene() {
+    for screen in [Screen::Sources, Screen::TeamSetup, Screen::History] {
+        assert!(!scene::build(&SceneInputs::on(screen)).dimmed, "{screen:?} should show the scene");
     }
 }
 

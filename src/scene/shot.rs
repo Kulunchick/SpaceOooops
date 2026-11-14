@@ -15,7 +15,7 @@ pub enum Shot {
 /// Whether the scene is dimmed behind the screen's panels. Screens still laid out as full-page documents dim it so
 /// their text stays readable; a screen designed as panels over the scene (and its own Shot) shows it clearly.
 pub(super) fn dims(screen: Screen) -> bool {
-    screen != Screen::Title
+    !matches!(screen, Screen::Title | Screen::Sources | Screen::TeamSetup | Screen::History)
 }
 
 pub(super) fn for_screen(screen: Screen) -> Shot {
