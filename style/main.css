@@ -73,3 +73,10 @@ html, body {
 .btn:hover { border-color: var(--accent); }
 .btn-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
 .btn-primary:hover { filter: brightness(1.1); }
+
+/* ---- Sources page (ticket 08) ---- */
+.sources-screen { max-width: 46rem; text-align: left; align-items: stretch; }
+.sources-screen h3 { color: var(--accent); margin: 1.2rem 0 0.4rem; }
+.sources-list { padding-left: 1.2rem; line-height: 1.5; }
+.sources-list li { margin-bottom: 0.6rem; }
+.sources-screen a { color: var(--accent); }

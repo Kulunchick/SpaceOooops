@@ -6,6 +6,7 @@ use spaceooops::sim::{self, Catalog, Design, LaunchReview, Pick, ReliabilityTier
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Screen {
     Title,
+    Sources,
     ScenarioSelect,
     Brief,
     Design,

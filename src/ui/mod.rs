@@ -12,6 +12,7 @@ mod option_card;
 mod placeholder;
 mod scenario_select;
 mod science_tab;
+mod sources;
 mod spacecraft_tab;
 mod state;
 mod tier_select;
@@ -44,7 +45,10 @@ pub fn App() -> impl IntoView {
     view! {
         <main class="app">
             {move || match screen.get() {
-                Screen::Title => view! { <title::TitleScreen on_start=move || state.go(Screen::ScenarioSelect) /> }.into_any(),
+                Screen::Title => view! {
+                    <title::TitleScreen on_start=move || state.go(Screen::ScenarioSelect) on_sources=move || state.go(Screen::Sources) />
+                }.into_any(),
+                Screen::Sources => view! { <sources::SourcesScreen on_back=move || state.go(Screen::Title) /> }.into_any(),
                 Screen::ScenarioSelect => view! { <scenario_select::ScenarioSelectScreen /> }.into_any(),
                 Screen::Brief => view! { <brief::BriefScreen /> }.into_any(),
                 Screen::Design => view! { <design::DesignScreen /> }.into_any(),

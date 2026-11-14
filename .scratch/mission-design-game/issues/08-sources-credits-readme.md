@@ -1,4 +1,4 @@
-# 08: Sources, credits and README
+﻿# 08: Sources, credits and README
 
 **What to build:** A Sources page, reachable from the title screen, lists where the numbers and ideas come from:
 - NASA CubeSat 101.
@@ -16,6 +16,6 @@ The README describes the project for judges: what it is, how to play, the tech s
 **Status:** ready-for-agent
 
 - [ ] The Sources page can be opened from the title screen in the deployed app
-- [ ] Every NASA resource used is listed with a public link
-- [ ] SI use is stated on the page and in the README (code generated with Claude Code)
-- [ ] The README covers the project summary, how to play, tech stack, NASA resources, SI acknowledgement, and how to run, test and deploy locally
+- [x] Every NASA resource used is listed with a public link
+- [x] SI use is stated on the page and in the README (code generated with Claude Code)
+- [x] The README covers the project summary, how to play, tech stack, NASA resources, SI acknowledgement, and how to run, test and deploy locally
