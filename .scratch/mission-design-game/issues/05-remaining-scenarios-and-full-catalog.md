@@ -14,10 +14,14 @@ This completes the catalog:
 
 **Blocked by:** 03: Run and basic Debrief.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Both Scenarios appear in Scenario select with difficulty and key constraints, and are fully playable in the deployed app
+- [x] Both Scenarios appear in Scenario select with difficulty and key constraints, and are fully playable in the deployed app
 - [x] Test: every Scenario has at least one known-good Design that reaches Success with a fixed seed
 - [x] Test: every Scenario has at least one tempting but wrong Design that fails Launch Review or the Run, so the trade-off is real (e.g. GEO with a launcher that is too small)
 - [x] Changing the Orbit visibly changes Lifetime, Power (eclipse) and Data (contact time) in the gauges
 - [x] All new numbers live in data files
+
+## Comments
+
+- 2026-11-14: Resolved on integration branch `mission-design-game` (merged to `main` at d78ab1e, deployed to https://kulunchick.github.io/SpaceOooops/). Acceptance criteria confirmed by `cargo test` (116 tests) and a scripted browser check of the deployed app.

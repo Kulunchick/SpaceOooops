@@ -16,13 +16,17 @@ A seeded PRNG makes the Run fully deterministic. The UI only plays back the time
 
 **Blocked by:** 02: Crop Watch: Scenario brief, Design and Launch Review.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Launch → Run playback (about 30 s, speed-up/skip) → Debrief works in the deployed app
-- [ ] The Debrief shows Success or failure (Success = required Science Value reached and minimum Lifetime survived) and the Score
-- [ ] "Modify design" keeps every choice; "Fly again" reruns with a new seed
+- [x] Launch → Run playback (about 30 s, speed-up/skip) → Debrief works in the deployed app
+- [x] The Debrief shows Success or failure (Success = required Science Value reached and minimum Lifetime survived) and the Score
+- [x] "Modify design" keeps every choice; "Fly again" reruns with a new seed
 - [x] Test: the same Design, Scenario and seed give an identical timeline and Debrief
 - [x] Test: different seeds can produce different Random Events
 - [x] Test: Flight-proven fails less often than Basic over many seeds
 - [x] Test: a known-good Crop Watch Design reaches Success with a fixed seed; a clearly bad one (e.g. battery too small) does not
 - [x] Scoring weights live in data files, not code
+
+## Comments
+
+- 2026-11-14: Resolved on integration branch `mission-design-game` (merged to `main` at d78ab1e, deployed to https://kulunchick.github.io/SpaceOooops/). Acceptance criteria confirmed by `cargo test` (116 tests) and a scripted browser check of the deployed app.

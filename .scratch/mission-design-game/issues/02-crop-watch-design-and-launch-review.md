@@ -20,14 +20,18 @@ The UI holds no rules; it renders what `sim` returns.
 
 **Blocked by:** 01: Skeleton and deploy.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Scenario select → brief → Design works in the deployed app
-- [ ] Gauges show the Launch Review totals and update instantly on every choice
-- [ ] Options show Mass, Power, cost, Data and Reliability Tier
-- [ ] Incompatible options are shown with the reason (e.g. imager needs reaction wheels)
+- [x] Scenario select → brief → Design works in the deployed app
+- [x] Gauges show the Launch Review totals and update instantly on every choice
+- [x] Options show Mass, Power, cost, Data and Reliability Tier
+- [x] Incompatible options are shown with the reason (e.g. imager needs reaction wheels)
 - [x] Hard constraints block launch with reasons: Mass over Launch Vehicle capacity to the Orbit, cost over Budget, negative average Power balance, a pointing Instrument without reaction wheels, Structure volume exceeded, no comms
 - [x] Soft warnings appear without blocking launch: thin margins, battery that only just covers the eclipse, Data above downlink, Basic tier on critical Components
 - [x] A test loads the bundled data files; each hard constraint has one `sim` test that asserts the violation and its reason through the public interface
 - [x] A test shows a known-good Crop Watch Design passes Launch Review
-- [ ] All UI text is in English and uses GLOSSARY.md terms
+- [x] All UI text is in English and uses GLOSSARY.md terms
+
+## Comments
+
+- 2026-11-14: Resolved on integration branch `mission-design-game` (merged to `main` at d78ab1e, deployed to https://kulunchick.github.io/SpaceOooops/). Acceptance criteria confirmed by `cargo test` (116 tests) and a scripted browser check of the deployed app.

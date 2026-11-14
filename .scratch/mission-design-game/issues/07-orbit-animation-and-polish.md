@@ -4,10 +4,15 @@
 
 **Blocked by:** 03: Run and basic Debrief.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The orbit animation stays in sync with the Run playback, including speed-up and skip
-- [ ] LEO, SSO and GEO look distinct; eclipses are visible
-- [ ] Usable at common laptop and tablet widths
-- [ ] Gauge states can be read without colour (icon or label)
-- [ ] No NASA logos, flags or mission identifiers anywhere
+- [x] The orbit animation stays in sync with the Run playback, including speed-up and skip
+- [x] LEO, SSO and GEO look distinct; eclipses are visible
+- [x] Usable at common laptop and tablet widths
+- [x] Gauge states can be read without colour (icon or label)
+- [x] No NASA logos, flags or mission identifiers anywhere
+
+## Comments
+
+- 2026-11-14: "No NASA mission identifiers" is read as graphic identifiers (logos, insignia, patches, flags); real missions are named in plain text in the Real-Mission Match.
+- 2026-11-14: Resolved on integration branch `mission-design-game` (merged to `main` at d78ab1e, deployed to https://kulunchick.github.io/SpaceOooops/). Acceptance criteria confirmed by `cargo test` (116 tests) and a scripted browser check of the deployed app.

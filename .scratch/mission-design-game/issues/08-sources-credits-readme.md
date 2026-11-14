@@ -13,9 +13,13 @@ The README describes the project for judges: what it is, how to play, the tech s
 
 **Blocked by:** 01: Skeleton and deploy.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The Sources page can be opened from the title screen in the deployed app
+- [x] The Sources page can be opened from the title screen in the deployed app
 - [x] Every NASA resource used is listed with a public link
 - [x] SI use is stated on the page and in the README (code generated with Claude Code)
 - [x] The README covers the project summary, how to play, tech stack, NASA resources, SI acknowledgement, and how to run, test and deploy locally
+
+## Comments
+
+- 2026-11-14: Resolved on integration branch `mission-design-game` (merged to `main` at d78ab1e, deployed to https://kulunchick.github.io/SpaceOooops/). Acceptance criteria confirmed by `cargo test` (116 tests) and a scripted browser check of the deployed app.

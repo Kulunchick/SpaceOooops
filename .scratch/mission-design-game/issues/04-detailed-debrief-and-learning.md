@@ -9,12 +9,16 @@ Every parameter in the Design gets a "why it matters" tooltip in simple English.
 
 **Blocked by:** 03: Run and basic Debrief.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The Debrief lists causes that come from `sim`, never made up in the UI
-- [ ] Test: an undersized battery produces a battery cause
-- [ ] Test: Data above downlink produces a lost-Data cause
-- [ ] Test: a Component failure that ends the Run early produces a cause naming the Component and the day
-- [ ] Test: the Score breakdown adds up to the Score
-- [ ] `sim` picks the Real-Mission Match from a data file of real missions; a test checks the match is sensible for a known Design
-- [ ] Every Design parameter has a tooltip; first-time hints appear only in Crop Watch
+- [x] The Debrief lists causes that come from `sim`, never made up in the UI
+- [x] Test: an undersized battery produces a battery cause
+- [x] Test: Data above downlink produces a lost-Data cause
+- [x] Test: a Component failure that ends the Run early produces a cause naming the Component and the day
+- [x] Test: the Score breakdown adds up to the Score
+- [x] `sim` picks the Real-Mission Match from a data file of real missions; a test checks the match is sensible for a known Design
+- [x] Every Design parameter has a tooltip; first-time hints appear only in Crop Watch
+
+## Comments
+
+- 2026-11-14: Resolved on integration branch `mission-design-game` (merged to `main` at d78ab1e, deployed to https://kulunchick.github.io/SpaceOooops/). Acceptance criteria confirmed by `cargo test` (116 tests) and a scripted browser check of the deployed app.

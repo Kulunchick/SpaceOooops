@@ -11,10 +11,14 @@ Team play is local, on one screen, with no networking (ADR-0002).
 
 **Blocked by:** 03: Run and basic Debrief.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Solo/team setup with Role → player-name assignment works in the deployed app
+- [x] Solo/team setup with Role → player-name assignment works in the deployed app
 - [x] Personal Objectives are defined in data files and evaluated by `sim` in the Debrief
 - [x] Test: Personal Objectives are correctly met or missed for known Designs, and their bonuses appear in the Score breakdown
 - [x] Go/No-Go blocks launch until every Role votes Go; solo play skips it
 - [x] The Debrief lists each Role, its player name and whether it met its Personal Objective
+
+## Comments
+
+- 2026-11-14: Resolved on integration branch `mission-design-game` (merged to `main` at d78ab1e, deployed to https://kulunchick.github.io/SpaceOooops/). Acceptance criteria confirmed by `cargo test` (116 tests) and a scripted browser check of the deployed app.

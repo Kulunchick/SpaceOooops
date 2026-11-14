@@ -4,10 +4,14 @@
 
 **Blocked by:** 03: Run and basic Debrief.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] Run history survives a page reload (browser local storage) and can be viewed
 - [x] The Debrief shows the change from the previous Run of the same Scenario
 - [x] The Share link round-trips: opening it loads exactly the same Design and Scenario
 - [x] A broken or outdated Share link shows a friendly message instead of crashing
 - [x] Test: a Design survives serialization and deserialization through the `sim` public interface
+
+## Comments
+
+- 2026-11-14: Resolved on integration branch `mission-design-game` (merged to `main` at d78ab1e, deployed to https://kulunchick.github.io/SpaceOooops/). Acceptance criteria confirmed by `cargo test` (116 tests) and a scripted browser check of the deployed app.
