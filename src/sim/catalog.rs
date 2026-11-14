@@ -20,6 +20,21 @@ pub struct Scenario {
     pub key_constraints: Vec<String>,
     #[serde(default)]
     pub tutorial_hints: Vec<String>,
+    /// Science Value per GB delivered by an Instrument with fit 1.0 over an Orbit with coverage 1.0.
+    pub science_value_per_gb: f64,
+    /// Random Event chances and severity in this Scenario.
+    pub events: EventTuning,
+}
+
+/// Per-Scenario Random Event chances (per day) and severity.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct EventTuning {
+    pub solar_flare_daily_chance: f64,
+    pub flare_safe_mode_days: u32,
+    /// On a flare day every Component's failure chance is multiplied by this.
+    pub flare_failure_multiplier: f64,
+    pub outage_daily_chance: f64,
+    pub outage_days: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -175,6 +190,26 @@ pub struct ReviewRules {
     pub battery_max_depth_of_discharge: f64,
 }
 
+/// Rules of the Run that hold in every Scenario.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RunRules {
+    /// Share of normal output a failed non-critical Component keeps.
+    pub degraded_output_fraction: f64,
+    /// Share of the original battery capacity lost per eclipse cycle at the healthy depth of discharge.
+    pub battery_fade_per_cycle_at_max_depth: f64,
+    /// How steeply wear grows with deeper discharge.
+    pub battery_fade_exponent: u32,
+}
+
+/// Score weights.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ScoringRules {
+    pub points_per_science_value: f64,
+    pub budget_margin_points: f64,
+    pub mass_margin_points: f64,
+    pub early_end_penalty_points: f64,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Catalog {
     pub scenarios: Vec<Scenario>,
@@ -189,6 +224,8 @@ pub struct Catalog {
     pub orbits: Vec<Orbit>,
     pub launch_vehicles: Vec<LaunchVehicle>,
     pub review: ReviewRules,
+    pub run_rules: RunRules,
+    pub scoring: ScoringRules,
 }
 
 impl Catalog {
@@ -248,6 +285,8 @@ const ORBITS: (&str, &str) = ("data/orbits.toml", include_str!("../../data/orbit
 const LAUNCH_VEHICLES: (&str, &str) =
     ("data/launch_vehicles.toml", include_str!("../../data/launch_vehicles.toml"));
 const REVIEW: (&str, &str) = ("data/review.toml", include_str!("../../data/review.toml"));
+const RUN: (&str, &str) = ("data/run.toml", include_str!("../../data/run.toml"));
+const SCORING: (&str, &str) = ("data/scoring.toml", include_str!("../../data/scoring.toml"));
 
 #[derive(Deserialize)]
 struct ScenariosFile {
@@ -285,6 +324,16 @@ struct ReviewFile {
     review: ReviewRules,
 }
 
+#[derive(Deserialize)]
+struct RunFile {
+    run: RunRules,
+}
+
+#[derive(Deserialize)]
+struct ScoringFile {
+    scoring: ScoringRules,
+}
+
 fn parse<T: serde::de::DeserializeOwned>((file, text): (&str, &str)) -> Result<T, CatalogError> {
     toml::from_str(text).map_err(|e| CatalogError::Parse { file: file.to_string(), message: e.to_string() })
 }
@@ -297,6 +346,8 @@ pub fn load_catalog() -> Result<Catalog, CatalogError> {
     let orbits: OrbitsFile = parse(ORBITS)?;
     let launch_vehicles: LaunchVehiclesFile = parse(LAUNCH_VEHICLES)?;
     let review: ReviewFile = parse(REVIEW)?;
+    let run: RunFile = parse(RUN)?;
+    let scoring: ScoringFile = parse(SCORING)?;
     let catalog = Catalog {
         scenarios: scenarios.scenarios,
         structures: components.structures,
@@ -310,6 +361,8 @@ pub fn load_catalog() -> Result<Catalog, CatalogError> {
         orbits: orbits.orbits,
         launch_vehicles: launch_vehicles.launch_vehicles,
         review: review.review,
+        run_rules: run.run,
+        scoring: scoring.scoring,
     };
     validate(&catalog)?;
     Ok(catalog)

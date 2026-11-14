@@ -158,5 +158,5 @@ tier = "flight_proven"
 name = "Flight-proven"
 why = "Parts that have already worked in orbit on other missions. They cost more, but fail far less often."
 cost_multiplier = 1.6
-# ~96% survival per Component over a year.
-daily_failure_chance = 0.0001
+# ~98% survival per Component over a year (flight heritage parts on mature small-satellite buses).
+daily_failure_chance = 0.00005

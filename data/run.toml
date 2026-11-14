@@ -1,0 +1,13 @@
+# Rules of the day-by-day Run that are the same in every Scenario.
+# Per-Scenario Random Event chances live in scenarios.toml; failure chances per Reliability Tier in components.toml.
+
+[run]
+# A failed Component marked `critical` in components.toml ends the Mission. Any other failed Component
+# keeps working at this share of its normal output (Power, battery capacity, pointing, downlink, storage).
+degraded_output_fraction = 0.5
+# Battery wear: share of the original capacity lost per eclipse cycle when the battery is drained exactly to
+# the healthy depth in review.toml; deeper discharges wear it faster (to the power below).
+# source: Li-ion cycle life collapses as depth of discharge grows (NASA battery handbooks); game-tuned so a
+# battery drained past the healthy depth every orbit wears out within a year in low Earth orbit.
+battery_fade_per_cycle_at_max_depth = 0.000045
+battery_fade_exponent = 3

@@ -1,0 +1,12 @@
+# Score = Science Value + Budget-margin bonus + Mass-margin bonus (+ Personal Objectives) - penalties.
+# All weights are game-tuned; change them here to rebalance without touching code.
+
+[scoring]
+# Score points per point of Science Value.
+points_per_science_value = 1.0
+# Bonus for unspent Budget: this many points if the whole Budget were left, proportionally less otherwise.
+budget_margin_points = 100.0
+# Bonus for spare Launch Vehicle capacity: this many points for a fully empty slot, proportionally less otherwise.
+mass_margin_points = 50.0
+# Penalty for a Run that ends before the minimum Lifetime: this many points times the share of days missed.
+early_end_penalty_points = 100.0

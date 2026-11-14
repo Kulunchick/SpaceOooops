@@ -24,3 +24,18 @@ tutorial_hints = [
     "On the Launch & Orbit tab, a sun-synchronous Orbit passes over Angola at the same local time every day.",
     "On the Budget & Comms tab, make sure the Data gauge stays green.",
 ]
+# Science Value earned per GB of Data delivered by an Instrument with fit 1.0 over an Orbit with coverage 1.0.
+# Game-tuned: a single well-suited imager sending ~300 MB a day for a year earns about 1.5x the requirement.
+science_value_per_gb = 1.4
+
+# Random Event tuning for this Scenario (chances are per day).
+[scenarios.events]
+# source: NOAA SWPC - strong (X-class) flares come a few times a year near solar maximum; ~1.5 per year here.
+solar_flare_daily_chance = 0.004
+# Spacecraft typically sit in safe mode for a day or two after a radiation upset.
+flare_safe_mode_days = 2
+# On a flare day every Component is this many times more likely to fail (single-event upsets).
+flare_failure_multiplier = 20.0
+# Ground-station outages (weather, maintenance, network faults): about twice a year.
+outage_daily_chance = 0.006
+outage_days = 3
