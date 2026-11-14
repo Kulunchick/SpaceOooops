@@ -1,0 +1,42 @@
+# Instruments: scientific payloads that produce Data and Science Value.
+# power_w is the orbit-averaged draw (cameras only run over their target).
+# `fit` says how well an Instrument suits each Scenario objective (0..1), keyed by scenario id.
+
+[[instruments]]
+id = "multispectral-imager"
+name = "Multispectral imager"
+why = "A camera that sees red, green, blue and near-infrared light. Healthy plants reflect near-infrared strongly, so it shows crop stress before it is visible to the eye."
+# source: commercial CubeSat multispectral imagers (~5 m resolution) weigh ~1.2-1.5 kg and take ~2U.
+mass_kg = 1.5
+power_w = 3.0
+cost_usd = 350_000.0
+volume_u = 2.0
+# Compressed scenes over Angola's farm belt each day.
+data_mb_per_day = 300.0
+needs_fine_pointing = true
+fit = { crop-watch = 1.0 }
+
+[[instruments]]
+id = "thermal-imager"
+name = "Thermal infrared imager"
+why = "A camera that measures ground temperature. Dry soil heats up faster than wet soil, so it reveals drought, but it is heavy and power-hungry."
+# source: uncooled microbolometer payloads for CubeSats: ~2.5-3 kg, 5-8 W while imaging.
+mass_kg = 3.0
+power_w = 6.0
+cost_usd = 400_000.0
+volume_u = 1.5
+data_mb_per_day = 250.0
+needs_fine_pointing = true
+fit = { crop-watch = 0.8 }
+
+[[instruments]]
+id = "wide-camera"
+name = "Wide-field camera"
+why = "A small, cheap colour camera with a wide view. It does not need precise pointing, but its coarse pictures show little detail about crops."
+mass_kg = 0.4
+power_w = 1.0
+cost_usd = 50_000.0
+volume_u = 0.5
+data_mb_per_day = 60.0
+needs_fine_pointing = false
+fit = { crop-watch = 0.3 }

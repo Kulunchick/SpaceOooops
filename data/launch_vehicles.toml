@@ -1,0 +1,20 @@
+# Launch Vehicles are generic classes; `real_example` names a real rocket of that class.
+# `capacity_kg` lists the Mass it can carry to each orbit id; an Orbit not listed cannot be reached.
+
+[[launch_vehicles]]
+id = "cubesat-rideshare"
+name = "CubeSat rideshare"
+why = "Your CubeSat flies in a dispenser next to dozens of others on a big rocket. Cheap, but the slot has a strict Mass limit and the rocket goes where its main customer wants."
+real_example = "like a 6U slot on a SpaceX Transporter rideshare mission"
+# source: 6U dispenser slots accept up to ~12 kg (CubeSat Design Specification); 6U rideshare prices ~US$300-400k (CubeSat 101, launch ch.).
+cost_usd = 330_000.0
+capacity_kg = { sso-600 = 12.0 }
+
+[[launch_vehicles]]
+id = "small-launcher"
+name = "Small dedicated launcher"
+why = "A whole small rocket just for you: it carries hundreds of kilograms to exactly the Orbit you want, at a price far above a CubeSat budget."
+real_example = "like Rocket Lab Electron"
+# source: Electron lists ~US$7.5 million per launch and ~200 kg to a 500-600 km SSO.
+cost_usd = 7_500_000.0
+capacity_kg = { sso-600 = 200.0 }

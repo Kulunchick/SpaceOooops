@@ -1,0 +1,16 @@
+# Orbits. `coverage` says how well an Orbit covers each Scenario's target (0..1), keyed by scenario id.
+
+[[orbits]]
+id = "sso-600"
+name = "Sun-synchronous Orbit, 600 km (SSO)"
+why = "A near-polar Orbit that passes over every place at the same local time each day, so lighting is the same in every image. It still spends about a third of each orbit in Earth's shadow."
+altitude_km = 600.0
+# source: Kepler's third law for a 600 km circular orbit gives ~96.7 min.
+period_min = 96.7
+# source: ~35 min of each orbit in shadow for a 10:30 local-time SSO at 600 km (35/96.7 = 0.36).
+eclipse_fraction = 0.36
+# source: ~5 passes of ~8 min per day over one mid/high-latitude ground station.
+contact_minutes_per_day = 40.0
+# source: atmospheric drag keeps a CubeSat at 600 km up for well over 5 years; radiation limits parts to ~5 years.
+lifetime_cap_days = 1825.0
+coverage = { crop-watch = 1.0 }

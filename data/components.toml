@@ -1,0 +1,162 @@
+# Spacecraft Components. Units are in the field names.
+# 1U = a 10 cm cube. volume_u is the internal volume a part takes; Structures offer usable_volume_u.
+# Masses and costs are rounded public figures for commercial CubeSat parts (Basic tier).
+# `critical = true` marks single points of failure: if they break, the Mission ends.
+
+# ---------------------------------------------------------------- Structures
+[[structures]]
+id = "cubesat-3u"
+name = "CubeSat 3U"
+why = "Three 10 cm cubes stacked: about the size of a loaf of bread. Cheap to build and launch, but little room for Instruments."
+# source: NASA CubeSat 101 - 1U = 10x10x10 cm, about 1.33 kg per U at most; frame + power board + harness of a 3U bus ~1.5 kg.
+mass_kg = 1.5
+cost_usd = 40_000.0
+size_u = 3.0
+# Power board, wiring and deployment switches take about 0.6U.
+usable_volume_u = 2.4
+
+[[structures]]
+id = "cubesat-6u"
+name = "CubeSat 6U"
+why = "Six cubes in a 2 x 3 block: room for a real camera and a pointing system, and still small enough for a rideshare."
+# source: NASA CubeSat 101 - 6U form factor; a 6U bus frame + power board + harness weighs ~4 kg.
+mass_kg = 4.0
+cost_usd = 60_000.0
+size_u = 6.0
+usable_volume_u = 5.5
+
+# ---------------------------------------------------------------- Solar panels
+[[solar_panels]]
+id = "solar-body"
+name = "Body-mounted solar panels"
+why = "Solar cells glued to the outside walls. Simple and robust, but only a few walls face the Sun at once, so they make little Power."
+mass_kg = 0.3
+cost_usd = 25_000.0
+volume_u = 0.0
+# source: ~30% efficient triple-junction cells, ~2 W per U of body averaged over sunlit attitudes (CubeSat 101, power ch.).
+generation_w_per_u = 2.0
+
+[[solar_panels]]
+id = "solar-deployable"
+name = "Deployable solar panels"
+why = "Wings that unfold after launch and face the Sun. About three times the Power of body-mounted cells, but heavier, pricier and one more thing that must unfold."
+mass_kg = 1.2
+cost_usd = 80_000.0
+volume_u = 0.1
+# source: commercial double-deployable 6U arrays give ~35-40 W while sunlit (~6 W per U).
+generation_w_per_u = 6.0
+critical = true
+
+# ---------------------------------------------------------------- Batteries
+[[batteries]]
+id = "battery-s"
+name = "Battery S (20 Wh)"
+why = "A small lithium-ion pack. Light and cheap, but it must carry the whole spacecraft through every pass in Earth's shadow."
+mass_kg = 0.25
+cost_usd = 10_000.0
+volume_u = 0.2
+# source: 18650-cell CubeSat battery packs, ~20 Wh per 2S2P pack.
+capacity_wh = 20.0
+critical = true
+
+[[batteries]]
+id = "battery-m"
+name = "Battery M (40 Wh)"
+why = "A mid-size pack: enough to keep a camera-carrying 6U alive in the shadow without draining deep."
+mass_kg = 0.45
+cost_usd = 15_000.0
+volume_u = 0.3
+capacity_wh = 40.0
+critical = true
+
+[[batteries]]
+id = "battery-l"
+name = "Battery L (80 Wh)"
+why = "A big pack for power-hungry spacecraft. Shallow discharges make it last for years, but it is heavy and bulky."
+mass_kg = 0.9
+cost_usd = 25_000.0
+volume_u = 0.6
+capacity_wh = 80.0
+critical = true
+
+# ---------------------------------------------------------------- Attitude control
+[[attitude_controls]]
+id = "magnetorquers"
+name = "Magnetorquers"
+why = "Coils that push against Earth's magnetic field. They stop the spacecraft tumbling, but cannot hold a camera steady on a target."
+mass_kg = 0.3
+power_w = 0.5
+cost_usd = 15_000.0
+volume_u = 0.2
+fine_pointing = false
+
+[[attitude_controls]]
+id = "reaction-wheels"
+name = "Reaction wheels"
+why = "Small spinning wheels that turn the spacecraft precisely. Needed to point a sharp camera at the ground."
+# source: commercial 3-axis CubeSat ADCS units: ~1.2-1.5 kg, ~0.8U, 1.5-3 W.
+mass_kg = 1.5
+power_w = 2.5
+cost_usd = 120_000.0
+volume_u = 0.8
+fine_pointing = true
+
+# ---------------------------------------------------------------- Comms
+[[comms]]
+id = "comms-uhf"
+name = "UHF radio"
+why = "A simple radio used by most student CubeSats. Cheap and low-power, but it sends only a few megabytes per day: fine for health data, far too slow for images."
+mass_kg = 0.25
+power_w = 0.6
+cost_usd = 15_000.0
+volume_u = 0.2
+# source: typical CubeSat UHF transceivers run at 9.6 kbps.
+downlink_mbps = 0.0096
+# source: amateur / university ground networks cost little per pass.
+ops_cost_usd_per_day = 50.0
+critical = true
+
+[[comms]]
+id = "comms-s-band"
+name = "S-band radio"
+why = "A faster radio band with a patch antenna. Hundreds of megabytes per day, enough for compressed images, at a higher price and ground-station fee."
+mass_kg = 0.5
+power_w = 2.0
+cost_usd = 60_000.0
+volume_u = 0.4
+# source: commercial CubeSat S-band transmitters, ~1-4 Mbps.
+downlink_mbps = 2.0
+# source: commercial ground-station networks charge roughly US$100-500 per pass.
+ops_cost_usd_per_day = 300.0
+critical = true
+
+# ---------------------------------------------------------------- Computer (one option, always on board)
+[computer]
+id = "computer-obc"
+name = "Onboard computer"
+why = "The spacecraft's brain: it runs the Instruments, stores Data until the next ground contact and keeps the spacecraft safe."
+mass_kg = 0.2
+power_w = 1.0
+cost_usd = 40_000.0
+volume_u = 0.2
+# source: CubeSat onboard computers carry several GB of flash; 2 GB usable for Data here.
+storage_mb = 2_000.0
+critical = true
+
+# ---------------------------------------------------------------- Reliability Tiers
+[[reliability_tiers]]
+tier = "basic"
+name = "Basic"
+why = "New or lightly tested parts. Cheaper, but more likely to fail in space."
+cost_multiplier = 1.0
+# source: surveys of CubeSat missions show ~20-40% of early student missions failed in their first year;
+# 0.06% per Component per day gives ~80% survival per Component over a year.
+daily_failure_chance = 0.0006
+
+[[reliability_tiers]]
+tier = "flight_proven"
+name = "Flight-proven"
+why = "Parts that have already worked in orbit on other missions. They cost more, but fail far less often."
+cost_multiplier = 1.6
+# ~96% survival per Component over a year.
+daily_failure_chance = 0.0001

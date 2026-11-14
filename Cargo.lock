@@ -1310,6 +1310,8 @@ name = "spaceooops"
 version = "0.1.0"
 dependencies = [
  "leptos",
+ "serde",
+ "toml",
 ]
 
 [[package]]

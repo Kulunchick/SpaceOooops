@@ -1,0 +1,8 @@
+# Launch Review thresholds.
+
+[review]
+# A gauge whose margin is below 15% of its limit turns amber (common early-design margin practice).
+thin_margin_fraction = 0.15
+# source: lithium-ion CubeSat batteries are kept above ~70% charge (≤30% depth of discharge) to survive
+# thousands of eclipse cycles per year.
+battery_max_depth_of_discharge = 0.3

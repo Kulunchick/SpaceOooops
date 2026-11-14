@@ -1,0 +1,26 @@
+# Scenarios: the mission briefs players choose from.
+# Instrument fit and Orbit coverage per Scenario live in instruments.toml and orbits.toml,
+# keyed by the scenario id used here.
+
+[[scenarios]]
+id = "crop-watch"
+name = "Crop Watch"
+difficulty = "Easy"
+objective = "Image Angola's farmland from a sun-synchronous Orbit every few days to track drought and crop health through a growing season."
+why_it_matters = "Most Angolan farms depend on rain. When the rains fail in the south, crops and cattle are lost before anyone can react. Regular images from space show where plants are stressed weeks earlier, so help and water can be sent in time."
+required_science_value = 100.0
+# One full growing season plus margin.
+min_lifetime_days = 365
+# source: university / national-agency 6U Earth-observation CubeSat missions typically cost about US$1-3 million including launch (NASA CubeSat 101, ch. 1).
+budget_usd = 1_800_000.0
+key_constraints = [
+    "A sharp imager needs reaction wheels to point at the ground.",
+    "A CubeSat rideshare carries only a small Mass.",
+    "Images are large: the comms link must send them down every day.",
+]
+tutorial_hints = [
+    "Start on the Science tab: pick one Instrument that suits drought monitoring.",
+    "On the Spacecraft tab, check the Power gauge: imagers and reaction wheels need deployable solar panels.",
+    "On the Launch & Orbit tab, a sun-synchronous Orbit passes over Angola at the same local time every day.",
+    "On the Budget & Comms tab, make sure the Data gauge stays green.",
+]

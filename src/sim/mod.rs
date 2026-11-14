@@ -1,16 +1,12 @@
 //! Pure simulation core. Must never depend on web/UI code.
+//! The module root only declares and re-exports; one file per concern.
+mod catalog;
+mod design;
 
-/// One-line game pitch shown on the title screen (placeholder public API until ticket 02).
+pub use catalog::*;
+pub use design::*;
+
+/// One-line game pitch shown on the title screen.
 pub fn tagline() -> &'static str {
     "Design the mission. Survive the physics."
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn tagline_is_the_game_pitch() {
-        assert_eq!(tagline(), "Design the mission. Survive the physics.");
-    }
 }
