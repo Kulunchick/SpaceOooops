@@ -7,6 +7,7 @@
 //! to `SceneSpec` after the first version is optional or has a default, so an older renderer ignores it.
 mod hangar;
 mod markers;
+pub mod orbit;
 mod shot;
 mod spacecraft;
 
@@ -16,10 +17,11 @@ use crate::sim::{Catalog, Design};
 
 pub use hangar::{HangarPreview, OrbitPreview, RocketPreview};
 pub use markers::Marker;
+pub use orbit::OrbitView;
 pub use shot::Shot;
 pub use spacecraft::{Finish, Part, PartKind, SpacecraftModel};
 
-use crate::sim::Scenario;
+use crate::sim::{RunResult, Scenario};
 
 /// The screen the player is on. The UI's screen state is this type, so every screen has a Shot.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -40,7 +42,7 @@ impl Screen {
     /// Screens whose scene shows the spacecraft assembled from the Design. Later tickets add their screens
     /// (Launch Review on the pad, the Run in orbit, the Debrief shots) here.
     pub fn shows_spacecraft(self) -> bool {
-        matches!(self, Screen::Design)
+        matches!(self, Screen::Design | Screen::Run)
     }
 }
 
@@ -57,11 +59,15 @@ pub struct SceneInputs<'a> {
     pub scenarios: &'a [Scenario],
     /// The id of the chosen Scenario (empty or unknown means none).
     pub chosen: Option<&'a str>,
+    /// The Run being played back (Run screen); the orbit view reads its timeline.
+    pub run: Option<&'a RunResult>,
+    /// The Run playback position in days elapsed, fractional (0 at launch). The scene's only clock for the Run.
+    pub playback: f64,
 }
 
 impl SceneInputs<'static> {
     pub fn on(screen: Screen) -> Self {
-        SceneInputs { screen, catalog: None, design: None, scenarios: &[], chosen: None }
+        SceneInputs { screen, catalog: None, design: None, scenarios: &[], chosen: None, run: None, playback: 0.0 }
     }
 }
 
@@ -81,16 +87,23 @@ pub struct SceneSpec {
     /// Scenario pins on the globe; empty except on Scenario select and Brief.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub markers: Vec<Marker>,
+    /// The Run's orbit view: the Orbit, the spacecraft's place on it and Earth's shadow (Run screen only).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub orbit: Option<OrbitView>,
 }
 
 /// Builds the Scene Spec for the given inputs.
 pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
+    let orbit = orbit::for_inputs(inputs);
     SceneSpec {
-        shot: markers::shot(inputs.screen, inputs.scenarios, inputs.chosen).unwrap_or_else(|| shot::for_screen(inputs.screen)),
+        shot: markers::shot(inputs.screen, inputs.scenarios, inputs.chosen)
+            .or_else(|| orbit.as_ref().map(|o| Shot::Orbit { radius: o.radius }))
+            .unwrap_or_else(|| shot::for_screen(inputs.screen)),
         dimmed: shot::dims(inputs.screen),
         spacecraft: spacecraft::for_inputs(inputs),
         hangar: hangar::for_inputs(inputs),
         markers: markers::markers(inputs.screen, inputs.scenarios, inputs.chosen),
+        orbit,
     }
 }
 

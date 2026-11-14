@@ -1,0 +1,113 @@
+/* Run screen over the 3D orbit scene (low-poly ticket 03). Only while the scene is live: the header with the
+   playback controls along the top, the dashboards along the bottom, the decision prompt and the event log down
+   the right, and the empty stage (`data-scene-frame`) the orbit is framed in, with the orbit caption in its
+   corner. Without WebGL none of this applies: the Run stays a page with the SVG orbit view (style/run.css). */
+
+.scene-layer[data-scene="live"] ~ .app .run-screen {
+  position: fixed;
+  inset: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0.75rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(270px, 27vw, 380px);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "head head"
+    "stage prompt"
+    "stage log"
+    "dash dash";
+  gap: 0.6rem;
+  overflow: hidden;
+}
+
+.scene-layer[data-scene="live"] ~ .app .run-screen > .run-head {
+  grid-area: head;
+  padding: 0.5rem 1rem;
+  background: var(--lp-panel-solid);
+  border-top: 3px solid var(--lp-panel-edge);
+}
+.scene-layer[data-scene="live"] ~ .app .run-head h2 { font-size: 1.2rem; margin: 0; font-family: var(--lp-font-display); }
+
+.scene-layer[data-scene="live"] ~ .app .run-stage { grid-area: stage; min-height: 0; pointer-events: none; }
+
+/* The orbit caption stays as a small panel in the stage's top-left corner; the SVG drawing gives way to the scene. */
+.scene-layer[data-scene="live"] ~ .app .run-orbit-slot {
+  grid-area: stage;
+  align-self: start;
+  justify-self: start;
+  max-width: min(30rem, 100%);
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background: rgba(13, 22, 42, 0.86);
+  border-color: var(--lp-panel-edge);
+}
+.scene-layer[data-scene="live"] ~ .app .orbit-svg { display: none; }
+.scene-layer[data-scene="live"] ~ .app .orbit-caption { margin: 0; flex-direction: column; gap: 0.15rem; }
+.scene-layer[data-scene="live"] ~ .app .orbit-event { min-height: 0; }
+.scene-layer[data-scene="live"] ~ .app .orbit-event:empty { display: none; }
+
+.scene-layer[data-scene="live"] ~ .app .run-ending {
+  grid-area: stage;
+  align-self: end;
+  justify-self: center;
+  margin: 0;
+  padding: 0.4rem 0.9rem;
+  background: rgba(13, 22, 42, 0.86);
+  border-top: 2px solid var(--lp-accent);
+}
+
+.scene-layer[data-scene="live"] ~ .app .run-screen > .decision-prompt {
+  grid-area: prompt;
+  margin: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.scene-layer[data-scene="live"] ~ .app .decision-prompt .decision-options { grid-template-columns: 1fr; }
+
+.scene-layer[data-scene="live"] ~ .app .run-screen > .event-log {
+  grid-area: log;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: rgba(13, 22, 42, 0.86);
+  border-color: var(--lp-panel-edge);
+}
+.scene-layer[data-scene="live"] ~ .app .event-log .events { max-height: none; flex: 1 1 auto; min-height: 0; }
+
+.scene-layer[data-scene="live"] ~ .app .run-screen > .dashboards { grid-area: dash; margin: 0; }
+.scene-layer[data-scene="live"] ~ .app .run-screen .dial { background: rgba(13, 22, 42, 0.86); padding: 0.4rem 0.65rem; }
+.scene-layer[data-scene="live"] ~ .app .run-screen .dial-value { font-size: 1.15rem; }
+
+@supports ((backdrop-filter: blur(6px)) or (-webkit-backdrop-filter: blur(6px))) {
+  .scene-layer[data-scene="live"] ~ .app .run-screen > .run-head,
+  .scene-layer[data-scene="live"] ~ .app .run-orbit-slot,
+  .scene-layer[data-scene="live"] ~ .app .run-screen > .event-log,
+  .scene-layer[data-scene="live"] ~ .app .run-screen .dial {
+    background: rgba(13, 22, 42, 0.72);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+}
+
+/* Without WebGL the Run keeps its page layout, so it keeps the veil over the static backdrop too (the Scene
+   Spec no longer dims the Run, because the live scene is meant to be seen). */
+.scene-layer[data-scene="fallback"]:has(~ .app .run-screen)::after { opacity: 0.9; }
+
+/* Without WebGL there is no stage. */
+.run-stage { display: none; }
+.scene-layer[data-scene="live"] ~ .app .run-stage { display: block; }
+
+/* Tablets and phones: one scrolling column; the stage keeps a fixed slice of the screen for the orbit. */
+@media (max-width: 900px) {
+  .scene-layer[data-scene="live"] ~ .app .run-screen {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 46vh auto auto;
+    grid-template-areas: "head" "prompt" "stage" "dash" "log";
+    overflow-y: auto;
+    padding: 0.5rem;
+  }
+  .scene-layer[data-scene="live"] ~ .app .run-screen > .decision-prompt { max-height: none; }
+  .scene-layer[data-scene="live"] ~ .app .run-screen > .event-log { max-height: 40vh; }
+  .scene-layer[data-scene="live"] ~ .app .orbit-facts { display: none; }
+}

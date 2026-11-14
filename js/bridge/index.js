@@ -12,6 +12,7 @@ import { createCameraRig } from './camera.js';
 import { createTitleCraft } from './spacecraft.js';
 import { createHangar } from './hangar.js';
 import { createMarkers } from './markers.js';
+import { createOrbitScene } from './orbit.js';
 
 let renderer = null;
 let scene = null;
@@ -23,6 +24,8 @@ let quality = 'high';
 let spec = null;
 let canvasEl = null;
 let markers = null;
+let sunLight = null;
+let skyLight = null;
 
 /** Whether this browser can create a WebGL context at all. */
 export function hasWebGL() {
@@ -46,12 +49,15 @@ function buildWorld() {
   if (spec) markers.set(spec.markers);
   const hangar = createHangar({ scene, camera, canvas: canvasEl });
   if (spec) hangar.apply(spec, reducedMotion);
-  return { earth, clouds, stars, craft, orbit, hangar };
+  const run = createOrbitScene({ scene, camera, earth, sunLight, ambient: skyLight, canvas: canvasEl });
+  if (spec) run.apply(spec, reducedMotion);
+  return { earth, clouds, stars, craft, orbit, hangar, run };
 }
 
 function disposeWorld() {
   if (!world) return;
   world.hangar.dispose();
+  world.run.dispose();
   for (const obj of [world.earth, world.stars, world.orbit]) {
     scene.remove(obj);
     obj.traverse((o) => {
@@ -83,10 +89,13 @@ function frame(dt, seconds) {
   world.craft.position.set(Math.cos(angle) * ORBIT_RADIUS, 0, -Math.sin(angle) * ORBIT_RADIUS);
   world.craft.rotation.y = angle;
   world.clouds.rotation.y = t * 0.01;
+  // The title craft gives way to the Design's own spacecraft during the Run.
+  world.orbit.visible = !world.run.active;
   rig.update(dt, seconds, reducedMotion);
   markers?.update(seconds, reducedMotion);
   renderer.domElement.dataset.flying = String(rig.flying);
   world.hangar.frame(dt, t);
+  world.run.frame(dt);
   renderer.render(scene, camera);
 }
 
@@ -108,9 +117,10 @@ export async function init(canvas, initialQuality = 'high') {
   camera = new THREE.PerspectiveCamera(40, 1, 0.05, 200);
   rig = createCameraRig(camera);
 
-  const sun = new THREE.DirectionalLight(palette.sun, 2.6);
-  sun.position.set(5, 2, 4);
-  scene.add(sun, new THREE.HemisphereLight(0x9fc4ff, 0x10131c, 0.7));
+  sunLight = new THREE.DirectionalLight(palette.sun, 2.6);
+  sunLight.position.set(5, 2, 4);
+  skyLight = new THREE.HemisphereLight(0x9fc4ff, 0x10131c, 0.7);
+  scene.add(sunLight, skyLight);
 
   world = buildWorld();
   if (spec) rig.setShot(spec.shot);
@@ -131,6 +141,7 @@ export function apply(sceneSpec) {
   spec = sceneSpec;
   if (rig) rig.setShot(sceneSpec.shot);
   world?.hangar.apply(sceneSpec, reducedMotion);
+  world?.run.apply(sceneSpec, reducedMotion);
   markers?.set(sceneSpec.markers);
 }
 
@@ -150,6 +161,7 @@ export function setReducedMotion(on) {
   reducedMotion = Boolean(on);
   rig?.cut();
   world?.hangar.setReducedMotion(reducedMotion);
+  world?.run.setReducedMotion(reducedMotion);
 }
 
 // Audio: ticket 04 implements these in audio.js and re-exports them here.

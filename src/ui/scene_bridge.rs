@@ -78,14 +78,21 @@ pub fn SceneLayer() -> impl IntoView {
     let spec = Memo::new(move |_| {
         let screen = state.screen.get();
         let chosen = state.scenario_id.get();
-        state.design.with(|design| {
-            state.catalog.with_value(|c| {
-                scene::build(&SceneInputs {
-                    catalog: Some(c),
-                    design: Some(design),
-                    scenarios: &c.scenarios,
-                    chosen: Some(&chosen),
-                    ..SceneInputs::on(screen)
+        // The Run playback position is the Run scene's only clock; read it only on the Run so other screens
+        // do not rebuild the spec on every playback tick.
+        let playback = if screen == scene::Screen::Run { state.playback.get() } else { 0.0 };
+        state.run_result.with(|run| {
+            state.design.with(|design| {
+                state.catalog.with_value(|c| {
+                    scene::build(&SceneInputs {
+                        catalog: Some(c),
+                        design: Some(design),
+                        scenarios: &c.scenarios,
+                        chosen: Some(&chosen),
+                        run: run.as_ref(),
+                        playback,
+                        ..SceneInputs::on(screen)
+                    })
                 })
             })
         })

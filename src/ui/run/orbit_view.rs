@@ -2,9 +2,13 @@
 //! A pure rendering of data: the spacecraft's place comes only from `AppState::playback`, the shadow
 //! from the orbit's eclipse fraction (the day's own value when the timeline has one), the flashes from
 //! the day's Random Events. It is not to scale: altitude is drawn on a log-ish scale so LEO and GEO both fit.
-use std::f64::consts::{PI, TAU};
+//! The angle, Earth's turn, the shadow and the altitude scale come from `spaceooops::scene::orbit`, the same
+//! functions the 3D Run scene is built from, so both views always agree. With WebGL the 3D scene replaces the
+//! drawing (CSS hides the SVG) and only the caption stays.
+use std::f64::consts::PI;
 
 use leptos::prelude::*;
+use spaceooops::scene::orbit;
 use spaceooops::sim::EventKind;
 
 use crate::ui::format::{num, percent};
@@ -19,12 +23,6 @@ const EARTH_R: f64 = 80.0;
 const ORBIT_SPAN: f64 = 340.0;
 /// Smallest drawn half-angle of the shadow arc so a tiny shadow (GEO) is still visible.
 const MIN_ARC_HALF: f64 = 0.1;
-/// Visual revolutions of a reference orbit over the whole Run. Angular speed of every Orbit is
-/// scaled from this by the inverse of its period, so GEO is visibly slower than LEO.
-const VISUAL_REVS: f64 = 14.0;
-const REFERENCE_PERIOD_MIN: f64 = 90.0;
-/// Earth's rotation period (sidereal day), minutes. Drives the ground marker on the globe.
-const EARTH_ROTATION_MIN: f64 = 1436.07;
 /// How long a Random Event's flash and caption stay on screen, whatever the playback speed.
 const FLASH_MS: u64 = 2000;
 
@@ -56,7 +54,7 @@ fn geometry(state: AppState) -> Geometry {
     state.catalog.with_value(|c| match c.orbit(&id) {
         Some(o) => {
             // Log scale on altitude: 0 at the surface, 1 at roughly GEO.
-            let f = ((1.0 + o.altitude_km.max(0.0) / 500.0).ln() / (1.0 + 36_000.0_f64 / 500.0).ln()).clamp(0.0, 1.0);
+            let f = orbit::altitude_share(o.altitude_km);
             Geometry {
                 name: o.name.clone(),
                 altitude_km: o.altitude_km,
@@ -69,7 +67,7 @@ fn geometry(state: AppState) -> Geometry {
         None => Geometry {
             name: String::new(),
             altitude_km: 0.0,
-            period_min: REFERENCE_PERIOD_MIN,
+            period_min: orbit::REFERENCE_PERIOD_MIN,
             eclipse_fraction: 0.0,
             rx: EARTH_R + 40.0,
             squash: 0.5,
@@ -93,13 +91,10 @@ pub fn OrbitView() -> impl IntoView {
     let geo = StoredValue::new(g.clone());
 
     // Share of the Run played, 0..1.
-    let progress = move || {
-        let days = state.run_days() as f64;
-        if days > 0.0 { (state.playback.get() / days).clamp(0.0, 1.0) } else { 0.0 }
-    };
+    let progress = move || orbit::progress(state.playback.get(), state.run_days());
     // Angle of the spacecraft, in radians; 0 is the point behind Earth, in the middle of the shadow.
     let period = g.period_min;
-    let theta = move || (TAU * VISUAL_REVS * REFERENCE_PERIOD_MIN / period * progress()).rem_euclid(TAU);
+    let theta = move || orbit::angle(progress(), period);
 
     // The shown day's shadow fraction and Random Events (changes once per day, not per tick).
     let day_snapshot = Memo::new(move |_| {
@@ -110,11 +105,7 @@ pub fn OrbitView() -> impl IntoView {
     let shadow_fraction = Memo::new(move |_| {
         day_snapshot.with(|d| d.as_ref().map_or(geo.with_value(|g| g.eclipse_fraction), |d| d.1)).clamp(0.0, 1.0)
     });
-    let in_shadow = move || {
-        let half = PI * shadow_fraction.get();
-        let t = theta();
-        half > 0.0 && (t <= half || t >= TAU - half)
-    };
+    let in_shadow = move || orbit::in_shadow(theta(), shadow_fraction.get());
     let hidden_behind_earth = move || {
         let t = theta();
         let (x, y) = geo.with_value(|g| g.at(t));
@@ -145,7 +136,7 @@ pub fn OrbitView() -> impl IntoView {
 
     // Ground marker spinning with Earth: over GEO it stays under the spacecraft.
     let marker = move || {
-        let phi = TAU * VISUAL_REVS * REFERENCE_PERIOD_MIN / EARTH_ROTATION_MIN * progress();
+        let phi = orbit::earth_turn(progress());
         let squash = geo.with_value(|g| g.squash);
         let r = EARTH_R * 0.7;
         (CX + r * phi.cos(), CY + r * squash * phi.sin(), phi.sin() >= 0.0)

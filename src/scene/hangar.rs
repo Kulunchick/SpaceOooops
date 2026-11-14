@@ -51,15 +51,10 @@ pub(super) fn for_inputs(inputs: &SceneInputs) -> Option<HangarPreview> {
     Some(preview(inputs.catalog?, inputs.design?))
 }
 
-/// Altitude share on the 2D orbit view's log-ish scale: 0 at the surface, 1 at GEO.
-fn altitude_share(altitude_km: f64) -> f64 {
-    ((1.0 + altitude_km.max(0.0) / 500.0).ln() / (1.0 + 36_000.0_f64 / 500.0).ln()).clamp(0.0, 1.0)
-}
-
 fn preview(c: &Catalog, d: &Design) -> HangarPreview {
     let orbit = d.orbit.as_deref().and_then(|id| c.orbit(id)).map(|o| OrbitPreview {
         id: o.id.clone(),
-        radius: 1.15 + 1.6 * altitude_share(o.altitude_km),
+        radius: super::orbit::display_radius(o.altitude_km),
         inclination_deg: o.inclination_deg,
         class: o.orbit_class.clone(),
     });

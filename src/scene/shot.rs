@@ -17,6 +17,9 @@ pub enum Shot {
     Globe { lat: f64, lon: f64 },
     /// Brief: the camera holds close over one place on Earth.
     Region { lat: f64, lon: f64 },
+    /// The Run: Earth, its shadow and the whole orbit in view, the spacecraft flying round it. `radius` is the
+    /// orbit's display radius in Earth radii (as in the Scene Spec's orbit view), so the camera can fit it.
+    Orbit { radius: f64 },
 }
 
 /// Whether the scene is dimmed behind the screen's panels. Screens still laid out as full-page documents dim it so
@@ -24,7 +27,7 @@ pub enum Shot {
 pub(super) fn dims(screen: Screen) -> bool {
     !matches!(
         screen,
-        Screen::Title | Screen::ScenarioSelect | Screen::Brief | Screen::Design | Screen::Sources | Screen::TeamSetup | Screen::History
+        Screen::Title | Screen::ScenarioSelect | Screen::Brief | Screen::Design | Screen::Run | Screen::Sources | Screen::TeamSetup | Screen::History
     )
 }
 
