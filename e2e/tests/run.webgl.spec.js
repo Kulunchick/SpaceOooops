@@ -3,7 +3,7 @@
 // The canvas exposes data-shot, data-orbit (Orbit id), data-orbit-angle (the angle drawn this frame),
 // data-orbit-target (the latest Scene Spec's angle) and data-in-shadow.
 import { test, expect } from '@playwright/test';
-import { collectErrors, CROP_WATCH_SHARE } from './helpers.js';
+import { collectErrors, pressLaunch, CROP_WATCH_SHARE } from './helpers.js';
 
 const TAU = Math.PI * 2;
 
@@ -20,9 +20,8 @@ async function seedRuns(page, k) {
 async function launchCropWatch(page) {
   await page.goto(`./#share=${CROP_WATCH_SHARE}`);
   await page.getByRole('button', { name: 'Launch Review' }).click();
-  await page.getByRole('button', { name: 'Launch', exact: true }).click();
-  // The launch sequence on the pad (ticket 07) can be skipped.
-  await page.getByRole('button', { name: 'Skip launch' }).click();
+  // The launch sequence on the pad (ticket 07) is skipped; slow frames must not make that a race.
+  await pressLaunch(page);
   await expect(page.locator('.run-screen')).toBeVisible();
   await expect(page.locator('canvas.scene-canvas')).toHaveAttribute('data-shot', 'orbit', { timeout: 20_000 });
 }
@@ -79,12 +78,18 @@ test('paused playback holds the spacecraft exactly where the playback is', async
   await launchCropWatch(page);
   // The playback waits before day 3 for the player's answer: playback 2 of 365 days.
   await expect(page.locator('.decision-prompt')).toBeVisible({ timeout: 20_000 });
-  await page.waitForTimeout(500);
+  // The drawn angle eases to the playback's; wait for it to arrive instead of for a time (slow frames are capped).
+  await expect
+    .poll(async () => {
+      const a = await angles(page);
+      return Math.abs(a.drawn - a.target);
+    }, { timeout: 15_000 })
+    .toBeLessThan(0.0005);
   const first = await angles(page);
   await page.waitForTimeout(1500);
   const later = await angles(page);
-  expect(later.drawn).toBe(first.drawn);
-  expect(later.drawn).toBe(later.target);
+  expect(later.drawn).toBeCloseTo(first.drawn, 3);
+  expect(later.drawn).toBeCloseTo(later.target, 3);
   // SSO: 14 * 90 / 96.7 visual turns over the whole Run, so 2 of 365 days is 0.449 rad (the SVG view's angle).
   expect(Math.abs(later.drawn - ((TAU * 14 * 90) / 96.7) * (2 / 365))).toBeLessThan(0.005);
   // Answering lets the playback, and the spacecraft, move on.

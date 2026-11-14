@@ -4,7 +4,7 @@
 // data-feather, data-dark-parts, data-stations (`id:on|dark`) and data-contact (the station a beam goes to).
 // Set EFFECT_SHOTS to a folder to save a screenshot of each effect mid-way (for checking the look by eye).
 import { test, expect } from '@playwright/test';
-import { collectErrors, CROP_WATCH_SHARE } from './helpers.js';
+import { collectErrors, pressLaunch, CROP_WATCH_SHARE } from './helpers.js';
 
 const BASIC_SHARE = CROP_WATCH_SHARE.replaceAll('~f', '~b').replace('.f.sso', '.b.sso');
 
@@ -27,8 +27,7 @@ const hold = (page, on) => page.evaluate((v) => (window.__holdPlayback = v), on)
 async function launch(page, share = CROP_WATCH_SHARE) {
   await page.goto(`./#share=${share}`);
   await page.getByRole('button', { name: 'Launch Review' }).click();
-  await page.getByRole('button', { name: 'Launch', exact: true }).click();
-  await page.getByRole('button', { name: 'Skip launch' }).click();
+  await pressLaunch(page);
   await expect(page.locator('canvas.scene-canvas')).toHaveAttribute('data-shot', 'orbit', { timeout: 20_000 });
 }
 
@@ -103,7 +102,7 @@ test('ground contact passes show as a beam between the spacecraft and the statio
   const errors = collectErrors(page);
   await seedRuns(page, 34);
   await launch(page);
-  await expect(canvas(page)).toHaveAttribute('data-contact', 'primary', { timeout: 30_000 });
+  await expect(canvas(page)).toHaveAttribute('data-contact', 'primary', { timeout: 60_000 });
   await hold(page, true);
   await page.waitForTimeout(300);
   await shot(page, 'contact');

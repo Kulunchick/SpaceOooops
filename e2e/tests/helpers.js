@@ -18,9 +18,11 @@ export const CROP_WATCH_SHARE =
 /** Presses Launch and, when the 3D launch sequence starts, skips it, so the Run begins at once. */
 export async function pressLaunch(page) {
   await page.getByRole('button', { name: 'Launch', exact: true }).click();
+  // With reduced motion there is no launch sequence to skip.
+  if (await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
   if (await page.locator('.scene-layer[data-scene="live"]').count()) {
     const skip = page.getByRole('button', { name: 'Skip launch' });
-    if (await skip.waitFor({ state: 'visible', timeout: 1500 }).then(() => true, () => false)) await skip.click();
+    if (await skip.waitFor({ state: 'visible', timeout: 5000 }).then(() => true, () => false)) await skip.click();
   }
 }
 

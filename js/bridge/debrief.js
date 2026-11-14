@@ -38,9 +38,13 @@ for (const kind of ['debriefHero', 'debriefFailure']) {
     const fate = kind === 'debriefHero' ? 'hero' : shot.fate ?? 'adrift';
     const p = POSES[fate] ?? POSES.adrift;
     const sway = Math.sin(seconds * 0.12) * 0.12;
+    // On a narrow screen the panel sits below the picture: aim the camera below the subject so it fills the upper
+    // part of the screen (the side-panel framing shift pushed it out of the frame on a phone).
+    const narrow = window.innerWidth <= 900;
     return {
       position: new THREE.Vector3(p.camera[0] + sway, p.camera[1], p.camera[2]),
-      target: new THREE.Vector3(p.craft[0] * 0.4, p.craft[1] * 0.4, p.craft[2] * 0.4),
+      target: new THREE.Vector3(p.craft[0] * 0.4, p.craft[1] * 0.4 - (narrow ? 1.1 : 0), p.craft[2] * 0.4),
+      framing: !narrow,
     };
   });
 }
