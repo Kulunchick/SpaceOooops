@@ -10,7 +10,7 @@ The choice changes the rest of the Run, and the Debrief mentions the decisions t
 
 **Status:** ready-for-agent
 
-- [ ] At least two interactive Random Event types, with two choices each
-- [ ] Choices are passed back into `sim`, so the Run stays deterministic: the same seed and the same choices give the same result (tested)
-- [ ] The Debrief mentions the player's decisions and their effect
-- [ ] When the player doesn't interact (playback skipped), a sensible default choice is applied
+- [x] At least two interactive Random Event types, with two choices each
+- [x] Choices are passed back into `sim`, so the Run stays deterministic: the same seed and the same choices give the same result (tested)
+- [x] The Debrief mentions the player's decisions and their effect
+- [x] When the player doesn't interact (playback skipped), a sensible default choice is applied
