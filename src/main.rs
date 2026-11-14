@@ -1,3 +1,5 @@
+mod ui;
+
 fn main() {
-    println!("Hello, world!");
+    leptos::mount::mount_to_body(ui::App);
 }

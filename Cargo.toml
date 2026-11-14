@@ -1,6 +1,20 @@
 [package]
-name = "SpaceOooops"
+name = "spaceooops"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+name = "spaceooops"
+path = "src/lib.rs"
+
+[[bin]]
+name = "spaceooops-app"
+path = "src/main.rs"
+
 [dependencies]
+leptos = { version = "=0.8.23", features = ["csr"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
