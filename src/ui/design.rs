@@ -5,6 +5,7 @@ use spaceooops::sim::Role;
 use super::budget_comms_tab::BudgetCommsTab;
 use super::gauges::Gauges;
 use super::launch_orbit_tab::LaunchOrbitTab;
+use super::role_banner::RoleBanner;
 use super::science_tab::ScienceTab;
 use super::spacecraft_tab::SpacecraftTab;
 use super::state::{AppState, Screen};
@@ -45,6 +46,7 @@ pub fn DesignScreen() -> impl IntoView {
                     })
                     .collect_view()}
             </nav>
+            <RoleBanner />
             {(!hints.is_empty()).then(|| view! {
                 <details class="panel hints">
                     <summary>"Hints"</summary>

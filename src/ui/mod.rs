@@ -9,9 +9,11 @@ mod format;
 mod gauges;
 mod history;
 mod history_store;
+mod go_no_go;
 mod launch_orbit_tab;
 mod launch_review;
 mod option_card;
+mod role_banner;
 mod run;
 mod scenario_select;
 mod science_tab;
@@ -21,6 +23,8 @@ mod sources;
 mod spacecraft_tab;
 mod state;
 mod storage;
+mod team;
+mod team_setup;
 mod tier_select;
 mod title;
 
@@ -53,9 +57,10 @@ pub fn App() -> impl IntoView {
         <main class="app">
             {move || match screen.get() {
                 Screen::Title => view! {
-                    <title::TitleScreen on_start=move || state.go(Screen::ScenarioSelect) on_sources=move || state.go(Screen::Sources) />
+                    <title::TitleScreen on_start=move || state.go(Screen::TeamSetup) on_sources=move || state.go(Screen::Sources) />
                 }.into_any(),
                 Screen::Sources => view! { <sources::SourcesScreen on_back=move || state.go(Screen::Title) /> }.into_any(),
+                Screen::TeamSetup => view! { <team_setup::TeamSetupScreen /> }.into_any(),
                 Screen::ScenarioSelect => view! { <scenario_select::ScenarioSelectScreen /> }.into_any(),
                 Screen::Brief => view! { <brief::BriefScreen /> }.into_any(),
                 Screen::Design => view! { <design::DesignScreen /> }.into_any(),

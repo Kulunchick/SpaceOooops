@@ -5,11 +5,13 @@ use spaceooops::sim::{self, Catalog, Design, LaunchReview, Pick, ReliabilityTier
 
 use super::history_store::{self, HistoryRecord};
 use super::seed::new_seed;
+use super::team::{Team, Votes};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Screen {
     Title,
     Sources,
+    TeamSetup,
     ScenarioSelect,
     Brief,
     Design,
@@ -39,6 +41,10 @@ pub struct AppState {
     pub history: RwSignal<Vec<HistoryRecord>>,
     /// A friendly message for the title screen, e.g. when a share link could not be opened (ticket 09).
     pub notice: RwSignal<Option<String>>,
+    /// Solo or team play, player names and Role owners (ticket 06).
+    pub team: RwSignal<Team>,
+    /// Go/No-Go votes per Role at Launch Review; any Design change clears them.
+    pub votes: RwSignal<Votes>,
 }
 
 impl AppState {
@@ -50,7 +56,14 @@ impl AppState {
             let id = scenario_id.get();
             design.with(|d| catalog.with_value(|c| sim::launch_review(c, d, &id)))
         });
+        let votes = RwSignal::new(Votes::default());
+        Effect::new(move |_| {
+            design.track();
+            votes.set(Votes::default());
+        });
         AppState {
+            team: RwSignal::new(Team::default()),
+            votes,
             catalog,
             screen: RwSignal::new(Screen::Title),
             scenario_id,
@@ -63,6 +76,11 @@ impl AppState {
             history: RwSignal::new(history_store::load()),
             notice: RwSignal::new(None),
         }
+    }
+
+    /// Launch may proceed as far as voting goes: solo play skips it, team play needs every Role on Go.
+    pub fn all_roles_go(&self) -> bool {
+        self.team.with(|t| t.solo) || self.votes.with(|v| v.iter().all(|x| *x == Some(true)))
     }
 
     pub fn go(&self, screen: Screen) {
