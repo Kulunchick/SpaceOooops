@@ -14,10 +14,14 @@ The Scene Spec gains Effects, built from the Run timeline and the Decisions, plu
 
 **Blocked by:** 03: Run in 3D; 04: Sound foundation.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] For seeded Runs, each effect is active on the days its Random Event or Decision occurs, and on no other day (`cargo test`)
-- [ ] Each Random Event kind emits its own Cue (`cargo test`)
-- [ ] Effects stay in sync through pause, speed-up and skip
-- [ ] Safe mode visibly changes the spacecraft
-- [ ] The no-WebGL fallback keeps today's SVG event flashes
+- [x] For seeded Runs, each effect is active on the days its Random Event or Decision occurs, and on no other day (`cargo test`)
+- [x] Each Random Event kind emits its own Cue (`cargo test`)
+- [x] Effects stay in sync through pause, speed-up and skip
+- [x] Safe mode visibly changes the spacecraft
+- [x] The no-WebGL fallback keeps today's SVG event flashes
+
+## Comments
+
+- 2026-11-15: Resolved on integration branch `low-poly-overhaul` (not pushed, not deployed). Acceptance criteria confirmed by `cargo test` (228 tests), a release Trunk build and the Playwright suite (75 tests, with and without WebGL). The look was checked in screenshots; sounds were not checked by ear.

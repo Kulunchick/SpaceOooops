@@ -4,10 +4,14 @@
 
 **Blocked by:** 01: 3D skeleton.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] History, team setup and Sources use the new skin
-- [ ] The Sources page lists every entry in the credits data file
-- [ ] The README asset list and AI disclosure match the credits data file
-- [ ] History "Load this Design" and share links work as before
-- [ ] A manual check confirms no NASA marks in any asset
+- [x] History, team setup and Sources use the new skin
+- [x] The Sources page lists every entry in the credits data file
+- [x] The README asset list and AI disclosure match the credits data file
+- [x] History "Load this Design" and share links work as before
+- [x] A manual check confirms no NASA marks in any asset
+
+## Comments
+
+- 2026-11-15: Resolved on integration branch `low-poly-overhaul` (not pushed, not deployed). Acceptance criteria confirmed by `cargo test` (228 tests), a release Trunk build and the Playwright suite (75 tests, with and without WebGL). The look was checked in screenshots; sounds were not checked by ear.

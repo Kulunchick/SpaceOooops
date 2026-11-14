@@ -19,14 +19,18 @@ The Scene Spec gains the spacecraft model: a list of parts derived from the Desi
 
 **Blocked by:** 01: 3D skeleton.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Every Component and Instrument choice in the catalog maps to a visible part, and removing the choice removes the part (`cargo test`)
-- [ ] Bus dimensions grow monotonically with structure size (`cargo test`)
-- [ ] Reliability Tier changes a part's finish (`cargo test`)
-- [ ] A sweep over all catalog combinations builds a Scene Spec without panics
-- [ ] Hangar Shot with snap animations and drag-rotate
-- [ ] New Design layout: Role side panels and the gauge strip; usable at laptop and tablet widths
-- [ ] Orbit and Launch Vehicle choices show their previews
-- [ ] A share link lands on the Design with the spacecraft assembled
-- [ ] Without WebGL the Design screen works as before
+- [x] Every Component and Instrument choice in the catalog maps to a visible part, and removing the choice removes the part (`cargo test`)
+- [x] Bus dimensions grow monotonically with structure size (`cargo test`)
+- [x] Reliability Tier changes a part's finish (`cargo test`)
+- [x] A sweep over all catalog combinations builds a Scene Spec without panics
+- [x] Hangar Shot with snap animations and drag-rotate
+- [x] New Design layout: Role side panels and the gauge strip; usable at laptop and tablet widths
+- [x] Orbit and Launch Vehicle choices show their previews
+- [x] A share link lands on the Design with the spacecraft assembled
+- [x] Without WebGL the Design screen works as before
+
+## Comments
+
+- 2026-11-15: Resolved on integration branch `low-poly-overhaul` (not pushed, not deployed). Acceptance criteria confirmed by `cargo test` (228 tests), a release Trunk build and the Playwright suite (75 tests, with and without WebGL). The look was checked in screenshots; sounds were not checked by ear.

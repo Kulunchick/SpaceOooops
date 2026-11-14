@@ -6,11 +6,15 @@ The Scene Spec gains an orbit view: display altitude, inclination, angular posit
 
 **Blocked by:** 02: Live spacecraft assembly.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The three Orbits are visibly distinct in 3D
-- [ ] Eclipse state per playback day matches the Run timeline (`cargo test`)
-- [ ] Angular position comes only from playback; pause, speed-up and skip stay in sync
-- [ ] New Run layout: dashboards and event log over the scene without hiding the spacecraft
-- [ ] Without WebGL the SVG orbit view is used and the Run plays as before
-- [ ] Ticket 07 guarantees from the mission-design-game spec still hold
+- [x] The three Orbits are visibly distinct in 3D
+- [x] Eclipse state per playback day matches the Run timeline (`cargo test`)
+- [x] Angular position comes only from playback; pause, speed-up and skip stay in sync
+- [x] New Run layout: dashboards and event log over the scene without hiding the spacecraft
+- [x] Without WebGL the SVG orbit view is used and the Run plays as before
+- [x] Ticket 07 guarantees from the mission-design-game spec still hold
+
+## Comments
+
+- 2026-11-15: Resolved on integration branch `low-poly-overhaul` (not pushed, not deployed). Acceptance criteria confirmed by `cargo test` (228 tests), a release Trunk build and the Playwright suite (75 tests, with and without WebGL). The look was checked in screenshots; sounds were not checked by ear.

@@ -10,14 +10,19 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] New ADR recorded; ADR 0001 notes it is partly superseded
-- [ ] Title screen shows the low-poly Earth with an orbiting spacecraft and a slow camera drift
-- [ ] Title panel uses the new skin; text is readable over the scene
-- [ ] Without WebGL a static background is shown and the game still starts and plays
-- [ ] Scene Spec module exists; `cargo test` covers screen → Shot for the title
-- [ ] Existing `sim` tests pass unchanged
-- [ ] Playwright runs in CI before deploy: the page loads with no console errors, the canvas initialises, and the fallback appears with WebGL disabled
-- [ ] Credits data file lists three.js and the fonts with their licences
+- [x] New ADR recorded; ADR 0001 notes it is partly superseded
+- [x] Title screen shows the low-poly Earth with an orbiting spacecraft and a slow camera drift
+- [x] Title panel uses the new skin; text is readable over the scene
+- [x] Without WebGL a static background is shown and the game still starts and plays
+- [x] Scene Spec module exists; `cargo test` covers screen → Shot for the title
+- [x] Existing `sim` tests pass unchanged
+- [x] Playwright runs in CI before deploy: the page loads with no console errors, the canvas initialises, and the fallback appears with WebGL disabled
+- [x] Credits data file lists three.js and the fonts with their licences
 - [ ] Deployed build works on GitHub Pages
+
+## Comments
+
+- 2026-11-15: Resolved on integration branch `low-poly-overhaul` (not pushed, not deployed). Acceptance criteria confirmed by `cargo test` (228 tests), a release Trunk build and the Playwright suite (75 tests, with and without WebGL). The look was checked in screenshots; sounds were not checked by ear.
+- 2026-11-15: The GitHub Pages item stays open: it can only be checked after the branch is pushed and deployed.

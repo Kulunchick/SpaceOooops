@@ -15,13 +15,17 @@ Under the hood:
 
 **Blocked by:** 02: Live spacecraft assembly (for the part-snap cue).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] No audio before the first user gesture
-- [ ] Music Cue is the menu track outside the Run and the Run track during it (`cargo test`)
-- [ ] Adding or removing a part emits a snap Cue (`cargo test`)
-- [ ] Crossfade between tracks
-- [ ] Music and effects volumes, plus mute, persist across a reload (Playwright)
-- [ ] Mute is fully silent
-- [ ] Audio works in the no-WebGL fallback
-- [ ] Every audio file is listed with its licence in the credits data file
+- [x] No audio before the first user gesture
+- [x] Music Cue is the menu track outside the Run and the Run track during it (`cargo test`)
+- [x] Adding or removing a part emits a snap Cue (`cargo test`)
+- [x] Crossfade between tracks
+- [x] Music and effects volumes, plus mute, persist across a reload (Playwright)
+- [x] Mute is fully silent
+- [x] Audio works in the no-WebGL fallback
+- [x] Every audio file is listed with its licence in the credits data file
+
+## Comments
+
+- 2026-11-15: Resolved on integration branch `low-poly-overhaul` (not pushed, not deployed). Acceptance criteria confirmed by `cargo test` (228 tests), a release Trunk build and the Playwright suite (75 tests, with and without WebGL). The look was checked in screenshots; sounds were not checked by ear.

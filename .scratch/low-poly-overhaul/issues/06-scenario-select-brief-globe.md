@@ -6,10 +6,14 @@ The Scenario data gains marker coordinates (latitude and longitude), and the Sce
 
 **Blocked by:** 01: 3D skeleton.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Each Scenario's marker position comes from its data (`cargo test`)
-- [ ] Choosing a Scenario flies the camera to its marker, and a click skips the flight
-- [ ] Cards keep all their information and get an illustration slot
-- [ ] New layout for Scenario select and Brief
-- [ ] Without WebGL both screens work over the static background
+- [x] Each Scenario's marker position comes from its data (`cargo test`)
+- [x] Choosing a Scenario flies the camera to its marker, and a click skips the flight
+- [x] Cards keep all their information and get an illustration slot
+- [x] New layout for Scenario select and Brief
+- [x] Without WebGL both screens work over the static background
+
+## Comments
+
+- 2026-11-15: Resolved on integration branch `low-poly-overhaul` (not pushed, not deployed). Acceptance criteria confirmed by `cargo test` (228 tests), a release Trunk build and the Playwright suite (75 tests, with and without WebGL). The look was checked in screenshots; sounds were not checked by ear.

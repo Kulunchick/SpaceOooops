@@ -4,9 +4,13 @@
 
 **Blocked by:** 05: Random Events in the Run scene.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The verdict picks the Shot and the Cue (success or failure), and the main cause picks the failure visual (`cargo test`)
-- [ ] The new Debrief layout keeps every existing section
-- [ ] "Modify design" returns to the hangar Shot with the spacecraft intact
-- [ ] Without WebGL the Debrief works as today
+- [x] The verdict picks the Shot and the Cue (success or failure), and the main cause picks the failure visual (`cargo test`)
+- [x] The new Debrief layout keeps every existing section
+- [x] "Modify design" returns to the hangar Shot with the spacecraft intact
+- [x] Without WebGL the Debrief works as today
+
+## Comments
+
+- 2026-11-15: Resolved on integration branch `low-poly-overhaul` (not pushed, not deployed). Acceptance criteria confirmed by `cargo test` (228 tests), a release Trunk build and the Playwright suite (75 tests, with and without WebGL). The look was checked in screenshots; sounds were not checked by ear.
