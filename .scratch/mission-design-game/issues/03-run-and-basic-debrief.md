@@ -21,8 +21,8 @@ A seeded PRNG makes the Run fully deterministic. The UI only plays back the time
 - [ ] Launch → Run playback (about 30 s, speed-up/skip) → Debrief works in the deployed app
 - [ ] The Debrief shows Success or failure (Success = required Science Value reached and minimum Lifetime survived) and the Score
 - [ ] "Modify design" keeps every choice; "Fly again" reruns with a new seed
-- [ ] Test: the same Design, Scenario and seed give an identical timeline and Debrief
-- [ ] Test: different seeds can produce different Random Events
-- [ ] Test: Flight-proven fails less often than Basic over many seeds
-- [ ] Test: a known-good Crop Watch Design reaches Success with a fixed seed; a clearly bad one (e.g. battery too small) does not
-- [ ] Scoring weights live in data files, not code
+- [x] Test: the same Design, Scenario and seed give an identical timeline and Debrief
+- [x] Test: different seeds can produce different Random Events
+- [x] Test: Flight-proven fails less often than Basic over many seeds
+- [x] Test: a known-good Crop Watch Design reaches Success with a fixed seed; a clearly bad one (e.g. battery too small) does not
+- [x] Scoring weights live in data files, not code
