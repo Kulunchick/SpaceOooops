@@ -1,0 +1,41 @@
+/* Scenario select and Brief: cards and the brief as faceted panels in a column at the left, the globe on the right
+   (the scene is shifted by the camera rig; on narrow screens the column sits below the globe). */
+.scenario-screen, .brief {
+  max-width: 34rem;
+  margin: 0;
+  margin-left: clamp(0rem, 3vw, 3rem);
+  font-family: var(--lp-font-body);
+  color: var(--lp-text);
+}
+.scenario-title { font-size: clamp(1.8rem, 4vw, 2.6rem); margin: 0.25rem 0 0.4rem; color: var(--lp-accent); text-shadow: 0 3px 0 #7a3d10; }
+.scenario-hint { margin: 0 0 1rem; color: var(--lp-text); text-shadow: 0 1px 6px #000; }
+
+.scenario-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem; }
+.scenario-card { padding: 0; display: flex; flex-direction: column; margin: 0; overflow: hidden; }
+.scenario-body { padding: 1rem 1.25rem 1.1rem; display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+.scenario-body p { margin: 0.15rem 0; }
+.scenario-body .muted, .brief .muted { color: var(--lp-text-muted); }
+.scenario-card .scenario-head h3 { font-size: 1.2rem; color: var(--lp-text); }
+.scenario-card .constraints { margin: 0.2rem 0 0.5rem; padding-left: 1.1rem; color: var(--lp-text-muted); font-size: 0.92rem; }
+.scenario-card .lp-btn { align-self: flex-start; }
+
+/* The illustration slot: a fixed-ratio frame. Swap the image file (or the path in data/scenarios.toml) freely. */
+.illustration-slot { aspect-ratio: 16 / 5; width: 100%; background: var(--lp-panel-solid); overflow: hidden; }
+.illustration-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.illustration-wide { aspect-ratio: 16 / 6; margin-bottom: 0.6rem; clip-path: var(--lp-facet); }
+
+.brief-panel { display: flex; flex-direction: column; gap: 0.1rem; }
+.brief h2 { color: var(--lp-accent); font-size: clamp(1.6rem, 3.5vw, 2.2rem); margin: 0 0 0.4rem; }
+.brief h3 { font-family: var(--lp-font-display); font-weight: 400; letter-spacing: 0.04em; margin: 0.8rem 0 0.2rem; font-size: 1rem; color: var(--lp-text); }
+.brief p { margin: 0.2rem 0; }
+.brief-facts { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0.6rem; margin: 0.6rem 0; }
+.brief-fact, .brief-facts > div { background: rgba(255, 255, 255, 0.05); padding: 0.5rem 0.7rem; }
+.brief-facts dt { color: var(--lp-text-muted); }
+.brief-facts dd { color: var(--lp-accent); font-family: var(--lp-font-display); font-size: 1.1rem; }
+.brief ul { margin: 0.2rem 0; padding-left: 1.1rem; }
+.brief .actions { margin: 1rem 0 0; }
+
+@media (max-width: 900px) {
+  /* The globe fills the upper part of the screen; the column starts below it. */
+  .scenario-screen, .brief { max-width: 100%; margin-left: 0; margin-top: 55vh; }
+}

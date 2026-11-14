@@ -17,6 +17,11 @@ pub struct Scenario {
     pub required_science_value: f64,
     pub min_lifetime_days: u32,
     pub budget_usd: f64,
+    /// Where the Scenario's marker sits on the globe (degrees). Visual only; the sim never reads it.
+    pub marker_lat: f64,
+    pub marker_lon: f64,
+    /// Illustration shown on the Scenario card (a path under `assets/`). Visual only.
+    pub illustration: String,
     #[serde(default)]
     pub key_constraints: Vec<String>,
     #[serde(default)]

@@ -13,6 +13,11 @@ required_science_value = 100.0
 min_lifetime_days = 365
 # source: university / national-agency 6U Earth-observation CubeSat missions typically cost about US$1-3 million including launch (NASA CubeSat 101, ch. 1).
 budget_usd = 1_800_000.0
+# Globe marker: Ondjiva, Cunene: the dry southern farmland.
+marker_lat = -17.07
+marker_lon = 15.73
+# Placeholder art (own work); swap the file or this path when the team supplies images.
+illustration = "assets/images/scenarios/crop-watch.svg"
 key_constraints = [
     "A sharp imager needs reaction wheels to point at the ground.",
     "A CubeSat rideshare carries only a small Mass.",
@@ -52,6 +57,11 @@ min_lifetime_days = 365
 # source: game estimate. Small-GEO pilot missions are far cheaper than a full ~US$300 million comsat, but the
 # launch to GEO alone costs millions.
 budget_usd = 6_000_000.0
+# Globe marker: Luena, Moxico: the remote eastern provinces.
+marker_lat = -11.78
+marker_lon = 19.92
+# Placeholder art (own work); swap the file or this path when the team supplies images.
+illustration = "assets/images/scenarios/connect-the-villages.svg"
 key_constraints = [
     "Only a satellite in geostationary Orbit (GEO) stays over Angola all day.",
     "The launch to GEO is expensive, and the affordable slot carries only 18 kg.",
@@ -80,6 +90,11 @@ required_science_value = 70.0
 min_lifetime_days = 180
 # source: game estimate; university space-weather CubeSats typically cost about US$1-2 million including launch.
 budget_usd = 1_500_000.0
+# Globe marker: Luanda: the ground station, on the Atlantic coast facing the South Atlantic Anomaly.
+marker_lat = -8.84
+marker_lon = 13.23
+# Placeholder art (own work); swap the file or this path when the team supplies images.
+illustration = "assets/images/scenarios/space-weather-sentinel.svg"
 key_constraints = [
     "One Instrument is not enough: you need several to reach the Science goal.",
     "At 400 km, air drag brings a CubeSat down within about a year.",
