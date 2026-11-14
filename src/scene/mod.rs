@@ -9,6 +9,7 @@ mod cues;
 mod hangar;
 mod markers;
 pub mod orbit;
+mod pad;
 mod shot;
 mod spacecraft;
 
@@ -20,6 +21,7 @@ pub use cues::{one_shots, Cue, Track};
 pub use hangar::{HangarPreview, OrbitPreview, RocketPreview};
 pub use markers::Marker;
 pub use orbit::OrbitView;
+pub use pad::{PadScene, PadVote};
 pub use shot::Shot;
 pub use spacecraft::{Finish, Part, PartKind, SpacecraftModel};
 
@@ -44,7 +46,7 @@ impl Screen {
     /// Screens whose scene shows the spacecraft assembled from the Design. Later tickets add their screens
     /// (Launch Review on the pad, the Run in orbit, the Debrief shots) here.
     pub fn shows_spacecraft(self) -> bool {
-        matches!(self, Screen::Design | Screen::Run)
+        matches!(self, Screen::Design | Screen::LaunchReview | Screen::Run)
     }
 }
 
@@ -65,11 +67,25 @@ pub struct SceneInputs<'a> {
     pub run: Option<&'a RunResult>,
     /// The Run playback position in days elapsed, fractional (0 at launch). The scene's only clock for the Run.
     pub playback: f64,
+    /// Go / No-Go votes per Role at Launch Review (empty when none; solo play never votes).
+    pub votes: &'a [Option<bool>],
+    /// True while the launch sequence (countdown, lift-off) is playing.
+    pub launching: bool,
 }
 
 impl SceneInputs<'static> {
     pub fn on(screen: Screen) -> Self {
-        SceneInputs { screen, catalog: None, design: None, scenarios: &[], chosen: None, run: None, playback: 0.0 }
+        SceneInputs {
+            screen,
+            catalog: None,
+            design: None,
+            scenarios: &[],
+            chosen: None,
+            votes: &[],
+            launching: false,
+            run: None,
+            playback: 0.0,
+        }
     }
 }
 
@@ -86,6 +102,9 @@ pub struct SceneSpec {
     /// Design-screen previews next to the spacecraft: the chosen Orbit and Launch Vehicle.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hangar: Option<HangarPreview>,
+    /// Launch Review: the rocket on the pad, vote lamps and the launch sequence flag.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pad: Option<PadScene>,
     /// Scenario pins on the globe; empty except on Scenario select and Brief.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub markers: Vec<Marker>,
@@ -106,6 +125,7 @@ pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
         dimmed: shot::dims(inputs.screen),
         spacecraft: spacecraft::for_inputs(inputs),
         hangar: hangar::for_inputs(inputs),
+        pad: pad::for_inputs(inputs),
         markers: markers::markers(inputs.screen, inputs.scenarios, inputs.chosen),
         orbit,
         music: cues::track_for(inputs.screen),

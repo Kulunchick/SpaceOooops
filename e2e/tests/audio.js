@@ -2,7 +2,7 @@
 // Nobody can listen in CI, so the bridge mirrors its state to <html data-audio-*>: whether the context is
 // unlocked, the current and wanted music track, the effective gains, the last Cue and how many sources started.
 import { expect } from '@playwright/test';
-import { collectErrors, CROP_WATCH_SHARE } from './helpers.js';
+import { collectErrors, CROP_WATCH_SHARE, pressLaunch } from './helpers.js';
 
 const html = (page) => page.locator('html');
 const attr = (page, name) => page.evaluate((n) => document.documentElement.dataset[n], name);
@@ -35,7 +35,7 @@ export function registerAudioTests(test) {
     await unlock(page);
     await expect(html(page)).toHaveAttribute('data-audio-track', 'menu');
     await page.getByRole('button', { name: 'Launch Review' }).click();
-    await page.getByRole('button', { name: 'Launch', exact: true }).click();
+    await pressLaunch(page);
     await expect(html(page)).toHaveAttribute('data-audio-wanted', 'run');
     await expect(html(page)).toHaveAttribute('data-audio-fading', '1'); // the menu track fading out
     await expect(html(page)).toHaveAttribute('data-audio-track', 'run');

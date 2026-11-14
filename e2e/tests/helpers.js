@@ -15,11 +15,20 @@ export function collectErrors(page) {
 export const CROP_WATCH_SHARE =
   'v1.crop-watch.multispectral-imager.cubesat-6u.solar-deployable~f.battery-m~f.reaction-wheels~f.comms-s-band~f.f.sso-600.cubesat-rideshare';
 
+/** Presses Launch and, when the 3D launch sequence starts, skips it, so the Run begins at once. */
+export async function pressLaunch(page) {
+  await page.getByRole('button', { name: 'Launch', exact: true }).click();
+  if (await page.locator('.scene-layer[data-scene="live"]').count()) {
+    const skip = page.getByRole('button', { name: 'Skip launch' });
+    if (await skip.waitFor({ state: 'visible', timeout: 1500 }).then(() => true, () => false)) await skip.click();
+  }
+}
+
 /** Opens the share link, launches, skips through the Run (answering any decision) and opens the Debrief. */
 export async function flyCropWatch(page) {
   await page.goto(`./#share=${CROP_WATCH_SHARE}`);
   await page.getByRole('button', { name: 'Launch Review' }).click();
-  await page.getByRole('button', { name: 'Launch', exact: true }).click();
+  await pressLaunch(page);
   const verdict = page.locator('.verdict-title');
   const debrief = page.getByRole('button', { name: 'Debrief' });
   const option = page.locator('.decision-option').first();

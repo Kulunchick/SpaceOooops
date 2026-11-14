@@ -10,7 +10,7 @@ use std::collections::BTreeSet;
 
 use serde::Serialize;
 
-use super::{SceneSpec, Screen, SpacecraftModel};
+use super::{PadVote, SceneSpec, Screen, SpacecraftModel};
 
 /// The looping music tracks.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize)]
@@ -44,6 +44,12 @@ pub fn track_for(screen: Screen) -> Track {
 pub enum Cue {
     /// A part was added to or removed from the spacecraft.
     Snap,
+    /// A Role voted Go at Launch Review.
+    Go,
+    /// A Role voted No-Go at Launch Review.
+    NoGo,
+    /// Launch was pressed: the launch sequence starts (the countdown ticks are timed by the renderer).
+    Launch,
 }
 
 impl Cue {
@@ -51,6 +57,9 @@ impl Cue {
     pub fn name(self) -> &'static str {
         match self {
             Cue::Snap => "snap",
+            Cue::Go => "go",
+            Cue::NoGo => "nogo",
+            Cue::Launch => "launch",
         }
     }
 }
@@ -67,6 +76,18 @@ pub fn one_shots(previous: &SceneSpec, current: &SceneSpec) -> Vec<Cue> {
         let changed = ids(before).symmetric_difference(&ids(after)).count();
         if changed > 0 && changed <= MAX_SNAPPED_PARTS {
             cues.push(Cue::Snap);
+        }
+    }
+    if let (Some(before), Some(after)) = (&previous.pad, &current.pad) {
+        let moved = |to: PadVote| before.votes.iter().zip(&after.votes).any(|(was, now)| was != now && *now == to);
+        if moved(PadVote::Go) {
+            cues.push(Cue::Go);
+        }
+        if moved(PadVote::NoGo) {
+            cues.push(Cue::NoGo);
+        }
+        if after.launching && !before.launching {
+            cues.push(Cue::Launch);
         }
     }
     cues

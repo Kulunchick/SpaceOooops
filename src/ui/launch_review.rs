@@ -28,7 +28,11 @@ pub fn LaunchReviewScreen() -> impl IntoView {
         String::new()
     };
     view! {
-        <section class="screen launch-review">
+        <section class="screen launch-review" class:launching=move || state.launching.get()>
+            <div class="launch-sequence" hidden=move || !state.launching.get()>
+                <p id="launch-count" class="launch-count lp-display" role="status" aria-live="polite"></p>
+                <button class="lp-btn launch-skip" on:click=move |_| state.finish_launch()>"Skip launch"</button>
+            </div>
             <h2>"Launch Review"</h2>
             <Gauges />
             <div class="panel">
@@ -57,10 +61,10 @@ pub fn LaunchReviewScreen() -> impl IntoView {
                 <button class="btn" on:click=move |_| state.go(Screen::Design)>"Modify design"</button>
                 <button
                     class="btn btn-primary"
-                    disabled=move || !can_launch()
+                    disabled=move || !can_launch() || state.launching.get()
                     on:click=move |_| {
                         if can_launch() {
-                            state.launch();
+                            state.begin_launch();
                         }
                     }
                 >

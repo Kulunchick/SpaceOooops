@@ -1,0 +1,60 @@
+/* Launch Review beside the launch pad (low-poly ticket 07): the review as a column at the left, the pad with the
+   rocket on the right (the camera rig shifts the scene; on narrow screens the column sits below the pad), and the
+   launch sequence overlay (countdown text and the Skip button). The review's own panels keep their look. */
+.screen.launch-review {
+  max-width: 38rem;
+  margin: 0 0 0 clamp(0rem, 3vw, 3rem);
+}
+.launch-review > h2 {
+  font-family: var(--lp-font-display);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--lp-accent);
+  text-shadow: 0 3px 0 #7a3d10;
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+}
+
+/* While the launch plays, the review steps aside so the rocket has the whole picture. */
+.launch-review > :not(.launch-sequence) { transition: opacity 0.5s ease; }
+.launch-review.launching > :not(.launch-sequence) { opacity: 0; pointer-events: none; }
+.launch-sequence {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2.5rem 1rem 2rem;
+  pointer-events: none;
+}
+.launch-sequence[hidden] { display: none; }
+.launch-count {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: clamp(3rem, 10vw, 6.5rem);
+  color: var(--lp-accent);
+  text-shadow: 0 4px 0 #7a3d10, 0 0 24px rgba(0, 0, 0, 0.6);
+}
+.launch-skip { pointer-events: auto; }
+
+/* Go / No-Go votes: the row flashes when its vote is cast, matching the lamp on the tower. */
+.vote-row.go, .vote-row.no-go { animation: vote-flash 0.7s ease-out; }
+@keyframes vote-flash {
+  from { box-shadow: 0 0 0 3px var(--flash, #fff); }
+  to { box-shadow: 0 0 0 0 transparent; }
+}
+.vote-row.go { --flash: #45e08a; }
+.vote-row.no-go { --flash: #ff4b4b; }
+@media (prefers-reduced-motion: reduce) {
+  .vote-row.go, .vote-row.no-go { animation: none; }
+  .launch-review > :not(.launch-sequence) { transition: none; }
+}
+
+@media (max-width: 900px) {
+  .screen.launch-review { max-width: 100%; margin-left: 0; margin-top: 55vh; }
+}
+/* Without WebGL there is no pad: the review is the plain page it always was. */
+.scene-layer[data-scene="fallback"] ~ .app .screen.launch-review { max-width: 960px; margin: 0 auto; }
+/* Without WebGL the review keeps the veil it had when it was a plain page. */
+body:has(.screen.launch-review) .scene-layer[data-scene="fallback"]::after { opacity: 0.9; }
