@@ -91,12 +91,16 @@ fn the_full_catalog_is_bundled() {
 
 // ---------------------------------------------------------------- every Scenario is winnable
 
+/// Cleanly: no violation and no warning. Disaster Response is the one exception, by design: its Budget is too tight
+/// for a radar spacecraft to leave the usual 15% unspent, so its known-good Design carries the thin-margin warning.
 #[test]
 fn every_scenario_has_a_known_good_design_that_passes_launch_review_cleanly() {
     for (scenario, design) in known_goods() {
         let r = review(&design, scenario);
         assert!(r.violations.is_empty(), "{scenario}: {:#?}", r.violations);
-        assert!(r.warnings.is_empty(), "{scenario}: {:#?}", r.warnings);
+        let warnings: Vec<FindingKind> = r.warnings.iter().map(|w| w.kind).collect();
+        let allowed: &[FindingKind] = if scenario == JAPAN_DISASTER_RESPONSE { &[FindingKind::ThinMargin] } else { &[] };
+        assert_eq!(warnings, allowed, "{scenario}: {:#?}", r.warnings);
     }
 }
 
@@ -293,9 +297,12 @@ fn the_weather_imager_is_not_the_answer_outside_india() {
 // ---------------------------------------------------------------- Japan: first images after a disaster
 
 #[test]
-fn japan_the_known_good_radar_design_passes_launch_review_cleanly() {
+fn japan_the_known_good_radar_design_launches_warned_only_about_its_thin_budget_margin() {
     let r = review(&japan_disaster_response_known_good(), JAPAN_DISASTER_RESPONSE);
-    assert!(r.can_launch && r.warnings.is_empty(), "{:#?} {:#?}", r.violations, r.warnings);
+    assert!(r.can_launch, "{:#?}", r.violations);
+    let warnings: Vec<FindingKind> = r.warnings.iter().map(|w| w.kind).collect();
+    assert_eq!(warnings, [FindingKind::ThinMargin], "{:#?}", r.warnings);
+    assert!(r.warnings[0].reason.contains("Budget"), "{}", r.warnings[0].reason);
 }
 
 #[test]
@@ -324,11 +331,28 @@ fn japan_an_optical_design_falls_short() {
     assert_eq!(success_rate(&crop_watch_known_good(), JAPAN_DISASTER_RESPONSE), 0.0);
 }
 
+/// The tight Budget: the radar spacecraft with the dearest working part in every slot (every part Flight-proven)
+/// is over it, so the player must give something up.
 #[test]
-fn japan_the_budget_is_tighter_than_the_cheapest_way_to_a_bigger_launcher() {
-    let mut d = japan_disaster_response_known_good();
-    d.launch_vehicle = Some("small-launcher".into());
-    assert!(has_violation(&review(&d, JAPAN_DISASTER_RESPONSE), FindingKind::OverBudget));
+fn japan_the_radar_design_with_the_dearest_part_in_every_slot_is_over_budget() {
+    let dearest = amazon_watch_known_good();
+    let r = review(&dearest, JAPAN_DISASTER_RESPONSE);
+    assert!(has_violation(&r, FindingKind::OverBudget), "{:#?}", r.violations);
+    assert_eq!(r.violations.len(), 1, "only the Budget stops it: {:#?}", r.violations);
+    // The same spacecraft fits Brazil's Budget: Japan's is the tight one.
+    assert!(review(&dearest, AMAZON_WATCH).can_launch);
+}
+
+/// Hard means hard: Japan's known-good Design wins less often than the Medium Scenarios' known-good Designs.
+#[test]
+fn japan_is_won_less_often_than_the_medium_scenarios() {
+    let japan = success_rate(&japan_disaster_response_known_good(), JAPAN_DISASTER_RESPONSE);
+    for (scenario, design) in known_goods() {
+        if load_catalog().unwrap().scenario(scenario).unwrap().difficulty == "Medium" {
+            let medium = success_rate(&design, scenario);
+            assert!(japan < medium, "Japan {japan} against {scenario} {medium}");
+        }
+    }
 }
 
 // ---------------------------------------------------------------- Glacier Watch: a trend needs years

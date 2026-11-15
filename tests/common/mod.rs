@@ -2,7 +2,11 @@
 //! Include from a test file with `mod common;`.
 #![allow(dead_code)]
 
-use spaceooops::sim::{Catalog, Design, Pick, ReliabilityTier::FlightProven, load_catalog, parse_events};
+use spaceooops::sim::{
+    Catalog, Design, Pick,
+    ReliabilityTier::{Basic, FlightProven},
+    load_catalog, parse_events,
+};
 
 /// The shipped catalog with the new Random Events switched off in every Scenario: a Run is as before them.
 /// Behaviour tests that pin numbers use this, so new events added later never move their thresholds.
@@ -102,10 +106,12 @@ pub fn cyclone_watch_known_good() -> Design {
 
 pub const JAPAN_DISASTER_RESPONSE: &str = "japan-disaster-response";
 
-/// The same radar spacecraft as Amazon Watch (12U CubeSat, X-band radio, SSO rideshare): the radio is the one
-/// thing that cannot be given up, and it fits Japan's tight Budget with little to spare. Passes cleanly in Japan.
+/// The radar spacecraft of Amazon Watch (12U CubeSat, X-band radio, SSO rideshare) with one thing given up to fit
+/// Japan's tight Budget: Basic reaction wheels (not critical: a failure only blurs the radar's aim). The X-band
+/// radio cannot be given up. Launches with one warning, the thin Budget margin that is this Scenario's lesson:
+/// a Design that leaves 15% of the Budget unspent cannot carry the radar here.
 pub fn japan_disaster_response_known_good() -> Design {
-    amazon_watch_known_good()
+    Design { attitude: Some(Pick::new("reaction-wheels", Basic)), ..amazon_watch_known_good() }
 }
 
 pub const GLACIER_WATCH: &str = "glacier-watch";
