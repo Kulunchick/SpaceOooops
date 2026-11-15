@@ -10,10 +10,10 @@ hints, event tuning, and Sources entries, checked against public sources first.
 
 **Blocked by:** 01, 02, 03, 04
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] A known-good optical Design on SSO passes Launch Review cleanly and reaches Success on a fixed seed and on the large majority of seeds
-- [ ] A Design whose Lifetime is shorter than the minimum fails
-- [ ] Argentina is outlined, highlighted when its card is hovered or selected, and holds the pin and stations
-- [ ] The Debrief can show SAOCOM for a matching Design
-- [ ] Illustration in the fallback project; end-to-end checks pass; the sweep passes
+- [x] A known-good optical Design on SSO passes Launch Review cleanly and reaches Success on a fixed seed and on the large majority of seeds
+- [x] A Design whose Lifetime is shorter than the minimum fails
+- [x] Argentina is outlined, highlighted when its card is hovered or selected, and holds the pin and stations
+- [x] The Debrief can show SAOCOM for a matching Design
+- [x] Illustration in the fallback project; end-to-end checks pass; the sweep passes
