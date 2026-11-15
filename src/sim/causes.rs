@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use super::catalog::*;
 use super::debrief::DebriefContext;
 use super::design::ReliabilityTier;
-use super::decisions::RIDE_OUT;
+use super::decisions::{BUY_STATION_TIME, RIDE_OUT};
 use super::events::{EventKind, RandomEvent, days};
 use super::resources::{Resolved, Resources, downlink_mb, resolve, resources};
 use super::review::{Finding, GaugeState};
@@ -620,22 +620,45 @@ fn flares(f: &Facts) -> Option<Weighed> {
     Some(weighed(CauseKind::RandomEvents, text, flare_days.first().copied(), impact))
 }
 
-/// The new Random Events (`data/events.toml`) that cost Science Value, named with their days. What one cost is
-/// estimated from the Run itself: how far the Science Value earned on its days (and two days after, when held-back
-/// Data comes down) fell below a typical day of this Run. Days in safe mode or short of battery are other causes'.
+/// The new Random Events (`data/events.toml`) that cost Science Value, named with their days. Only an event whose
+/// applied effects could cost Science Value is named (never a lucky one that only gave, nor one a Design choice
+/// shrugged off). What one cost is estimated from the Run itself: how far the Science Value earned on its days (and
+/// two days after, when held-back Data comes down) fell below a typical day of this Run. Days in safe mode, short of
+/// battery, without a ground station, or after a Component failure are other causes'.
 fn new_events(f: &Facts) -> Option<Weighed> {
     let timeline = f.ctx.timeline;
     let gain = |i: usize| timeline[i].science_value - if i == 0 { 0.0 } else { timeline[i - 1].science_value };
-    let other_cause = |i: usize| f.safe_mode_days.contains(&timeline[i].day) || timeline[i].battery_state == GaugeState::Violated;
-    let mut typical: Vec<f64> = (0..timeline.len()).filter(|&i| !other_cause(i)).map(gain).collect();
-    typical.sort_by(f64::total_cmp);
-    let typical = *typical.get(typical.len() / 2)?;
+    let mut outage_days = BTreeSet::new();
+    for day in timeline {
+        if day.events.iter().any(|e| e.kind == EventKind::GroundStationOutage && e.choice.as_deref() != Some(BUY_STATION_TIME)) {
+            outage_days.extend(day.day..day.day + f.scenario.events.outage_days);
+        }
+    }
+    let other_cause = |i: usize| {
+        let day = timeline[i].day;
+        f.safe_mode_days.contains(&day) || timeline[i].battery_state == GaugeState::Violated || outage_days.contains(&day)
+    };
+    // A Component failure lowers every day after it: each stretch between failures has its own typical day, so the
+    // failure's loss is never an event's.
+    let mut stretch = vec![0usize; timeline.len()];
+    for i in 1..timeline.len() {
+        let failed = timeline[i].events.iter().any(|e| e.kind == EventKind::ComponentFailure);
+        stretch[i] = stretch[i - 1] + usize::from(failed);
+    }
+    let typical_in = |s: usize| -> Option<f64> {
+        let mut gains: Vec<f64> = (0..timeline.len()).filter(|&i| stretch[i] == s && !other_cause(i)).map(gain).collect();
+        gains.sort_by(f64::total_cmp);
+        gains.get(gains.len() / 2).copied()
+    };
+    let typical: Vec<Option<f64>> = (0..=stretch.last().copied().unwrap_or(0)).map(typical_in).collect();
     let mut counted: BTreeSet<usize> = BTreeSet::new();
     let mut named: Vec<(String, u32, f64)> = Vec::new();
     for (i, day) in timeline.iter().enumerate() {
         for e in day.events.iter().filter(|e| e.kind == EventKind::Catalog) {
-            let Some(event) = &e.catalog else { continue };
-            let window = (i..(i + event.scene_days as usize + 3).min(timeline.len())).filter(|&j| !other_cause(j));
+            let Some(event) = e.catalog.as_ref().filter(|c| c.can_cost_science) else { continue };
+            let Some(typical) = typical[stretch[i]] else { continue };
+            let window = (i..(i + event.scene_days as usize + 3).min(timeline.len()))
+                .filter(|&j| stretch[j] == stretch[i] && !other_cause(j));
             let lost: f64 = window.filter(|&j| counted.insert(j)).map(|j| typical - gain(j)).sum();
             if lost > 0.0 {
                 let title = f.catalog.events.iter().find(|s| s.id == event.id).map_or(event.id.clone(), |s| s.title.clone());

@@ -141,6 +141,27 @@ pub struct EffectSpec {
     pub label: Option<String>,
 }
 
+impl EffectSpec {
+    /// The effect takes something the Science Value depends on: Instruments off, or less Power, Data, downlink,
+    /// storage, pointing or battery.
+    pub fn can_cost_science(&self) -> bool {
+        match self.mechanic {
+            Mechanic::InstrumentsOff => true,
+            Mechanic::Power
+            | Mechanic::Downlink
+            | Mechanic::Data
+            | Mechanic::Storage
+            | Mechanic::Pointing
+            | Mechanic::BatteryCapacity => self.strength < 0.0,
+            Mechanic::FailureChance
+            | Mechanic::Budget
+            | Mechanic::ScienceBonus
+            | Mechanic::ExtraDataDay
+            | Mechanic::ScoreBonus => false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MoreLikely {

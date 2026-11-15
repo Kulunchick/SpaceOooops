@@ -90,6 +90,7 @@ fn fire(
             model: spec.model.clone(),
             scene_days: scene_days(&effects),
             softened,
+            can_cost_science: effects.iter().any(EffectSpec::can_cost_science),
         }),
     }
 }

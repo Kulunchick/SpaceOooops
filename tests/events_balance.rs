@@ -225,15 +225,107 @@ effects = [{ mechanic = "instruments-off", days = 5 }]
         1,
     );
     let design = space_weather_sentinel_known_good();
-    let r = run(&c, &design, SPACE_WEATHER_SENTINEL, 4);
+    // A seed whose built-in events stay clear of the nap (an outage during it would explain some of its days).
+    let seed = (0..100)
+        .find(|&seed| {
+            let r = run(&c, &design, SPACE_WEATHER_SENTINEL, seed);
+            let Some(&(day, _)) = new_events(&r).first() else { return false };
+            r.timeline.iter().all(|t| t.day + 3 < day || t.day > day + 8 || t.events.iter().all(|e| e.kind == EventKind::Catalog))
+        })
+        .expect("a calm seed");
+    let r = run(&c, &design, SPACE_WEATHER_SENTINEL, seed);
     let (day, _) = new_events(&r)[0];
     let cause = r.debrief.causes.iter().find(|c| c.kind == CauseKind::RandomEvents).expect("a Random Events cause");
     assert!(cause.text.contains(&format!("A long nap (day {day})")), "{}", cause.text);
     assert!(cause.text.contains("Science Value"), "{}", cause.text);
     assert_eq!(cause.day, Some(day));
     // Without the event there is no such cause.
-    let quiet = run(&legacy_catalog(), &design, SPACE_WEATHER_SENTINEL, 4);
+    let quiet = run(&legacy_catalog(), &design, SPACE_WEATHER_SENTINEL, seed);
     assert!(!quiet.debrief.causes.iter().any(|c| c.text.contains("A long nap")));
+}
+
+/// The titles the Random Events cause of a Run names.
+fn blamed(c: &Catalog, r: &RunResult) -> Vec<String> {
+    let cause = r.debrief.causes.iter().filter(|c| c.kind == CauseKind::RandomEvents).map(|c| c.text.as_str()).collect::<Vec<_>>().join(" ");
+    c.events.iter().filter(|e| cause.contains(&format!("{} (day", e.title))).map(|e| e.title.clone()).collect()
+}
+
+#[test]
+fn the_debrief_never_blames_a_lucky_event_or_one_a_design_choice_shrugged_off() {
+    let c = load_catalog().unwrap();
+    // Seed 71 met "A neighbouring station gives away passes" (lucky), seed 32 a bit flip the Flight-proven computer
+    // corrected; both were once named as costing Science Value.
+    let r = run(&c, &crop_watch_known_good(), CROP_WATCH, 71);
+    assert!(new_events(&r).iter().any(|(_, e)| e.catalog.as_ref().unwrap().id == "neighbouring-station-gives-away-passes"));
+    assert!(!blamed(&c, &r).iter().any(|t| t.contains("neighbouring station")), "{:?}", r.debrief.causes);
+    let r = run(&c, &crop_watch_known_good(), CROP_WATCH, 32);
+    assert!(new_events(&r).iter().any(|(_, e)| e.catalog.as_ref().unwrap().softened));
+    assert!(!blamed(&c, &r).iter().any(|t| t.contains("cosmic ray")), "{:?}", r.debrief.causes);
+    // And over many Runs: only events that could cost Science Value are ever named.
+    for (scenario, design) in references(&c) {
+        for seed in 0..100 {
+            let r = run(&c, &design, &scenario, seed);
+            for title in blamed(&c, &r) {
+                let (_, e) = new_events(&r).into_iter().find(|(_, e)| c.events.iter().any(|s| s.title == title && Some(&s.id) == e.catalog.as_ref().map(|k| &k.id))).unwrap();
+                let k = e.catalog.as_ref().unwrap();
+                assert!(k.group != EventGroup::Lucky && !k.softened, "{scenario} seed {seed}: blames {title}: {}", e.text);
+            }
+        }
+    }
+}
+
+#[test]
+fn the_debrief_does_not_charge_an_event_for_an_outage_or_a_component_failure() {
+    // A real event that costs almost nothing: the downlink 1% lower for a day. Days of an outage after it are the
+    // outage's, not the event's.
+    let c = catalog_with_events(
+        r#"
+[[events]]
+id = "small-hiccup"
+group = "real"
+title = "A small hiccup"
+log = "A small hiccup: the downlink was 1% lower for 1 day."
+scene = "link-interference"
+real_life = "It happens."
+effects = [{ mechanic = "downlink", strength = -0.01, days = 1 }]
+"#,
+        1,
+        1,
+    );
+    let design = crop_watch_known_good();
+    let mut checked = 0;
+    for seed in 0..400 {
+        let r = run(&c, &design, CROP_WATCH, seed);
+        // A Run a failure ended early may not reach the event.
+        let Some(&(day, _)) = new_events(&r).first() else { continue };
+        let outage_soon = r.timeline.iter().any(|t| {
+            t.day >= day.saturating_sub(2) && t.day <= day + 2 && t.events.iter().any(|e| e.kind == EventKind::GroundStationOutage && e.choice.as_deref() != Some("buy-station-time"))
+        });
+        if !outage_soon {
+            continue;
+        }
+        checked += 1;
+        assert!(blamed(&c, &r).is_empty(), "seed {seed}: {:?}", r.debrief.causes);
+    }
+    assert!(checked > 0, "no seed puts an outage beside the event");
+    // Nor for what a Component that failed shortly before took away.
+    let basic = |p: Option<Pick>| p.map(|p| Pick::new(&p.id, ReliabilityTier::Basic));
+    let d = crop_watch_known_good();
+    let design = Design { solar: basic(d.solar.clone()), comms: basic(d.comms.clone()), attitude: basic(d.attitude.clone()), ..d };
+    let mut checked = 0;
+    for seed in 0..2000 {
+        let r = run(&c, &design, CROP_WATCH, seed);
+        let Some(&(day, _)) = new_events(&r).first() else { continue };
+        let failed_before = r.timeline.iter().any(|t| {
+            t.day + 20 >= day && t.day < day && t.events.iter().any(|e| e.kind == EventKind::ComponentFailure)
+        });
+        if !failed_before || (r.timeline.len() as u32) < day + 5 {
+            continue;
+        }
+        checked += 1;
+        assert!(blamed(&c, &r).is_empty(), "seed {seed}: {:?}", r.debrief.causes);
+    }
+    assert!(checked > 0, "no seed puts a failure shortly before the event");
 }
 
 // ---------------------------------------------------------------- balance

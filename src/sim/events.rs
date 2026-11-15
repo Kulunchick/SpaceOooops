@@ -51,6 +51,10 @@ pub struct CatalogEvent {
     /// A Design choice softened the event.
     #[serde(default)]
     pub softened: bool,
+    /// What applied could cost Science Value (less Power, Data, downlink, pointing, ...), so the Debrief may
+    /// blame it; an event that only gave or only cost money never is.
+    #[serde(default)]
+    pub can_cost_science: bool,
 }
 
 /// The Component kinds that carry a Reliability Tier and can fail, in their fixed draw order.
