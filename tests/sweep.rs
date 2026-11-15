@@ -29,12 +29,11 @@ struct Flown {
 /// answering every question at random, one question at a time.
 fn sweep() -> Vec<Flown> {
     let c = load_catalog().unwrap();
-    // Seed 7 stopped producing a slow-wear battery case once the weather imager joined the catalog; any seed that does is fine.
-    let mut l = Lcg(8);
+    let mut l = Lcg(7);
     let tiers = [Basic, FlightProven];
     let mut out = Vec::new();
     let mut launchable = 0;
-    while launchable < 400 {
+    while launchable < 600 {
         let sc = c.scenarios[l.below(c.scenarios.len())].id.clone();
         let mut instruments: Vec<String> =
             (0..1 + l.below(3)).map(|_| c.instruments[l.below(c.instruments.len())].id.clone()).collect();

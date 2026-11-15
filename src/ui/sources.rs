@@ -134,6 +134,17 @@ pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
                     " (secondary source)."
                 </li>
                 <li>
+                    "Japan (Disaster Response), JAXA. Tsukuba station: position of the "
+                    <Ext href="https://en.wikipedia.org/wiki/Tsukuba_Space_Center" label="Tsukuba Space Center, Wikipedia" />
+                    " (secondary source; JAXA's "
+                    <Ext href="https://global.jaxa.jp/about/centers/index.html" label="list of centers" />
+                    " gives its address). Okinawa station: JAXA's Okinawa Tracking and Communications Station in Onna, position from "
+                    <Ext href="https://www.wikidata.org/wiki/Q11552678" label="Wikidata" />
+                    " (secondary source). ALOS-2 (Daichi-2): "
+                    <Ext href="https://www.eoportal.org/satellite-missions/alos-2" label="ALOS-2, eoPortal" />
+                    " (secondary source)."
+                </li>
+                <li>
                     "Argentina (Glacier Watch), National Space Activities Commission (CONAE). C\u{f3}rdoba station, at the Te\u{f3}filo Tabanera Space Center: "
                     <Ext href="https://www.wikidata.org/wiki/Q5693426" label="Te\u{f3}filo Tabanera Space Center, Wikidata" />
                     " (position, secondary source; CONAE's "

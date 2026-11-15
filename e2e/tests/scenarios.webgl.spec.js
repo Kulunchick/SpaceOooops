@@ -85,6 +85,22 @@ test('hovering the India card turns the globe to its pin and highlights India on
   await expect(canvas).toHaveAttribute('data-flying', 'false', { timeout: 15000 });
   await page.waitForTimeout(500);
   await page.screenshot({ path: 'test-results/brief-india.png' });
+test('hovering the Japan card turns the globe to its pin and highlights Japan only', async ({ page }) => {
+  const errors = collectErrors(page);
+  await openScenarioSelect(page);
+  const canvas = page.locator('canvas.scene-canvas');
+  await page.locator('.scenario-card', { hasText: 'Disaster Response' }).hover();
+  await expect(canvas).toHaveAttribute('data-highlight', 'japan');
+  await expect(canvas).toHaveAttribute('data-shot-at', '38.3,140.7');
+  await expect(canvas).toHaveAttribute('data-flying', 'false', { timeout: 15000 });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: 'test-results/scenario-select-japan.png' });
+  await page.locator('.scenario-card', { hasText: 'Disaster Response' }).getByRole('button', { name: 'Select' }).click();
+  await expect(page.getByRole('heading', { name: 'Disaster Response' })).toBeVisible();
+  await expect(canvas).toHaveAttribute('data-highlight', 'japan');
+  await expect(canvas).toHaveAttribute('data-flying', 'false', { timeout: 15000 });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: 'test-results/brief-japan.png' });
   expect(errors).toEqual([]);
 });
 
