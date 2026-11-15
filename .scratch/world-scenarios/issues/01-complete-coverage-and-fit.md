@@ -9,9 +9,9 @@ player.
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Loading fails, with a message naming the Scenario and the Orbit or Instrument, when a coverage or fit number is missing
-- [ ] Every existing Orbit has coverage for all three Scenarios and every Instrument has fit for all three, explicitly
-- [ ] Every existing Run, Score and Debrief is unchanged (existing tests pass without re-pinning)
-- [ ] A catalog test covers the rejection
+- [x] Loading fails, with a message naming the Scenario and the Orbit or Instrument, when a coverage or fit number is missing
+- [x] Every existing Orbit has coverage for all three Scenarios and every Instrument has fit for all three, explicitly
+- [x] Every existing Run, Score and Debrief is unchanged (existing tests pass without re-pinning)
+- [x] A catalog test covers the rejection
