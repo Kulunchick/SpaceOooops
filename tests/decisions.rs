@@ -2,11 +2,11 @@
 //! passed back into `run_with_decisions`, determinism, defaults and the Debrief's notes on decisions.
 mod common;
 
-use common::{CROP_WATCH, SPACE_WEATHER_SENTINEL, crop_watch_known_good, space_weather_sentinel_known_good};
+use common::{CROP_WATCH, SPACE_WEATHER_SENTINEL, crop_watch_known_good, legacy_catalog, space_weather_sentinel_known_good};
 use spaceooops::sim::*;
 
 fn catalog() -> Catalog {
-    load_catalog().unwrap()
+    legacy_catalog()
 }
 
 /// Every decision prompt of a Run, in timeline order.

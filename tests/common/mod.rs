@@ -2,7 +2,30 @@
 //! Include from a test file with `mod common;`.
 #![allow(dead_code)]
 
-use spaceooops::sim::{Design, Pick, ReliabilityTier::FlightProven};
+use spaceooops::sim::{Catalog, Design, Pick, ReliabilityTier::FlightProven, load_catalog, parse_events};
+
+/// The shipped catalog with the new Random Events switched off in every Scenario: a Run is as before them.
+/// Behaviour tests that pin numbers use this, so new events added later never move their thresholds.
+pub fn legacy_catalog() -> Catalog {
+    with_new_events(load_catalog().unwrap(), 0, 0)
+}
+
+/// The shipped catalog with only the events of `toml` (a `data/events.toml`-shaped text), and every Scenario
+/// giving a Run between `min` and `max` of them.
+pub fn catalog_with_events(toml: &str, min: u32, max: u32) -> Catalog {
+    let mut c = load_catalog().unwrap();
+    c.events = parse_events(toml).unwrap();
+    with_new_events(c, min, max)
+}
+
+/// The shipped catalog, events included, with every Scenario giving a Run between `min` and `max` of them.
+pub fn with_new_events(mut c: Catalog, min: u32, max: u32) -> Catalog {
+    for s in &mut c.scenarios {
+        s.events.new_events_min = min;
+        s.events.new_events_max = max;
+    }
+    c
+}
 
 pub const CROP_WATCH: &str = "crop-watch";
 

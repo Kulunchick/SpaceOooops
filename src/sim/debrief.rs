@@ -40,6 +40,12 @@ pub struct Debrief {
     /// Plain-language notes on decisions taken during the Run (ticket 10).
     pub decisions: Vec<String>,
     pub stats: RunStats,
+    /// How each real new Random Event that happened happens in real life.
+    #[serde(default)]
+    pub real_life: Vec<String>,
+    /// Which Design choices caused or softened a new Random Event.
+    #[serde(default)]
+    pub design_notes: Vec<String>,
 }
 
 /// Everything the Debrief parts may look at.
@@ -55,6 +61,8 @@ pub(crate) struct DebriefContext<'a> {
     /// Budget of the Scenario and Launch Vehicle capacity to the Orbit, for margin bonuses.
     pub budget_usd: f64,
     pub capacity_kg: Option<f64>,
+    /// Score lines from new Random Events, after the Personal Objectives.
+    pub event_score_lines: Vec<ScoreLine>,
 }
 
 /// The Debrief of a Design that did not pass Launch Review: it never flew, so it scores nothing.
@@ -72,6 +80,8 @@ pub(crate) fn not_launched(stats: RunStats, causes: Vec<Cause>) -> Debrief {
         real_mission_match: None,
         decisions: Vec::new(),
         stats,
+        real_life: Vec::new(),
+        design_notes: Vec::new(),
     }
 }
 
@@ -96,6 +106,7 @@ pub(crate) fn debrief(ctx: &DebriefContext) -> Debrief {
         label: o.description.clone(),
         points: o.bonus,
     }));
+    lines.extend(ctx.event_score_lines.iter().cloned());
     Debrief {
         success: ctx.success,
         ending: ctx.ending.clone(),
@@ -105,5 +116,7 @@ pub(crate) fn debrief(ctx: &DebriefContext) -> Debrief {
         real_mission_match: real_mission_match(ctx),
         decisions: Vec::new(),
         stats: s.clone(),
+        real_life: Vec::new(),
+        design_notes: Vec::new(),
     }
 }

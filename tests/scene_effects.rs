@@ -6,7 +6,7 @@ mod common;
 use common::*;
 use spaceooops::scene::effects::{BACKUP, PRIMARY};
 use spaceooops::scene::{self, Cue, EffectKind, SceneInputs, Screen};
-use spaceooops::sim::{load_catalog, run, run_with_decisions, Catalog, Decision, Design, EventKind, ReliabilityTier, RunResult};
+use spaceooops::sim::{run, run_with_decisions, Catalog, Decision, Design, EventKind, ReliabilityTier, RunResult};
 
 /// The Scene Spec's effects at a playback position of a Crop Watch Run.
 fn effects_at(c: &Catalog, d: &Design, r: &RunResult, playback: f64) -> Vec<EffectKind> {
@@ -52,7 +52,7 @@ fn event_days(r: &RunResult, kind: EventKind) -> Vec<u32> {
 
 #[test]
 fn a_solar_flare_wave_is_in_the_scene_on_the_flare_day_and_on_no_other_day() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     for (seed, r) in seeds_with(&c, &d, EventKind::SolarFlare, 5) {
         let flares = days_with(&c, &d, &r, |k| *k == EffectKind::Flare);
@@ -81,7 +81,7 @@ fn decide_all(r: &RunResult, choice: &str) -> Vec<Decision> {
 
 #[test]
 fn safe_mode_lasts_from_the_flare_day_for_the_scenarios_safe_mode_days() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     let safe_days = c.scenario(CROP_WATCH).unwrap().events.flare_safe_mode_days;
     assert!(safe_days > 1, "the check needs a safe mode longer than the flare day");
@@ -105,7 +105,7 @@ fn spec_at(c: &Catalog, d: &Design, r: &RunResult, playback: f64) -> scene::Scen
 
 #[test]
 fn the_run_shows_a_main_ground_station_in_angola_and_a_backup_station() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     let r = run(&c, &d, CROP_WATCH, 1);
     let stations = spec_at(&c, &d, &r, 3.0).stations;
@@ -122,7 +122,7 @@ fn the_run_shows_a_main_ground_station_in_angola_and_a_backup_station() {
 
 #[test]
 fn the_main_stations_beacon_is_dark_for_the_whole_outage_and_on_no_other_day() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     let outage_days = c.scenario(CROP_WATCH).unwrap().events.outage_days;
     for (seed, plain) in seeds_with(&c, &d, EventKind::GroundStationOutage, 5) {
@@ -152,7 +152,7 @@ fn downlink_days(r: &RunResult) -> Vec<u32> {
 
 #[test]
 fn a_contact_beam_links_the_spacecraft_to_a_station_on_each_day_data_comes_down() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     let outage_days = c.scenario(CROP_WATCH).unwrap().events.outage_days;
     for (seed, plain) in seeds_with(&c, &d, EventKind::GroundStationOutage, 5) {
@@ -186,7 +186,7 @@ fn all_basic() -> Design {
 
 #[test]
 fn a_failed_component_is_marked_on_its_part_from_the_failure_day_to_the_end_of_the_run() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = all_basic();
     for (seed, r) in seeds_with(&c, &d, EventKind::ComponentFailure, 8) {
         let failed: Vec<String> = r.timeline.last().unwrap().failed_components.clone();
@@ -204,7 +204,7 @@ fn a_failed_component_is_marked_on_its_part_from_the_failure_day_to_the_end_of_t
 
 #[test]
 fn a_battery_shortfall_is_marked_on_the_battery_on_the_day_it_starts() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let mut d = crop_watch_known_good();
     d.battery = Some(spaceooops::sim::Pick::new("battery-s", ReliabilityTier::FlightProven));
     let r = run(&c, &d, CROP_WATCH, 3);
@@ -220,6 +220,7 @@ fn cue_for(kind: EventKind) -> Cue {
         EventKind::GroundStationOutage => Cue::Outage,
         EventKind::ComponentFailure => Cue::Failure,
         EventKind::BatteryShortfall => Cue::BatteryShortfall,
+        EventKind::Catalog => unreachable!("new Random Events are off in these tests"),
     }
 }
 
@@ -247,7 +248,7 @@ fn expected_cues(r: &RunResult) -> Vec<(u32, Cue)> {
 
 #[test]
 fn each_random_event_kind_is_heard_with_its_own_cue_when_the_playback_reaches_its_day() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let names: std::collections::BTreeSet<&str> =
         [Cue::Flare, Cue::Outage, Cue::Failure, Cue::BatteryShortfall].iter().map(|c| c.name()).collect();
     assert_eq!(names.len(), 4, "every Random Event kind has its own sound");
@@ -269,7 +270,7 @@ fn each_random_event_kind_is_heard_with_its_own_cue_when_the_playback_reaches_it
 
 #[test]
 fn a_paused_or_skipped_run_plays_no_event_cues() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = all_basic();
     let (_, r) = seeds_with(&c, &d, EventKind::ComponentFailure, 1).remove(0);
     let first = event_days(&r, EventKind::ComponentFailure)[0];
@@ -301,7 +302,7 @@ fn positions(r: &RunResult, speed: f64) -> Vec<f64> {
 
 #[test]
 fn the_playback_lingers_on_random_event_days_at_any_speed_so_every_effect_is_seen() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = all_basic();
     for (seed, r) in seeds_with(&c, &d, EventKind::GroundStationOutage, 4) {
         for speed in [1.0, 4.0] {
@@ -323,7 +324,7 @@ fn the_playback_lingers_on_random_event_days_at_any_speed_so_every_effect_is_see
 
 #[test]
 fn at_four_times_speed_every_random_event_is_still_heard_on_its_day() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = all_basic();
     for (seed, r) in seeds_with(&c, &d, EventKind::SolarFlare, 4) {
         let mut previous = spec_at(&c, &d, &r, 0.0);
@@ -349,7 +350,7 @@ fn event_days_are_slowed_only_with_the_live_scene_and_when_motion_is_allowed() {
 
 #[test]
 fn the_bridge_receives_effects_with_their_kind_target_start_and_length() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     let (_, r) = seeds_with(&c, &d, EventKind::GroundStationOutage, 1).remove(0);
     let day = event_days(&r, EventKind::GroundStationOutage)[0];
@@ -366,7 +367,7 @@ fn the_bridge_receives_effects_with_their_kind_target_start_and_length() {
 
 #[test]
 fn riding_out_a_flare_shows_the_wave_but_no_safe_mode() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     for (seed, plain) in seeds_with(&c, &d, EventKind::SolarFlare, 5) {
         let ridden = run_with_decisions(&c, &d, CROP_WATCH, seed, &decide_all(&plain, "ride-out"));

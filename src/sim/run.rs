@@ -7,6 +7,12 @@ use super::causes::not_launched_causes;
 use super::debrief::{Debrief, DebriefContext, RunStats, debrief, not_launched};
 use super::decisions::{self, Decision, Taken};
 use super::design::*;
+use super::design_facts::{Facts, facts};
+use super::event_catalog::EventSpec;
+use super::event_debrief;
+use super::event_effects::EventState;
+use super::event_flow;
+use super::event_plan::{Plan, plan};
 use super::events::{self, ComponentKind, RandomEvent};
 use super::resources::{Resources, resolve, resources};
 use super::review::{GaugeState, launch_review};
@@ -91,7 +97,7 @@ pub fn run_with_decisions(
         let causes = not_launched_causes(&catalog.cause_rules, &review.violations);
         return RunResult { timeline: Vec::new(), debrief: not_launched(stats, causes) };
     }
-    let ctx = RunContext::new(catalog, design, scenario_id, &r, &res, decisions);
+    let ctx = RunContext::new(catalog, design, scenario_id, &r, &res, decisions, seed);
     let mut state = RunState::new(seed, &ctx);
     let mut timeline = Vec::with_capacity(ctx.planned_days as usize);
     while state.day < ctx.planned_days && !state.ended {
@@ -134,11 +140,19 @@ pub fn run_with_decisions(
         stats: &stats,
         success,
         ending,
-        budget_usd: res.budget_usd,
+        budget_usd: res.budget_usd + state.pool.budget_gained_usd,
         capacity_kg: res.capacity_kg,
+        event_score_lines: state.pool.score_lines.clone(),
     });
     let mut debrief = debrief;
-    debrief.decisions = decision_notes(&state.taken, &timeline, &catalog.run_rules.decisions);
+    // The notes of the built-in questions and of the new events' questions, merged by day.
+    let built_in = decision_notes(&state.taken, &timeline, &catalog.run_rules.decisions);
+    let mut notes: Vec<(u32, String)> = state.taken.iter().map(|t| t.day).zip(built_in).collect();
+    notes.extend(event_debrief::question_notes(&state.pool));
+    notes.sort_by_key(|n| n.0);
+    debrief.decisions = notes.into_iter().map(|n| n.1).collect();
+    debrief.real_life = event_debrief::real_life_lines(&state.pool);
+    debrief.design_notes = event_debrief::design_notes(&state.pool);
     RunResult { timeline, debrief }
 }
 
@@ -175,7 +189,7 @@ struct InstrumentOutput {
 }
 
 /// Everything about the Run that does not change from day to day.
-struct RunContext<'a> {
+pub(crate) struct RunContext<'a> {
     rules: &'a RunRules,
     /// The player's answers to interactive Random Events.
     decisions: &'a [Decision],
@@ -197,6 +211,11 @@ struct RunContext<'a> {
     storage_mb: f64,
     /// Budget left after the Design's cost, before anything is bought during the Run.
     budget_left_usd: f64,
+    /// The new Random Events of this Run, planned at the start.
+    pub(crate) plan: Plan,
+    pub(crate) event_specs: &'a [EventSpec],
+    pub(crate) facts: Facts,
+    pub(crate) required_science_value: f64,
 }
 
 const NO_EVENTS: EventTuning = EventTuning {
@@ -217,6 +236,7 @@ impl<'a> RunContext<'a> {
         r: &super::resources::Resolved,
         res: &Resources,
         decisions: &'a [Decision],
+        seed: u64,
     ) -> Self {
         let chance = |t: ReliabilityTier| catalog.tier(t).map_or(0.0, |s| s.daily_failure_chance);
         let part = |id: &str, name: &str, tier: ReliabilityTier, critical: bool| Part {
@@ -249,10 +269,13 @@ impl<'a> RunContext<'a> {
             Some(cap) => min_days.min(cap.max(0.0).floor() as u32),
             None => min_days,
         };
+        let tuning = r.scenario.map_or(NO_EVENTS, |s| s.events.clone());
+        let facts = facts(r, design);
+        let plan = plan(&catalog.events, tuning.new_events_min, tuning.new_events_max, planned_days, seed, &facts);
         RunContext {
             rules: &catalog.run_rules,
             decisions,
-            tuning: r.scenario.map_or(NO_EVENTS, |s| s.events.clone()),
+            tuning,
             planned_days,
             parts,
             instruments,
@@ -267,6 +290,10 @@ impl<'a> RunContext<'a> {
             downlink_mb_per_day: res.downlink_mb_per_day,
             storage_mb: computer.storage_mb,
             budget_left_usd: res.budget_usd - res.cost.total_usd,
+            plan,
+            event_specs: &catalog.events,
+            facts,
+            required_science_value: r.scenario.map_or(0.0, |s| s.required_science_value),
         }
     }
 }
@@ -305,6 +332,8 @@ pub(crate) struct RunState {
     ended: bool,
     /// The battery has stopped covering the eclipse (reported once).
     battery_short: bool,
+    /// What the new Random Events keep over the Run.
+    pool: EventState,
 }
 
 impl RunState {
@@ -327,6 +356,7 @@ impl RunState {
             taken: Vec::new(),
             ended: false,
             battery_short: false,
+            pool: EventState::new(ctx.facts.clone()),
         }
     }
 }
@@ -366,7 +396,7 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
         day_events.push(event);
     }
     if draws.outage && s.outage_days_left == 0 {
-        let prompt = decisions::outage_prompt(s.day, tuning, choices, ctx.budget_left_usd - s.extra_cost_usd);
+        let prompt = decisions::outage_prompt(s.day, tuning, choices, budget_left(ctx, s));
         let (choice, by_player) = decisions::chosen(&prompt, ctx.decisions);
         let buy = choice == decisions::BUY_STATION_TIME;
         let cost_usd = if buy { choices.outage_station_time_cost_usd } else { 0.0 };
@@ -387,9 +417,15 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
         s.station_bought = buy;
         s.extra_cost_usd += cost_usd;
     }
+    // ---- new Random Events: their effects start today; the day's factors come from every effect active.
+    let fired = event_flow::on_day(ctx, s.day, budget_left(ctx, s), &mut s.pool, ctx.decisions);
+    day_events.extend(fired.events);
+    s.extra_cost_usd += fired.cost_usd;
+    s.science_value += fired.science_bonus;
+    let m = s.pool.modifiers(s.day);
     for (i, kind) in ComponentKind::DRAW_ORDER.into_iter().enumerate() {
         let Some(part) = &ctx.parts[i] else { continue };
-        if s.failed[i] || draws.component_rolls[i] >= part.daily_failure_chance * multiplier {
+        if s.failed[i] || draws.component_rolls[i] >= part.daily_failure_chance * multiplier * m.failure_chance {
             continue;
         }
         s.failed[i] = true;
@@ -426,9 +462,10 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
     let degraded = ctx.rules.degraded_output_fraction;
     let failed = s.failed;
     let output = |i: usize| if failed[i] { degraded } else { 1.0 };
-    let generation_w = ctx.generation_w * output(SOLAR);
+    let generation_w = ctx.generation_w * output(SOLAR) * m.power;
     let power_ratio = if ctx.consumption_w > 0.0 { (generation_w / ctx.consumption_w).min(1.0) } else { 1.0 };
-    let capacity_wh = s.battery_capacity_wh * output(BATTERY);
+    // An event's lower capacity is for today only; it never wears the battery.
+    let capacity_wh = s.battery_capacity_wh * output(BATTERY) * m.battery_capacity;
     // Share of each eclipse the battery carries; the Instruments are off for the rest of it.
     let (eclipse_covered, battery_charge, battery_state) = if ctx.eclipse_energy_wh <= 0.0 {
         (1.0, 1.0, GaugeState::Ok)
@@ -450,20 +487,21 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
     } else {
         1.0
     };
-    if battery_state == GaugeState::Violated && !s.battery_short && !s.ended {
+    // Reported only for the battery's own shortfall, never on a day an event lowers its capacity.
+    if battery_state == GaugeState::Violated && !s.battery_short && !s.ended && m.battery_capacity >= 1.0 {
         s.battery_short = true;
         if let Some(battery) = &ctx.parts[BATTERY] {
             let worn = s.battery_capacity_wh < ctx.battery_capacity_wh;
             day_events.push(events::battery_shortfall(&battery.id, &battery.name, ctx.eclipse_minutes, worn));
         }
     }
-    let safe_mode = s.safe_mode_days_left > 0;
+    let safe_mode = s.safe_mode_days_left > 0 || m.instruments_off;
     let operating_fraction = if safe_mode || s.ended { 0.0 } else { power_ratio * battery_ratio };
 
     // ---- Data: produce, store, send down, lose what does not fit
-    let pointing = output(ATTITUDE);
+    let pointing = output(ATTITUDE) * m.pointing;
     let (produced_mb, produced_value) = ctx.instruments.iter().fold((0.0, 0.0), |(mb, value), i| {
-        let made = i.data_mb_per_day * operating_fraction * if i.needs_fine_pointing { pointing } else { 1.0 };
+        let made = i.data_mb_per_day * operating_fraction * if i.needs_fine_pointing { pointing } else { 1.0 } * m.data;
         (mb + made, value + made * i.science_per_mb)
     });
     s.produced_mb += produced_mb;
@@ -471,12 +509,12 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
     s.stored_value += produced_value;
 
     let ground_up = (s.outage_days_left == 0 || s.station_bought) && !s.ended;
-    let downlink_mb = if ground_up { ctx.downlink_mb_per_day * output(COMMS) } else { 0.0 };
+    let downlink_mb = if ground_up { ctx.downlink_mb_per_day * output(COMMS) * m.downlink } else { 0.0 };
     let sent = take(s, downlink_mb.min(s.stored_mb));
     s.delivered_mb += sent.0;
     s.science_value += sent.1;
 
-    let storage_mb = ctx.storage_mb * output(COMPUTER);
+    let storage_mb = ctx.storage_mb * output(COMPUTER) * m.storage;
     if s.stored_mb > storage_mb {
         let lost = take(s, s.stored_mb - storage_mb);
         s.lost_mb += lost.0;
@@ -502,6 +540,11 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
             .collect(),
         events: day_events,
     }
+}
+
+/// Budget left now: after the Design's cost and everything bought during the Run, plus anything gained.
+fn budget_left(ctx: &RunContext, s: &RunState) -> f64 {
+    ctx.budget_left_usd - s.extra_cost_usd + s.pool.budget_gained_usd
 }
 
 /// Removes `mb` of stored Data with its share of the stored Science Value; returns both.

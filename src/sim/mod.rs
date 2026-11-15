@@ -28,7 +28,7 @@ pub use decisions::{Decision, DecisionOption, DecisionPrompt};
 pub use design::*;
 pub use design_facts::DesignFact;
 pub use event_catalog::*;
-pub use events::{EventKind, RandomEvent};
+pub use events::{CatalogEvent, EventKind, RandomEvent};
 pub use objectives::{
     ObjectiveOutlook, ObjectiveResult, ObjectiveRule, ObjectiveSpec, objective_outlook, scenario_objectives,
 };

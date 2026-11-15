@@ -4,7 +4,7 @@ mod common;
 
 use common::*;
 use spaceooops::scene::{self, Cue, Fate, SceneInputs, SceneSpec, Screen, Shot};
-use spaceooops::sim::{load_catalog, run, CauseKind, Catalog, Design, Pick, ReliabilityTier::Basic, RunResult};
+use spaceooops::sim::{run, CauseKind, Catalog, Design, Pick, ReliabilityTier::Basic, RunResult};
 
 fn debrief_spec(c: &Catalog, d: &Design, scenario: &str, r: &RunResult) -> SceneSpec {
     scene::build(&SceneInputs {
@@ -74,7 +74,7 @@ fn fate_of(spec: &SceneSpec) -> Fate {
 
 #[test]
 fn a_success_holds_the_hero_shot_with_the_spacecraft() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     let r = (0..50).map(|s| run(&c, &d, CROP_WATCH, s)).find(|r| r.debrief.success).expect("a Success");
     let spec = debrief_spec(&c, &d, CROP_WATCH, &r);
@@ -87,7 +87,7 @@ fn a_success_holds_the_hero_shot_with_the_spacecraft() {
 
 #[test]
 fn the_verdict_picks_the_shot_for_every_seeded_run() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let (mut successes, mut failures) = (0, 0);
     for (scenario, design, r) in runs(&c) {
         let spec = debrief_spec(&c, &design, scenario, &r);
@@ -149,7 +149,7 @@ fn a_failed_component_picks_the_visual_by_what_it_does() {
 
 #[test]
 fn each_failure_visual_is_reached_by_some_real_run_and_follows_its_main_cause() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let mut seen = std::collections::BTreeSet::new();
     for (scenario, design, r) in runs(&c) {
         if r.debrief.success {
@@ -175,7 +175,7 @@ fn each_failure_visual_is_reached_by_some_real_run_and_follows_its_main_cause() 
 
 #[test]
 fn the_failure_visual_reaches_the_bridge_as_a_camel_case_shot_and_scene() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let (scenario, design, r) = runs(&c)
         .into_iter()
         .find(|(_, _, r)| !r.debrief.success && r.debrief.causes.first().is_some_and(|c| c.kind == CauseKind::LifetimeShortfall))
@@ -197,7 +197,7 @@ fn a_debrief_without_a_run_has_no_scene_and_keeps_the_old_shot() {
 
 #[test]
 fn other_screens_have_no_debrief_scene() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     let r = run(&c, &d, CROP_WATCH, 1);
     let spec = run_spec(&c, &d, CROP_WATCH, &r, 3.0);
@@ -206,7 +206,7 @@ fn other_screens_have_no_debrief_scene() {
 
 #[test]
 fn every_run_that_failed_to_launch_still_gets_a_failure_shot() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let mut d = crop_watch_known_good();
     d.launch_vehicle = None; // never passes Launch Review
     let r = run(&c, &d, CROP_WATCH, 1);
@@ -223,7 +223,7 @@ fn verdict_cues(prev: &SceneSpec, now: &SceneSpec) -> Vec<Cue> {
 
 #[test]
 fn arriving_from_the_run_plays_the_verdict_cue_once() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let all = runs(&c);
     let (s, d, win) = all.iter().find(|(_, _, r)| r.debrief.success).unwrap();
     let (fs, fd, loss) = all.iter().find(|(_, _, r)| !r.debrief.success && !r.timeline.is_empty()).unwrap();
@@ -243,7 +243,7 @@ fn arriving_from_the_run_plays_the_verdict_cue_once() {
 
 #[test]
 fn skipping_from_the_middle_of_the_run_still_plays_the_verdict() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     let r = (0..50).map(|s| run(&c, &d, CROP_WATCH, s)).find(|r| r.debrief.success).unwrap();
     let mid = run_spec(&c, &d, CROP_WATCH, &r, 2.5);
@@ -252,7 +252,7 @@ fn skipping_from_the_middle_of_the_run_still_plays_the_verdict() {
 
 #[test]
 fn a_debrief_reached_from_anywhere_but_the_run_is_silent() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     let r = run(&c, &d, CROP_WATCH, 1);
     let debrief = debrief_spec(&c, &d, CROP_WATCH, &r);
@@ -264,7 +264,7 @@ fn a_debrief_reached_from_anywhere_but_the_run_is_silent() {
 
 #[test]
 fn leaving_the_debrief_plays_no_verdict_cue() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     let r = run(&c, &d, CROP_WATCH, 1);
     let debrief = debrief_spec(&c, &d, CROP_WATCH, &r);
@@ -275,7 +275,7 @@ fn leaving_the_debrief_plays_no_verdict_cue() {
 
 #[test]
 fn modify_design_returns_to_the_hangar_with_the_same_spacecraft() {
-    let c = load_catalog().unwrap();
+    let c = legacy_catalog();
     let d = crop_watch_known_good();
     let r = run(&c, &d, CROP_WATCH, 1);
     let debrief = debrief_spec(&c, &d, CROP_WATCH, &r);

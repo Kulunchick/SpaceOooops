@@ -1,11 +1,11 @@
 //! The Run through the public `sim` interface: timeline, Random Events, Success and determinism.
 mod common;
 
-use common::{CROP_WATCH, crop_watch_known_good};
+use common::{CROP_WATCH, crop_watch_known_good, legacy_catalog};
 use spaceooops::sim::*;
 
 fn fly(design: &Design, seed: u64) -> RunResult {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     run(&catalog, design, CROP_WATCH, seed)
 }
 
@@ -58,7 +58,7 @@ fn random_events_explain_themselves() {
 const SEEDS: std::ops::Range<u64> = 0..300;
 
 fn success_rate(design: &Design) -> f64 {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     let wins = SEEDS.filter(|&seed| run(&catalog, design, CROP_WATCH, seed).debrief.success).count();
     let rate = wins as f64 / SEEDS.count() as f64;
     eprintln!("success rate {rate:.3} for {design:?}");
@@ -142,7 +142,7 @@ fn an_all_basic_design_does_visibly_worse_than_flight_proven() {
 
 #[test]
 fn flight_proven_components_fail_less_often_than_basic() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     let failures = |design: &Design| -> usize {
         SEEDS
             .map(|seed| {
@@ -162,7 +162,7 @@ fn flight_proven_components_fail_less_often_than_basic() {
 
 #[test]
 fn a_fatal_failure_ends_the_run_early() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     let ended_early = SEEDS
         .map(|seed| run(&catalog, &all_basic(), CROP_WATCH, seed))
         .find(|r| r.timeline.len() < 365)
@@ -175,7 +175,7 @@ fn a_fatal_failure_ends_the_run_early() {
 
 #[test]
 fn an_empty_design_or_unknown_scenario_flies_badly_without_panicking() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     assert!(!run(&catalog, &Design::default(), CROP_WATCH, 7).debrief.success);
     let r = run(&catalog, &crop_watch_known_good(), "no-such-scenario", 7);
     assert!(!r.debrief.success);
@@ -192,7 +192,7 @@ fn unlaunchable() -> Design {
 
 #[test]
 fn a_design_that_fails_launch_review_never_flies_scores_or_succeeds() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     for design in [unlaunchable(), Design::default()] {
         assert!(!launch_review(&catalog, &design, CROP_WATCH).can_launch);
         for seed in 0..20 {
@@ -219,7 +219,7 @@ fn the_debrief_says_how_the_run_ended() {
     let done = fly(&crop_watch_known_good(), 1).debrief;
     assert!(done.ending.to_lowercase().contains("planned mission complete"), "{}", done.ending);
     assert!(done.stats.science_met && done.stats.lifetime_met);
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     let early = SEEDS
         .map(|seed| run(&catalog, &all_basic(), CROP_WATCH, seed))
         .find(|r| r.timeline.len() < 365)

@@ -5,7 +5,7 @@ use common::*;
 use spaceooops::sim::*;
 
 fn catalog() -> Catalog {
-    load_catalog().unwrap()
+    legacy_catalog()
 }
 
 /// Same Design with every Component on the cheaper, less reliable Basic tier.

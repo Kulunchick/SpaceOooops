@@ -1,11 +1,11 @@
 //! The Score breakdown in the Debrief.
 mod common;
 
-use common::{CROP_WATCH, crop_watch_known_good};
+use common::{CROP_WATCH, crop_watch_known_good, legacy_catalog};
 use spaceooops::sim::*;
 
 fn debrief(design: &Design, seed: u64) -> Debrief {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     run(&catalog, design, CROP_WATCH, seed).debrief
 }
 

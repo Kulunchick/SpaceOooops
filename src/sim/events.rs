@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use super::catalog::EventTuning;
 use super::decisions::DecisionPrompt;
+use super::event_catalog::{EventGroup, SceneEffect};
 use super::rng::Rng;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -13,6 +14,8 @@ pub enum EventKind {
     /// The battery can no longer carry the spacecraft through a whole eclipse (too small, or worn by deep
     /// discharges), so the Instruments switch off for part of every orbit. Not fatal by itself.
     BatteryShortfall,
+    /// One of the new Random Events from `data/events.toml`; `RandomEvent::catalog` says which.
+    Catalog,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -28,6 +31,26 @@ pub struct RandomEvent {
     /// For an event with a prompt: the id of the option that applied (the player's, or the default).
     #[serde(default)]
     pub choice: Option<String>,
+    /// For a new Random Event (`EventKind::Catalog`): which one, and what the scene shows.
+    #[serde(default)]
+    pub catalog: Option<CatalogEvent>,
+}
+
+/// What a new Random Event carries beyond its text: its catalog entry and what the 3D scene shows for it.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CatalogEvent {
+    /// `EventSpec::id` in `data/events.toml`.
+    pub id: String,
+    pub group: EventGroup,
+    pub scene: SceneEffect,
+    /// A star model for a fly-by or a visitor.
+    #[serde(default)]
+    pub model: Option<String>,
+    /// How many days the scene shows the effect: its longest timed effect, 1..=5.
+    pub scene_days: u32,
+    /// A Design choice softened the event.
+    #[serde(default)]
+    pub softened: bool,
 }
 
 /// The Component kinds that carry a Reliability Tier and can fail, in their fixed draw order.
@@ -86,6 +109,7 @@ pub(crate) fn solar_flare(tuning: &EventTuning) -> RandomEvent {
         component: None,
         prompt: None,
         choice: None,
+        catalog: None,
     }
 }
 
@@ -96,6 +120,7 @@ pub(crate) fn solar_flare_ridden_out() -> RandomEvent {
         component: None,
         prompt: None,
         choice: None,
+        catalog: None,
     }
 }
 
@@ -109,6 +134,7 @@ pub(crate) fn ground_station_outage_covered(tuning: &EventTuning) -> RandomEvent
         component: None,
         prompt: None,
         choice: None,
+        catalog: None,
     }
 }
 
@@ -122,6 +148,7 @@ pub(crate) fn ground_station_outage(tuning: &EventTuning) -> RandomEvent {
         component: None,
         prompt: None,
         choice: None,
+        catalog: None,
     }
 }
 
@@ -133,7 +160,7 @@ pub(crate) fn component_failure(kind: ComponentKind, id: &str, name: &str, fatal
     } else {
         format!("{cause} {name} failed. The spacecraft carries on with less {}.", kind.lost_capability())
     };
-    RandomEvent { kind: EventKind::ComponentFailure, text, component: Some(id.to_string()), prompt: None, choice: None }
+    RandomEvent { kind: EventKind::ComponentFailure, text, component: Some(id.to_string()), prompt: None, choice: None, catalog: None }
 }
 
 pub(crate) fn battery_shortfall(id: &str, name: &str, eclipse_minutes: f64, worn: bool) -> RandomEvent {
@@ -150,6 +177,7 @@ pub(crate) fn battery_shortfall(id: &str, name: &str, eclipse_minutes: f64, worn
         component: Some(id.to_string()),
         prompt: None,
         choice: None,
+        catalog: None,
     }
 }
 

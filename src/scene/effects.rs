@@ -124,6 +124,8 @@ pub fn all(run: &RunResult, tuning: Option<&EventTuning>) -> Vec<Effect> {
                     };
                     push(id, kind, start, days);
                 }
+                // New Random Events: their six effect kinds arrive with More Random Events ticket 08.
+                EventKind::Catalog => {}
             }
         }
         // Ground contact: a beam on every day Data came down, to whichever station carried it.

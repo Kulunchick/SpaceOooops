@@ -7,7 +7,7 @@ use spaceooops::sim::*;
 use ReliabilityTier::{Basic, FlightProven};
 
 fn fly(design: &Design, scenario: &str, seed: u64) -> Debrief {
-    run(&load_catalog().unwrap(), design, scenario, seed).debrief
+    run(&legacy_catalog(), design, scenario, seed).debrief
 }
 
 fn cause(d: &Debrief, kind: CauseKind) -> &Cause {
@@ -71,7 +71,7 @@ fn all_basic() -> Design {
 
 #[test]
 fn a_component_failure_that_ends_the_run_early_names_the_component_its_tier_and_the_day() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     let r = (0..300)
         .map(|seed| run(&catalog, &all_basic(), CROP_WATCH, seed))
         .find(|r| r.timeline.len() < 365)
@@ -96,7 +96,7 @@ fn a_component_failure_that_ends_the_run_early_names_the_component_its_tier_and_
 
 #[test]
 fn the_score_breakdown_adds_up_to_the_score_and_an_early_end_is_a_negative_line() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     for seed in 0..60 {
         for design in [all_basic(), crop_watch_known_good()] {
             let d = run(&catalog, &design, CROP_WATCH, seed).debrief;
@@ -114,7 +114,7 @@ fn the_score_breakdown_adds_up_to_the_score_and_an_early_end_is_a_negative_line(
 
 #[test]
 fn a_design_that_cannot_launch_gives_its_launch_review_violations_as_causes() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     let mut design = crop_watch_known_good();
     design.attitude = Some(Pick::new("magnetorquers", FlightProven));
     let violations = launch_review(&catalog, &design, CROP_WATCH).violations;
@@ -186,7 +186,7 @@ fn an_orbit_that_comes_down_too_soon_produces_a_drag_cause() {
 
 #[test]
 fn solar_flares_that_cost_science_are_told() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     let design = space_weather_sentinel_known_good();
     let flare_runs = (0..100)
         .map(|seed| run(&catalog, &design, SPACE_WEATHER_SENTINEL, seed).debrief)
@@ -217,7 +217,7 @@ fn the_match_follows_the_objective_first_then_the_spacecraft_size() {
     let mut design = space_weather_sentinel_known_good();
     design.structure = Some("cubesat-3u".into());
     design.instruments = vec!["particle-detector".into()];
-    assert!(launch_review(&load_catalog().unwrap(), &design, SPACE_WEATHER_SENTINEL).can_launch);
+    assert!(launch_review(&legacy_catalog(), &design, SPACE_WEATHER_SENTINEL).can_launch);
     let m = fly(&design, SPACE_WEATHER_SENTINEL, 1).real_mission_match.unwrap();
     assert!(m.name.starts_with("CSSWE"), "{m:#?}");
     // The relay flown low still matches by objective (communications), and says the Orbit differs.
@@ -231,7 +231,7 @@ fn the_match_follows_the_objective_first_then_the_spacecraft_size() {
 
 #[test]
 fn every_real_mission_in_the_catalog_has_a_source_link_and_a_fact() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     assert!(catalog.real_missions.len() >= 6);
     for m in &catalog.real_missions {
         assert!(m.url.starts_with("https://") && m.blurb.len() > 30 && m.year >= 1990, "{m:#?}");
@@ -242,7 +242,7 @@ fn every_real_mission_in_the_catalog_has_a_source_link_and_a_fact() {
 
 #[test]
 fn every_design_parameter_gauge_and_component_category_has_a_why_it_matters_text() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     let labels = [
         // gauges and resources
         "Budget", "Mass", "Power", "Data", "Lifetime", "Cost", "Volume",
@@ -262,7 +262,7 @@ fn every_design_parameter_gauge_and_component_category_has_a_why_it_matters_text
 
 #[test]
 fn only_crop_watch_carries_first_time_hints() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     for s in &catalog.scenarios {
         assert_eq!(!s.tutorial_hints.is_empty(), s.id == CROP_WATCH, "{}", s.id);
     }
@@ -271,7 +271,7 @@ fn only_crop_watch_carries_first_time_hints() {
 #[test]
 #[ignore = "prints example Debriefs for review: cargo test --test debrief -- --ignored --nocapture"]
 fn print_examples() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     let mut battery = crop_watch_known_good();
     battery.battery = Some(Pick::new("battery-s", FlightProven));
     let mut uhf = crop_watch_known_good();
@@ -316,7 +316,7 @@ fn print_examples() {
 
 #[test]
 fn causes_are_capped_to_the_few_that_mattered() {
-    let catalog = load_catalog().unwrap();
+    let catalog = legacy_catalog();
     for seed in 0..40 {
         let d = run(&catalog, &all_basic(), CROP_WATCH, seed).debrief;
         assert!(d.causes.len() <= catalog.cause_rules.max_causes, "{}", texts(&d));

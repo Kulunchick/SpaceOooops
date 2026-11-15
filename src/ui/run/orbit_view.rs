@@ -81,6 +81,7 @@ fn event_icon(kind: EventKind) -> &'static str {
         EventKind::SolarFlare => "\u{2600}",
         EventKind::GroundStationOutage => "\u{1F4E1}",
         EventKind::BatteryShortfall => "\u{1F50B}",
+        EventKind::Catalog => "\u{2604}",
     }
 }
 

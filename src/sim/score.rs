@@ -11,6 +11,8 @@ pub enum ScoreLineKind {
     MassMargin,
     PersonalObjective,
     Penalty,
+    /// A bonus from a new Random Event (helping rescuers); never part of Science Value.
+    EventBonus,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
