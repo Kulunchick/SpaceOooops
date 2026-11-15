@@ -1,4 +1,4 @@
-//! New Random Events that depend on the Design (More Random Events, ticket 05): conditions, "more likely",
+//! New Random Events that depend on the Design (More Random Events): conditions, "more likely",
 //! mitigation, and what the Debrief says about the choice behind an event. Seen through `run` and `parse_events`.
 mod common;
 

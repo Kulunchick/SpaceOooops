@@ -11,11 +11,10 @@
 #   effects     what it does: { mechanic, strength, days | to_end, delay, when }
 #               strength is a signed share: -0.5 = half as much; downlink -1.0 = no downlink
 # Texts state durations and percentages: change them together with the numbers.
-# Each ticket appends its events under its own banner of three comment lines.
+# Events are grouped by topic under '# ----' headings; the order does not matter to the game.
 
-# ==== 01: first events, passive =============================================
+# ---- First events, passive
 # Power, Instruments off and downlink only.
-# ============================================================================
 
 [[events]]
 id = "station-looks-into-the-sun"
@@ -89,9 +88,8 @@ scene = "link-interference"
 real_life = "Small missions often run on a handful of people, and a missed pass because nobody could reach the console is a classic of university ground stations."
 effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]
 
-# ==== 03: events with a question ============================================
+# ---- Events with a question
 # Two options each, a stated price, a free default. Effects sit on the options.
-# ============================================================================
 
 [[events]]
 id = "digger-cut-the-cable"
@@ -312,9 +310,8 @@ log = "You thanked the university and declined."
 note = "nothing changed"
 effects = []
 
-# ==== 02: remaining mechanics, passive events ================================
+# ---- Remaining mechanics, passive events
 # Data, storage, pointing, battery capacity, failure chance, Budget, Science Value bonus, extra day of Data.
-# ============================================================================
 
 [[events]]
 id = "thermostat-lost-its-mind"
@@ -446,9 +443,8 @@ scene = "bonus-glow"
 real_life = "Datasheets are conservative; real solar cells often beat their rated output early in life."
 effects = [{ mechanic = "data", strength = 0.03, to_end = true }]
 
-# ==== 06: the rescue bonus ====================================================
+# ---- The rescue bonus
 # Helping costs planned science and pays its own Score line, never Science Value.
-# ============================================================================
 
 [[events]]
 id = "rescuers-ask-for-flood-images"
@@ -481,9 +477,8 @@ log = "You stayed on the science plan and the rescuers found other images."
 note = "the planned science went on"
 effects = []
 
-# ==== 04: gamble options ====================================================
+# ---- Gamble options
 # Each question has one safe free default and one gamble (chance + bad outcome).
-# ============================================================================
 
 [[events]]
 id = "debris-on-a-collision-course"
@@ -748,9 +743,8 @@ effects = []
 chance = 0.7
 bad = { log = "The dragon was not impressed and scratched a panel. The spacecraft makes 3% less Power for the rest of the Mission.", note = "the dragon scratched a panel and Power fell by 3% for good", effects = [{ mechanic = "power", strength = -0.03, to_end = true }] }
 
-# ==== 05: events that depend on the Design ===================================
+# ---- Events that depend on the Design
 # Conditions (only, more_likely), mitigations, and `when` effects; 12, 17 and 21 ask a question.
-# ============================================================================
 
 [[events]]
 id = "micrometeoroid-through-a-panel"

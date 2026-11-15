@@ -1,5 +1,5 @@
-//! Which new Random Events a Run gets, and on which days, seen through the Run interface (More Random Events,
-//! ticket 01): a count from the Scenario, each event at most once, on distinct days, from their own random
+//! Which new Random Events a Run gets, and on which days, seen through the Run interface (More Random Events):
+//! a count from the Scenario, each event at most once, on distinct days, from their own random
 //! stream, so the built-in events fall exactly as before.
 mod common;
 
@@ -129,7 +129,7 @@ fn a_new_event_carries_its_catalog_id_group_and_scene_and_logs_its_text() {
         assert!((1..=5).contains(&catalog.scene_days));
         assert!(e.component.is_none());
         match &spec.question {
-            // a question event asks, and logs the text of the option that applied (ticket 03)
+            // a question event asks, and logs the text of the option that applied
             Some(q) => {
                 assert!(e.prompt.is_some());
                 let option = q.options.iter().find(|o| Some(&o.id) == e.choice.as_ref()).expect("an option id");

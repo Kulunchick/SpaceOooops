@@ -1,5 +1,5 @@
 //! The Debrief's real-life lines, the separate Score line of a Score bonus, and the shipped rescue event (More
-//! Random Events, ticket 06).
+//! Random Events).
 mod common;
 
 use common::*;

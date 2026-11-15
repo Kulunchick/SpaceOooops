@@ -1,6 +1,6 @@
-//! New Random Events that ask the player a question (More Random Events, ticket 03): the prompt, the choice
+//! New Random Events that ask the player a question (More Random Events): the prompt, the choice
 //! applying that option's mechanic, defaults, unaffordable options, the count per Run and the Debrief notes.
-//! Test catalogs use only mechanics that exist from ticket 01 (instruments off, downlink, power).
+//! Test catalogs use only the first mechanics (instruments off, downlink, power).
 mod common;
 
 use common::*;
@@ -201,7 +201,7 @@ fn a_badly_formed_question_is_refused_when_the_catalog_loads() {
 }
 
 #[test]
-fn the_shipped_catalog_has_the_eight_question_events_of_this_ticket() {
+fn the_shipped_catalog_has_the_eight_question_events() {
     let c = load_catalog().unwrap();
     for id in [
         "digger-cut-the-cable",

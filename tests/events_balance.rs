@@ -1,4 +1,4 @@
-//! The full pool of new Random Events and its balance (More Random Events, ticket 07): the shipped pool has the
+//! The full pool of new Random Events and its balance (More Random Events): the shipped pool has the
 //! agreed size and split and names no real country or agency; every Scenario gives a Run 5 to 8 new events, 3 or
 //! 4 of them with a question, none of them ending the Mission; and together they move Science Value by about a
 //! tenth at most, so the Design still decides Success. All through the public `sim` interface.

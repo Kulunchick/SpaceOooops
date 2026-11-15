@@ -116,20 +116,13 @@ impl EventState {
     }
 }
 
-/// Starts one effect of an event that fired on `day`. One arm per mechanic; a later ticket fills its own arm.
+/// Starts one effect of an event that fired on `day`: a timed mechanic becomes an active effect, an instant one
+/// acts now.
 pub(crate) fn start(effect: &EffectSpec, day: u32, st: &mut EventState, out: &mut DayOutcome) {
     match effect.mechanic {
-        // ---- 01
-        Mechanic::Power => st.timed(effect, day),
-        Mechanic::InstrumentsOff => st.timed(effect, day),
-        Mechanic::Downlink => st.timed(effect, day),
-        // ---- 02, timed
-        Mechanic::Data => st.timed(effect, day),
-        Mechanic::Storage => st.timed(effect, day),
-        Mechanic::Pointing => st.timed(effect, day),
-        Mechanic::BatteryCapacity => st.timed(effect, day),
-        Mechanic::FailureChance => st.timed(effect, day),
-        // ---- 02, instant
+        Mechanic::ExtraDataDay => {
+            st.timed(&EffectSpec { strength: 1.0, days: Some(1), to_end: false, ..effect.clone() }, day)
+        }
         Mechanic::Budget => {
             if effect.strength >= 0.0 {
                 st.budget_gained_usd += effect.strength;
@@ -138,15 +131,15 @@ pub(crate) fn start(effect: &EffectSpec, day: u32, st: &mut EventState, out: &mu
             }
         }
         Mechanic::ScienceBonus => out.science_bonus_share += effect.strength,
-        Mechanic::ExtraDataDay => {
-            st.timed(&EffectSpec { strength: 1.0, days: Some(1), to_end: false, ..effect.clone() }, day)
-        }
-        // ---- 06
         Mechanic::ScoreBonus => st.score_lines.push(ScoreLine {
             kind: ScoreLineKind::EventBonus,
             label: effect.label.clone().unwrap_or_default(),
             points: effect.strength,
         }),
+        timed => {
+            debug_assert!(timed.is_timed());
+            st.timed(effect, day)
+        }
     }
 }
 

@@ -3,7 +3,7 @@
 use super::event_catalog::EventGroup;
 use super::event_effects::EventState;
 
-/// Ticket 03 (04 for gambles): one note per question answered or defaulted, with its day:
+/// One note per question answered or defaulted, with its day:
 /// `Day N, {title}: you chose "{label}". {note}.`
 pub(crate) fn question_notes(pool: &EventState) -> Vec<(u32, String)> {
     pool.fired
@@ -29,7 +29,7 @@ fn sentence(note: &str) -> String {
     chars.next().map_or(String::new(), |c| c.to_uppercase().chain(chars).collect())
 }
 
-/// Ticket 06: `{title}: {real_life}` for each real event that fired, once, in day order.
+/// `{title}: {real_life}` for each real event that fired, once, in day order.
 pub(crate) fn real_life_lines(pool: &EventState) -> Vec<String> {
     let mut seen: Vec<&str> = Vec::new();
     let mut lines = Vec::new();

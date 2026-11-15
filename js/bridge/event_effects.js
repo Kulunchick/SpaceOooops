@@ -1,4 +1,4 @@
-// The new Random Events in the Run scene (More Random Events ticket 08). Rust decides which of the six effect
+// The new Random Events in the Run scene. Rust decides which of the six effect
 // kinds is active and for how long (src/scene/effects.rs); this file only draws them, from the playback position
 // inside each effect, like effects.js: no timers, so a pause freezes them and a skip leaves nothing behind.
 //
@@ -10,7 +10,7 @@
 //   visitor           a small saucer holds beside the spacecraft and bobs, with a pale beam towards it
 //
 // Everything is generic low-poly geometry in the spacecraft's neighbourhood, sized by the halo ring (one halo
-// radius = U), so it reads at phone size. `effect.model` names a star model (ticket 09 adds js/bridge/star_models.js);
+// radius = U), so it reads at phone size. `effect.model` names a star model (js/bridge/star_models.js);
 // an unknown or absent name draws the generic shape. With reduced motion the effect holds one still pose.
 //
 // `frame(effects, playback)` returns what the spacecraft itself must show, for effects.js to merge into its
@@ -126,7 +126,7 @@ const BUILDERS = {
   visitor: buildVisitor,
 };
 
-/** A named star model, when ticket 09 has one; otherwise the generic shape. */
+/** A named star model, when star_models.js has one; otherwise the generic shape. */
 function modelFor(effect, generic, low) {
   const make = effect.model ? MODELS[effect.model] : null;
   if (!make) return generic;

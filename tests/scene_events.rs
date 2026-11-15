@@ -1,4 +1,4 @@
-//! Scene Spec: the new Random Events (More Random Events ticket 08) as six effect kinds in the Run scene, each
+//! Scene Spec: the new Random Events as six effect kinds in the Run scene, each
 //! with its own Cue. Built from the Run timeline and the playback position only, like the older effects.
 mod common;
 
@@ -232,7 +232,7 @@ fn a_skip_over_an_event_plays_no_cue_for_it() {
     assert!(scene::one_shots(&before, &after).is_empty());
 }
 
-// ---- ticket 09: star models
+// ---- star models
 
 fn model_entry(scene: &str, model: &str) -> String {
     format!(

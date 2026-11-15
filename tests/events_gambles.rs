@@ -1,4 +1,4 @@
-//! Gamble options of new Random Events (More Random Events, ticket 04): the catalog rules, the roll planned
+//! Gamble options of new Random Events (More Random Events): the catalog rules, the roll planned
 //! with the Run, both outcomes through the Run interface, the consequence text and the Debrief note.
 mod common;
 
@@ -165,7 +165,7 @@ fn a_badly_formed_gamble_is_refused_when_the_catalog_loads() {
 }
 
 #[test]
-fn the_shipped_catalog_has_the_gamble_events_of_this_ticket() {
+fn the_shipped_catalog_has_the_gamble_events() {
     let c = load_catalog().unwrap();
     for (id, model) in [
         ("debris-on-a-collision-course", None),

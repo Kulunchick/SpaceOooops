@@ -107,14 +107,14 @@ fn fire(
 
 /// The answer to an event's question.
 struct Asked {
-    /// Shown to the player; `None` until ticket 03.
+    /// Shown to the player.
     prompt: Option<DecisionPrompt>,
     /// Index into the question's options.
     option: usize,
     by_player: bool,
 }
 
-/// Ticket 03: the question as a `DecisionPrompt` (id `day-{day}-event-{event id}`, consequences from
+/// The question as a `DecisionPrompt` (id `day-{day}-event-{event id}`, consequences from
 /// `consequence`, an option the Budget left cannot pay for unavailable), and the player's answer by
 /// `decisions::chosen`, or the default.
 fn ask(spec: &EventSpec, q: &QuestionSpec, day: u32, budget_left_usd: f64, decisions: &[Decision]) -> Asked {
@@ -151,7 +151,7 @@ fn ask(spec: &EventSpec, q: &QuestionSpec, day: u32, budget_left_usd: f64, decis
     Asked { prompt: Some(prompt), option, by_player }
 }
 
-/// Tickets 03, 04: an option's consequence as the player reads it: the data text, the price against the Budget
+/// An option's consequence as the player reads it: the data text, the price against the Budget
 /// left, and for a gamble its odds.
 fn consequence(o: &OptionSpec, budget_left_usd: f64) -> String {
     let mut text = o.consequence.clone();
@@ -169,7 +169,7 @@ fn consequence(o: &OptionSpec, budget_left_usd: f64) -> String {
     }
 }
 
-/// Tickets 03, 04: the outcome of the chosen option: its own log and effects, or for a gamble whose planned
+/// The outcome of the chosen option: its own log and effects, or for a gamble whose planned
 /// `roll` missed its `chance`, the `bad` ones. Returns (log, effects, good).
 fn outcome(o: &OptionSpec, roll: f64) -> (String, Vec<EffectSpec>, bool) {
     match (&o.bad, o.chance) {

@@ -1,5 +1,5 @@
-//! What each mechanic of the new Random Events does to a Run, seen in the day snapshots (More Random Events,
-//! tickets 01 and 02). Each test flies a catalog with one event against the same Run without it: the days the
+//! What each mechanic of the new Random Events does to a Run, seen in the day snapshots (More Random Events).
+//! Each test flies a catalog with one event against the same Run without it: the days the
 //! event holds move as it states, every other day is as before.
 mod common;
 
@@ -150,7 +150,7 @@ fn playback_slows_on_a_day_with_a_new_event() {
     assert!(advance(&without, start, 5.0, 0.25) > start + 1.0);
 }
 
-// ---- ticket 02: the remaining mechanics
+// ---- the remaining mechanics
 
 /// Data made so far (stored + delivered + lost).
 fn made(s: &DaySnapshot) -> f64 {
