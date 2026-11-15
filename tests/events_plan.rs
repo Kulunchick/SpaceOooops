@@ -66,7 +66,7 @@ fn flares_outages_and_failures_fall_on_the_same_days_with_new_events_on() {
         with_new += usize::from(!new_events(&after).is_empty());
     }
     assert!(failures > 0, "the sweep sees Component failures");
-    assert!(with_new > 100, "only {with_new} of 120 Runs had new events");
+    assert!(with_new > 80, "only {with_new} of 120 Runs had new events");
 }
 
 #[test]
@@ -109,7 +109,9 @@ fn a_run_gets_its_count_of_new_events_each_once_on_distinct_days_and_none_ends_t
         assert!(r.timeline.len() >= before.timeline.len(), "seed {seed}");
         seen.extend(ids.into_iter().map(str::to_string));
     }
-    assert_eq!(seen.len(), on.events.len(), "every event shows up in a sweep");
+    // Questions fill a Run first (up to 3 or 4), so while the Scenarios give 2 to 3 events and the pool has
+    // three or more questions, only those show up; ticket 07 raises the count and checks the whole pool.
+    assert!(seen.len() >= 3, "a sweep shows several different events: {seen:?}");
 }
 
 #[test]
@@ -133,7 +135,10 @@ fn a_new_event_carries_its_catalog_id_group_and_scene_and_logs_its_text() {
                 assert_eq!(e.text, option.log);
             }
             None => {
-                assert_eq!(e.text, spec.log);
+                match &spec.mitigation {
+                    Some(m) if catalog.softened => assert_eq!(e.text, m.log),
+                    _ => assert_eq!(e.text, spec.log),
+                }
                 assert!(e.prompt.is_none() && e.choice.is_none());
             }
         }

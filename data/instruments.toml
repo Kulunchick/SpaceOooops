@@ -4,6 +4,7 @@
 
 [[instruments]]
 id = "multispectral-imager"
+optical = true
 # Visual only (3D model).
 shape = "telescope"
 name = "Multispectral imager"
@@ -20,6 +21,7 @@ fit = { crop-watch = 1.0, connect-the-villages = 0.0, space-weather-sentinel = 0
 
 [[instruments]]
 id = "thermal-imager"
+optical = true
 shape = "thermal-camera"
 name = "Thermal infrared imager"
 why = "A camera that measures ground temperature. Dry soil heats up faster than wet soil, so it reveals drought, but it is heavy and power-hungry."
@@ -34,6 +36,7 @@ fit = { crop-watch = 0.8, connect-the-villages = 0.0, space-weather-sentinel = 0
 
 [[instruments]]
 id = "wide-camera"
+optical = true
 shape = "wide-camera"
 name = "Wide-field camera"
 why = "A small, cheap colour camera with a wide view. It does not need precise pointing, but its coarse pictures show little detail about crops."
