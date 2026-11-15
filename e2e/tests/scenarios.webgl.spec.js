@@ -85,6 +85,9 @@ test('hovering the India card turns the globe to its pin and highlights India on
   await expect(canvas).toHaveAttribute('data-flying', 'false', { timeout: 15000 });
   await page.waitForTimeout(500);
   await page.screenshot({ path: 'test-results/brief-india.png' });
+  expect(errors).toEqual([]);
+});
+
 test('hovering the Japan card turns the globe to its pin and highlights Japan only', async ({ page }) => {
   const errors = collectErrors(page);
   await openScenarioSelect(page);
