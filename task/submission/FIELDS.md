@@ -90,7 +90,7 @@ TOOLS AND LANGUAGES
 Rust, WebAssembly, Leptos 0.8, Trunk, JavaScript, three.js 0.186.1, CSS, TOML data files, Playwright browser tests, GitHub Actions and GitHub Pages. The simulation is covered by native Rust tests, and the release build is checked by browser tests before every deploy.
 
 USE OF AI TOOLS
-The idea, the game design and the specification are the team's own work. The code was written with Claude Code, an AI coding assistant by Anthropic, working from the team's specification; this is also stated in the repository README and on the in-game Sources page. The text of this submission was edited with AI assistance. Voice-over generated with ElevenLabs. No image, music or sound effect in the game was made with AI tools, and the demo video shows real gameplay footage.
+The idea, the game design and the specification are the team's own work. The code was written with Claude Code, an AI coding assistant by Anthropic, working from the team's specification; this is also stated in the repository README and on the in-game Sources page. The text of this submission was edited with AI assistance. Voice-over generated with ElevenLabs. The team logo, used as the video thumbnail, is an AI-generated image and carries a visible "AI-generated image" watermark. No image, music or sound effect inside the game was made with AI tools, and the demo video shows real gameplay footage.
 
 NOTICES
 SpaceOooops uses no NASA logos, insignia, mission patches or flags. Real missions are named in plain text only, as factual references. SpaceOooops is not endorsed by NASA.
@@ -100,7 +100,7 @@ SpaceOooops uses no NASA logos, insignia, mission patches or flags. Real mission
 
 ## Use of Super Intelligence (SI)
 
-Dropdown: select the options that match "code generation" (or the closest wording for coding assistants / large language models), "text" editing, and "audio" generation. Do not select image or video generation. Do not select "I did not use SI".
+Dropdown: select "Coding, Debugging, or Troubleshooting", "Writing, Editing, or Translation", "Visual Design or Image Creation" and "Presentation, Video, or Audio". Do not select "Ideation or Brainstorming" or "None".
 
 ```
 Yes.
@@ -111,7 +111,9 @@ Text: the wording of this submission page was edited with AI assistance.
 
 Audio: the voice-over of the demo video was generated with ElevenLabs. This is acknowledged in the video description, in the project description and in the video file's metadata.
 
-Images, video, music and sound effects: none were made with AI tools. The demo video is a recording of real gameplay. The game's music and sounds are CC0 assets by human authors, listed with their sources in the game.
+Images: the team logo, used as the video thumbnail, was generated with an AI image tool. It carries a visible "AI-generated image" watermark. No image inside the game was made with AI tools.
+
+Video, music and sound effects: none were made with AI tools. The demo video is a recording of real gameplay. The game's music and sounds are CC0 assets by human authors, listed with their sources in the game.
 
 No generated content uses or modifies NASA logos, flags or mission identifiers.
 ```
@@ -210,7 +212,7 @@ Source code: https://github.com/Kulunchick/SpaceOooops
 Challenge: Space Mission Design Game, 2026 NASA Space Apps Challenge
 Team SpaceOooops: Mykyta Kalachuk, Artem Voloshyn, Danilo Andronov, Mykhailo Korotaiev, Anastasiia Savenko, Mykola Krasovskyi
 
-Voice-over generated with ElevenLabs. The footage is real gameplay. Music: "Space Flight" by wipics (CC0).
+Voice-over generated with ElevenLabs. The footage is real gameplay. Music: "Space Flight" by wipics (CC0). Thumbnail: the team logo, an AI-generated image (watermarked).
 The game's code was written with Claude Code, an AI coding assistant, from the team's specification.
 
 SpaceOooops is not endorsed by NASA and uses no NASA logos or insignia.
@@ -226,7 +228,7 @@ If the video uses the menu track instead, change the music line to: `Music: "Out
 - [ ] YouTube link opens in a private window without login; pasted into the form.
 - [ ] https://kulunchick.github.io/SpaceOooops/ opens in a private window and shows all seven Scenarios.
 - [ ] Every field above is pasted, in English.
-- [ ] SI dropdown options selected (code, text, audio).
+- [ ] SI dropdown options selected (coding, writing, visual design, presentation/video/audio).
 - [ ] All six members appear on the team's Members tab and are registered for the same Local Event, none waitlisted.
 - [ ] "Terms and Conditions" and "Confirm All Work is Original" boxes checked.
 - [ ] "Submit for Judging" clicked before 23:59 local time, and the confirmation banner appeared.
