@@ -301,8 +301,8 @@ pub(crate) fn validate_effect(effect: &EffectSpec) -> Result<(), String> {
         if effect.days == Some(0) || days == effect.to_end {
             return Err(format!("'{name}' lasts either days >= 1 or to_end = true, exactly one of them"));
         }
-    } else if effect.days.is_some() || effect.to_end {
-        return Err(format!("'{name}' acts once, so it takes neither days nor to_end"));
+    } else if effect.days.is_some() || effect.to_end || effect.delay > 0 {
+        return Err(format!("'{name}' acts once on the event's day, so it takes neither days, to_end nor delay"));
     }
     if effect.mechanic.is_share() && !(-1.0..=1.0).contains(&effect.strength) {
         return Err(format!("'{name}' strength {} is a share and must lie in -1.0..=1.0", effect.strength));
@@ -400,12 +400,17 @@ fn validate_design(e: &EventSpec) -> Result<(), String> {
         if m.log.trim().is_empty() {
             return Err("a mitigation needs log text".to_string());
         }
+        if e.question.is_some() {
+            // The option would still be charged and its log replaced: a question's options carry the trade-off.
+            return Err("an event with a question has no mitigation (put the softer outcome on an option)".to_string());
+        }
         let options = e.question.iter().flat_map(|q| &q.options);
         let all = e.effects.iter().chain(options.clone().flat_map(|o| &o.effects)).chain(
             options.filter_map(|o| o.bad.as_ref()).flat_map(|b| &b.effects),
         );
-        if m.scale != 0.0 && all.into_iter().any(|f| f.mechanic == Mechanic::InstrumentsOff) {
-            return Err("a mitigation of an event with instruments-off must have scale = 0.0, as Instruments off cannot be scaled".to_string());
+        let unscalable = all.into_iter().find(|f| matches!(f.mechanic, Mechanic::InstrumentsOff | Mechanic::ExtraDataDay));
+        if let Some(f) = unscalable.filter(|_| m.scale != 0.0) {
+            return Err(format!("a mitigation of an event with {} must have scale = 0.0, as it cannot be scaled", f.mechanic.name()));
         }
     }
     Ok(())

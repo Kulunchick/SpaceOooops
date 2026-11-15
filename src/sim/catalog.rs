@@ -748,6 +748,13 @@ pub fn validate_catalog(c: &Catalog) -> Result<(), CatalogError> {
         if s.ground_stations.is_empty() {
             return Err(CatalogError::Invalid(format!("scenario '{}' has no ground station", s.id)));
         }
+        if s.ground_stations.len() > 2 {
+            return Err(CatalogError::Invalid(format!(
+                "scenario '{}' has {} ground stations: a main one and at most one backup",
+                s.id,
+                s.ground_stations.len()
+            )));
+        }
     }
     for s in &c.scenarios {
         if s.events.new_events_min > s.events.new_events_max {

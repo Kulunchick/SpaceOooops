@@ -103,6 +103,57 @@ fn a_share_stays_within_minus_one_and_one() {
 }
 
 #[test]
+fn an_instant_effect_has_no_delay() {
+    let msg = error(&GOOD.replace("{ mechanic = \"instruments-off\", days = 2 }", "{ mechanic = \"budget\", strength = -1000.0, delay = 3 }"));
+    assert!(msg.contains("test-event") && msg.contains("budget") && msg.contains("delay"), "{msg}");
+}
+
+#[test]
+fn a_mitigation_cannot_scale_an_extra_day_of_data() {
+    let toml = GOOD.replace("{ mechanic = \"instruments-off\", days = 2 }", "{ mechanic = \"extra-data-day\" }").replace(
+        "effects =",
+        "mitigation = { fact = \"camera\", scale = 0.5, log = \"Half.\" }\neffects =",
+    );
+    let msg = error(&toml);
+    assert!(msg.contains("test-event") && msg.contains("extra-data-day"), "{msg}");
+}
+
+#[test]
+fn an_event_with_a_question_has_no_mitigation() {
+    let toml = r#"
+[[events]]
+id = "asks"
+group = "real"
+title = "Asks"
+scene = "hit"
+real_life = "It happens."
+mitigation = { fact = "camera", scale = 0.0, log = "Shrugged off." }
+
+[events.question]
+text = "Well?"
+default = "no"
+
+[[events.question.options]]
+id = "yes"
+label = "Yes"
+consequence = "Costs money."
+cost_usd = 1000.0
+log = "Yes."
+note = "yes"
+
+[[events.question.options]]
+id = "no"
+label = "No"
+consequence = "Free."
+log = "No."
+note = "no"
+effects = [{ mechanic = "instruments-off", days = 1 }]
+"#;
+    let msg = error(toml);
+    assert!(msg.contains("asks") && msg.contains("mitigation"), "{msg}");
+}
+
+#[test]
 fn the_event_log_marks_fantasy_events_unexplained_and_lucky_ones_lucky() {
     assert_eq!(EventGroup::Fantasy.mark(), Some("Unexplained"));
     assert_eq!(EventGroup::Lucky.mark(), Some("Lucky"));

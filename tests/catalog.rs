@@ -53,6 +53,16 @@ fn a_scenario_without_a_ground_station_is_rejected() {
 }
 
 #[test]
+fn a_scenario_with_more_than_a_main_and_a_backup_station_is_rejected() {
+    let mut catalog = load_catalog().unwrap();
+    let id = catalog.scenarios[0].id.clone();
+    let third = catalog.scenarios[0].ground_stations[0].clone();
+    catalog.scenarios[0].ground_stations.push(third);
+    let message = spaceooops::sim::validate_catalog(&catalog).unwrap_err().to_string();
+    assert!(message.contains(&id) && message.contains("ground station"), "{message}");
+}
+
+#[test]
 fn a_missing_coverage_number_is_rejected_naming_the_scenario_and_the_orbit() {
     let mut catalog = load_catalog().unwrap();
     let scenario = catalog.scenarios[1].id.clone();
