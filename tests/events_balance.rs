@@ -101,6 +101,7 @@ fn reference(scenario: &str) -> Design {
         AMAZON_WATCH => amazon_watch_known_good(),
         GLACIER_WATCH => glacier_watch_known_good(),
         JAPAN_DISASTER_RESPONSE => japan_disaster_response_known_good(),
+        CYCLONE_WATCH => cyclone_watch_known_good(),
         other => panic!("Scenario '{other}' has no reference Design: add its known-good Design to `reference` in tests/events_balance.rs"),
     }
 }

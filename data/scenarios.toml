@@ -391,8 +391,8 @@ flare_failure_multiplier = 30.0
 outage_daily_chance = 0.006
 outage_days = 3
 # New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
-new_events_min = 2
-new_events_max = 3
+new_events_min = 5
+new_events_max = 8
 
 # Ground stations, main first: ISRO's ISTRAC in Bengaluru, and the Master Control Facility at Hassan (backup).
 # source: mapcarta / Wikimapia map entries for ISTRAC, Peenya, Bengaluru: 13.035 N, 77.51 E (secondary; ISTRAC
