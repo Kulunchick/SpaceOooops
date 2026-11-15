@@ -88,3 +88,226 @@ log = "The only key to the control room went on holiday with the engineer who ha
 scene = "link-interference"
 real_life = "Small missions often run on a handful of people, and a missed pass because nobody could reach the console is a classic of university ground stations."
 effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]
+
+# ==== 03: events with a question ============================================
+# Two options each, a stated price, a free default. Effects sit on the options.
+# ============================================================================
+
+[[events]]
+id = "digger-cut-the-cable"
+group = "real"
+title = "A digger cut the station's cable"
+scene = "link-interference"
+real_life = "Buried cables are cut by construction machinery all the time, and a ground station at the end of one can lose its link until a crew splices it."
+
+[events.question]
+text = "A digger working next door cut the ground station's cable. Pay for an urgent repair crew?"
+default = "wait"
+
+[[events.question.options]]
+id = "repair"
+label = "Urgent repair"
+consequence = "A crew works overnight and the link is back after 1 day without downlink."
+cost_usd = 20000.0
+log = "A crew spliced the cable overnight. The downlink was off for 1 day."
+note = "the cable was repaired overnight and the downlink was off for only 1 day"
+effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]
+
+[[events.question.options]]
+id = "wait"
+label = "Wait for the council"
+consequence = "Free, but there is no downlink for 3 days."
+log = "The council took its time with the cable. No downlink for 3 days."
+note = "the cable took 3 days to be repaired, with no downlink"
+effects = [{ mechanic = "downlink", strength = -1.0, days = 3 }]
+
+[[events]]
+id = "birds-in-the-dish"
+group = "real"
+title = "Birds nested in the antenna dish"
+scene = "link-interference"
+real_life = "Birds and insects really do nest in dishes and feed horns, and protected species cannot simply be moved on."
+
+[events.question]
+text = "Birds have nested in the ground station's antenna dish. Evict them?"
+default = "wait"
+
+[[events.question.options]]
+id = "evict"
+label = "Evict them"
+consequence = "The conservationists fine you, and the link stays clear."
+cost_usd = 15000.0
+log = "The birds were moved on and the conservationists sent a fine. The link stayed clear."
+note = "the birds were evicted and the link stayed clear"
+effects = []
+
+[[events.question.options]]
+id = "wait"
+label = "Wait for the chicks"
+consequence = "Free, but the downlink is 30% lower for 5 days."
+log = "The chicks needed 5 days to fledge. The downlink was 30% lower in the meantime."
+note = "the downlink was 30% lower for 5 days while the chicks fledged"
+effects = [{ mechanic = "downlink", strength = -0.3, days = 5 }]
+
+[[events]]
+id = "lost-frequency-licence"
+group = "real"
+title = "An official lost the frequency licence"
+scene = "link-interference"
+real_life = "Every radio link needs a licence, and an expired or misfiled one can force an operator off the air until the paperwork is found."
+
+[events.question]
+text = "An official has lost the paperwork for your radio frequency. Hire a lawyer to sort it out?"
+default = "stay-off-air"
+
+[[events.question.options]]
+id = "lawyer"
+label = "Pay a lawyer"
+consequence = "The licence is found again and the downlink carries on."
+cost_usd = 25000.0
+log = "A lawyer found the licence in the right drawer. The downlink carried on."
+note = "the lawyer found the licence and the downlink carried on"
+effects = []
+
+[[events.question.options]]
+id = "stay-off-air"
+label = "Stay off the air"
+consequence = "Free, but there is no downlink for 2 days."
+log = "Without a licence the station stayed off the air for 2 days."
+note = "the station stayed off the air for 2 days, with no downlink"
+effects = [{ mechanic = "downlink", strength = -1.0, days = 2 }]
+
+[[events]]
+id = "rival-jams-the-link"
+group = "real"
+title = "The rival jams the link over its own territory"
+scene = "link-interference"
+real_life = "Deliberate jamming of satellite links is real and increasingly common, and operators sometimes route their data through other stations to get around it."
+
+[events.question]
+text = "A rival agency is jamming your link whenever you pass over its territory. Buy time on another station?"
+default = "wait"
+
+[[events.question.options]]
+id = "buy-time"
+label = "Buy time elsewhere"
+consequence = "Another station takes the Data, so nothing is lost."
+cost_usd = 18000.0
+log = "A friendly station took the Data the rival's jamming would have blocked."
+note = "time on another station kept the Data coming down"
+effects = []
+
+[[events.question.options]]
+id = "wait"
+label = "Wait it out"
+consequence = "Free, but about half the Data is lost for 2 days."
+log = "The jamming went on for 2 days and about half the Data was lost."
+note = "about half the Data was lost for 2 days"
+effects = [{ mechanic = "data", strength = -0.5, days = 2 }]
+
+[[events]]
+id = "journalists-want-a-picture"
+group = "real"
+title = "Journalists want a pretty picture"
+scene = "bonus-glow"
+real_life = "Missions rely on public attention, and operators do sometimes retask a spacecraft for a press-friendly picture, at the price of a day of planned science."
+
+[events.question]
+text = "Journalists want a pretty picture from the spacecraft for tomorrow's paper. Spend a day on it?"
+default = "decline"
+
+[[events.question.options]]
+id = "shoot"
+label = "A day of shooting"
+consequence = "The Instruments are off for 1 day for the photo shoot, but the sponsors add US$10k to the Budget."
+log = "The spacecraft spent a day posing. The Instruments were off, and the sponsors sent US$10k."
+note = "a day of science was spent on the photo shoot, and the sponsors added US$10k to the Budget"
+effects = [{ mechanic = "instruments-off", days = 1 }, { mechanic = "budget", strength = 10000.0 }]
+
+[[events.question.options]]
+id = "decline"
+label = "Decline"
+consequence = "Nothing changes; the journalists write about something else."
+log = "The journalists wrote about something else."
+note = "nothing changed"
+effects = []
+
+[[events]]
+id = "cloud-archive-unpaid"
+group = "real"
+title = "Nobody paid for the cloud archive"
+scene = "link-interference"
+real_life = "Missions that keep their Data with a commercial provider can lose access when an invoice slips through, and a few have."
+
+[events.question]
+text = "The invoice for the cloud archive was never paid, and today's Data is about to be locked. Pay up now?"
+default = "lose-a-day"
+
+[[events.question.options]]
+id = "pay"
+label = "Pay the invoice"
+consequence = "The archive unlocks and the Data is safe."
+cost_usd = 12000.0
+log = "The invoice was paid and the archive unlocked. No Data was lost."
+note = "the invoice was paid and no Data was lost"
+effects = []
+
+[[events.question.options]]
+id = "lose-a-day"
+label = "Lose a day's Data"
+consequence = "Free, but a day's Data is lost."
+log = "The archive stayed locked and a day's Data was lost."
+note = "a day's Data was lost"
+effects = [{ mechanic = "data", strength = -1.0, days = 1 }]
+
+[[events]]
+id = "space-cat-chases-the-beam"
+group = "fantasy"
+title = "A space cat chases the downlink beam"
+scene = "visitor"
+
+[events.question]
+text = "A space cat is chasing the downlink beam like a laser pointer. Switch the beam off for a day?"
+default = "keep-playing"
+
+[[events.question.options]]
+id = "switch-off"
+label = "Switch the beam off"
+consequence = "The cat loses interest, but there is no downlink for 1 day."
+log = "The beam went dark for a day. The cat wandered off, offended."
+note = "the beam was off for a day and the cat lost interest"
+effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]
+
+[[events.question.options]]
+id = "keep-playing"
+label = "Keep playing"
+consequence = "Free, and the cat is happy, but there is about 30% less Data for 2 days."
+log = "The cat played with the beam for 2 days and about 30% of the Data went missing. The cat is happy."
+note = "the cat played with the beam, 30% of the Data went missing for 2 days, and the cat was happy"
+effects = [{ mechanic = "data", strength = -0.3, days = 2 }]
+
+[[events]]
+id = "university-joint-observations"
+group = "lucky"
+title = "A university invites joint observations"
+scene = "bonus-glow"
+
+[events.question]
+text = "A university invites you to make joint observations of a target of theirs. Agree?"
+default = "decline"
+
+[[events.question.options]]
+id = "agree"
+label = "Agree"
+consequence = "A little extra Science Value from the joint paper, but about 30% less Data for 2 days."
+log = "The joint observations produced a little extra Science Value, at the price of some of the day's own Data."
+note = "the joint observations added a little Science Value, and about 30% of the Data went missing for 2 days"
+effects = [{ mechanic = "science-bonus", strength = 0.02 }, { mechanic = "data", strength = -0.3, days = 2 }]
+
+[[events.question.options]]
+id = "decline"
+label = "Decline"
+consequence = "Nothing changes."
+log = "You thanked the university and declined."
+note = "nothing changed"
+effects = []

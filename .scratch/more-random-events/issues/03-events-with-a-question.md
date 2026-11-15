@@ -4,12 +4,12 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] An interactive event carries a prompt with a unique id, two options and a default, in the same shape as the flare and outage prompts
-- [ ] The player's choice applies that option's mechanic; no answer or an invalid answer applies the default
-- [ ] An option that costs more than the Budget left is unavailable with a plain-language reason, and a Decision naming it takes the default
-- [ ] Days before a question are identical whatever its answer
-- [ ] Across a sweep of seeds a Run has 3 or 4 interactive new events when at least that many are eligible, and never more than 4
-- [ ] The Debrief lists a note per question in day order, together with the existing flare and outage notes, saying who chose (player or default) and the effect
-- [ ] The question UI shows a new event's question and options with no change to team play
+- [x] An interactive event carries a prompt with a unique id, two options and a default, in the same shape as the flare and outage prompts
+- [x] The player's choice applies that option's mechanic; no answer or an invalid answer applies the default
+- [x] An option that costs more than the Budget left is unavailable with a plain-language reason, and a Decision naming it takes the default
+- [x] Days before a question are identical whatever its answer
+- [x] Across a sweep of seeds a Run has 3 or 4 interactive new events when at least that many are eligible, and never more than 4
+- [x] The Debrief lists a note per question in day order, together with the existing flare and outage notes, saying who chose (player or default) and the effect
+- [x] The question UI shows a new event's question and options with no change to team play
