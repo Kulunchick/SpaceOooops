@@ -209,7 +209,7 @@ effects = [{ mechanic = "data", strength = -0.5, days = 2 }]
 id = "journalists-want-a-picture"
 group = "real"
 title = "Journalists want a pretty picture"
-scene = "bonus-glow"
+scene = "panel-shading"
 real_life = "Missions rely on public attention, and operators do sometimes retask a spacecraft for a press-friendly picture, at the price of a day of planned science."
 
 [events.question]
@@ -348,7 +348,7 @@ id = "budget-cut-for-a-fountain"
 group = "real"
 title = "Budget cut"
 log = "The ministry needed a new fountain for its lobby and took $60,000 from the Mission's Budget."
-scene = "bonus-glow"
+scene = "hit"
 real_life = "Space budgets are set by governments every year, and a mission can lose money to unrelated priorities even after it has launched."
 effects = [{ mechanic = "budget", strength = -60000.0 }]
 
@@ -398,7 +398,7 @@ id = "time-loop"
 group = "fantasy"
 title = "Time loop"
 log = "The satellite lived one day twice. Nobody can explain it, but there is an extra day of Data."
-scene = "bonus-glow"
+scene = "visitor"
 effects = [{ mechanic = "extra-data-day" }]
 
 [[events]]
@@ -415,7 +415,7 @@ id = "neighbouring-station-gives-away-passes"
 group = "lucky"
 title = "A neighbouring station gives away passes"
 log = "A neighbouring ground station had free time and gave away its passes. The operators used them to bring down old calibration Data: a bonus of 1% of the Science Value the Mission needs."
-scene = "link-interference"
+scene = "bonus-glow"
 real_life = "Ground stations around the world share spare time, and a mission with an idle neighbour can borrow extra contact time."
 effects = [{ mechanic = "science-bonus", strength = 0.01 }]
 
@@ -454,7 +454,7 @@ effects = [{ mechanic = "data", strength = 0.03, to_end = true }]
 id = "rescuers-ask-for-flood-images"
 group = "real"
 title = "Rescuers ask for flood images"
-scene = "bonus-glow"
+scene = "link-interference"
 only = "camera"
 real_life = "After floods, rescue services ask satellite operators for fresh images, and operators often retask a spacecraft for a few days to help."
 
@@ -665,7 +665,7 @@ bad = { log = "The schoolchildren broadcast their playlist through the link. The
 id = "scientists-argue-where-to-look"
 group = "real"
 title = "The scientists argue about where to look"
-scene = "bonus-glow"
+scene = "link-interference"
 real_life = "Mission teams often disagree about which target is the best use of limited observing time, and the plan changes more than once."
 
 [events.question]

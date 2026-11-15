@@ -68,6 +68,14 @@ fn an_event_naming_a_real_agency_or_country_fails_to_load() {
 }
 
 #[test]
+fn the_bonus_glow_is_the_lucky_events_own_scene_effect() {
+    let c = load_catalog().unwrap();
+    for e in &c.events {
+        assert_eq!(e.scene == SceneEffect::BonusGlow, e.group == EventGroup::Lucky, "{}: {:?} for a {:?} event", e.id, e.scene, e.group);
+    }
+}
+
+#[test]
 fn every_gamble_states_its_odds_between_1_and_9_in_10() {
     let c = load_catalog().unwrap();
     let mut gambles = 0;
