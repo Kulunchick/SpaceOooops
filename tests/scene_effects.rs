@@ -104,17 +104,21 @@ fn spec_at(c: &Catalog, d: &Design, r: &RunResult, playback: f64) -> scene::Scen
 }
 
 #[test]
-fn the_run_shows_a_main_ground_station_in_angola_and_a_backup_station() {
-    let c = legacy_catalog();
+fn the_run_shows_the_chosen_scenarios_own_main_and_backup_stations() {
+    let mut c = legacy_catalog();
     let d = crop_watch_known_good();
     let r = run(&c, &d, CROP_WATCH, 1);
+    // Move the Scenario's stations somewhere else entirely: the scene follows the data, not a fixed place.
+    let moved = [("Cuiaba", -15.55, -56.07), ("Alcantara", -2.37, -44.40)];
+    c.scenarios.iter_mut().find(|s| s.id == CROP_WATCH).unwrap().ground_stations = moved
+        .iter()
+        .map(|&(name, lat, lon)| spaceooops::sim::GroundStation { name: name.into(), lat, lon })
+        .collect();
     let stations = spec_at(&c, &d, &r, 3.0).stations;
     assert_eq!(stations.iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), [PRIMARY, BACKUP]);
-    let main = &stations[0];
-    assert!((-18.0..-4.5).contains(&main.lat) && (11.5..24.0).contains(&main.lon), "{main:?} is not in Angola");
-    let backup = &stations[1];
-    assert!((-90.0..90.0).contains(&backup.lat) && (-180.0..180.0).contains(&backup.lon));
-    assert_ne!((main.lat, main.lon), (backup.lat, backup.lon));
+    for (station, (_, lat, lon)) in stations.iter().zip(moved) {
+        assert_eq!((station.lat, station.lon), (lat, lon));
+    }
     // Only the Run has ground stations.
     let elsewhere = scene::build(&SceneInputs { run: Some(&r), ..SceneInputs::on(Screen::Debrief) });
     assert!(elsewhere.stations.is_empty() && elsewhere.effects.is_empty());

@@ -48,6 +48,17 @@ outage_days = 3
 new_events_min = 2
 new_events_max = 3
 
+# Ground stations, main first: near Luanda, and a commercial site near Johannesburg (outage backup).
+[[scenarios.ground_stations]]
+name = "Luanda"
+lat = -8.92
+lon = 13.18
+
+[[scenarios.ground_stations]]
+name = "Johannesburg"
+lat = -25.89
+lon = 27.69
+
 [[scenarios]]
 id = "connect-the-villages"
 name = "Connect the Villages"
@@ -84,6 +95,17 @@ outage_days = 3
 # New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
 new_events_min = 2
 new_events_max = 3
+
+# Ground stations, main first: near Luanda, and a commercial site near Johannesburg (outage backup).
+[[scenarios.ground_stations]]
+name = "Luanda"
+lat = -8.92
+lon = 13.18
+
+[[scenarios.ground_stations]]
+name = "Johannesburg"
+lat = -25.89
+lon = 27.69
 
 [[scenarios]]
 id = "space-weather-sentinel"
@@ -122,3 +144,14 @@ outage_days = 3
 # New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
 new_events_min = 2
 new_events_max = 3
+
+# Ground stations, main first: near Luanda, and a commercial site near Johannesburg (outage backup).
+[[scenarios.ground_stations]]
+name = "Luanda"
+lat = -8.92
+lon = 13.18
+
+[[scenarios.ground_stations]]
+name = "Johannesburg"
+lat = -25.89
+lon = 27.69

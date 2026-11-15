@@ -31,6 +31,16 @@ pub struct Scenario {
     pub science_value_per_gb: f64,
     /// Random Event chances and severity in this Scenario.
     pub events: EventTuning,
+    /// The Mission's ground stations, main station first, then the backup (at least one). Visual only.
+    pub ground_stations: Vec<GroundStation>,
+}
+
+/// A named ground station on the globe (degrees).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GroundStation {
+    pub name: String,
+    pub lat: f64,
+    pub lon: f64,
 }
 
 /// Per-Scenario Random Event chances (per day) and severity.
@@ -687,6 +697,11 @@ pub fn validate_catalog(c: &Catalog) -> Result<(), CatalogError> {
     for o in &c.objectives {
         if let Some(key) = o.scenario.as_ref().filter(|k| !scenario_ids.contains(k.as_str())) {
             return Err(CatalogError::Invalid(format!("objective '{}' is for unknown scenario '{key}'", o.id)));
+        }
+    }
+    for s in &c.scenarios {
+        if s.ground_stations.is_empty() {
+            return Err(CatalogError::Invalid(format!("scenario '{}' has no ground station", s.id)));
         }
     }
     for s in &c.scenarios {
