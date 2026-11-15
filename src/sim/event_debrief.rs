@@ -44,8 +44,8 @@ pub(crate) fn real_life_lines(pool: &EventState) -> Vec<String> {
     lines
 }
 
-/// One line per fired event with an `only` condition, a `more_likely` whose fact held, or a mitigation that
-/// applied: which Design choice caused or softened it.
+/// One line per fired event with an `only` condition, a `more_likely` whose fact held, or a mitigation: which
+/// Design choice caused or softened it, or which choice would have prevented or softened it.
 pub(crate) fn design_notes(pool: &EventState) -> Vec<String> {
     pool.fired
         .iter()
@@ -57,8 +57,14 @@ pub(crate) fn design_notes(pool: &EventState) -> Vec<String> {
             if let Some(m) = f.spec.more_likely.as_ref().filter(|m| pool.facts.contains(&m.fact)) {
                 parts.push(format!("it was more likely with {}", m.fact.phrase()));
             }
-            if let Some(m) = f.spec.mitigation.as_ref().filter(|_| f.softened) {
-                parts.push(format!("it was softened by {}", m.fact.phrase()));
+            match f.spec.mitigation.as_ref() {
+                Some(m) if f.softened => parts.push(format!("it was softened by {}", m.fact.phrase())),
+                // Story 23: what the player could change next time.
+                Some(m) => {
+                    let would = if m.scale == 0.0 { "prevented" } else { "softened" };
+                    parts.push(format!("{} would have {would} it", m.fact.phrase()));
+                }
+                None => {}
             }
             (!parts.is_empty()).then(|| format!("Day {}, {}: {}.", f.day, f.spec.title, parts.join(", and ")))
         })

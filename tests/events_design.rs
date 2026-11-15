@@ -239,8 +239,19 @@ fn the_debrief_names_the_design_choice_behind_each_conditioned_or_mitigated_even
     let flip = notes.iter().find(|n| n.contains("Title of bit-flip")).unwrap();
     assert!(flip.contains("a Flight-proven computer"), "{flip}");
 
+    // Without the choice, the Debrief says which choice would have prevented or softened it.
     let notes = run(&c, &basic_computer(), CROP_WATCH, 1).debrief.design_notes;
-    assert_eq!(notes.len(), 1, "an unsoftened event with no condition has no note: {notes:?}");
+    assert_eq!(notes.len(), 2, "{notes:?}");
+    let flip = notes.iter().find(|n| n.contains("Title of bit-flip")).unwrap();
+    assert!(flip.contains("a Flight-proven computer would have prevented it"), "{flip}");
+    let toml = format!(
+        "[[events]]\nid = \"glare\"\ngroup = \"real\"\ntitle = \"Glare\"\nlog = \"Glare.\"\nscene = \"hit\"\nreal_life = \"It happens.\"\n\
+         mitigation = {{ fact = \"computer-flight-proven\", scale = 0.5, log = \"Half the glare.\" }}\n\
+         effects = [{{ mechanic = \"data\", strength = -0.4, days = 2 }}]\n"
+    );
+    let c = catalog_with_events(&toml, 1, 1);
+    let notes = run(&c, &basic_computer(), CROP_WATCH, 1).debrief.design_notes;
+    assert!(notes.len() == 1 && notes[0].contains("a Flight-proven computer would have softened it"), "{notes:?}");
 }
 
 #[test]
