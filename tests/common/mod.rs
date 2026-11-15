@@ -82,6 +82,14 @@ pub fn amazon_watch_known_good() -> Design {
     }
 }
 
+pub const JAPAN_DISASTER_RESPONSE: &str = "japan-disaster-response";
+
+/// The same radar spacecraft as Amazon Watch (12U CubeSat, X-band radio, SSO rideshare): the radio is the one
+/// thing that cannot be given up, and it fits Japan's tight Budget with little to spare. Passes cleanly in Japan.
+pub fn japan_disaster_response_known_good() -> Design {
+    amazon_watch_known_good()
+}
+
 /// A 6U CubeSat with a particle detector and an ionosphere probe in LEO 400 km, deployed from the space
 /// station, sending its heavy Data down over an X-band radio. Passes cleanly.
 pub fn space_weather_sentinel_known_good() -> Design {

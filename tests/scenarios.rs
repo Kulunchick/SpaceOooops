@@ -24,12 +24,13 @@ fn has_violation(r: &LaunchReview, kind: FindingKind) -> bool {
     r.violations.iter().any(|f| f.kind == kind)
 }
 
-fn known_goods() -> [(&'static str, Design); 4] {
+fn known_goods() -> [(&'static str, Design); 5] {
     [
         (CROP_WATCH, crop_watch_known_good()),
         (CONNECT_THE_VILLAGES, connect_the_villages_known_good()),
         (SPACE_WEATHER_SENTINEL, space_weather_sentinel_known_good()),
         (AMAZON_WATCH, amazon_watch_known_good()),
+        (JAPAN_DISASTER_RESPONSE, japan_disaster_response_known_good()),
     ]
 }
 
@@ -42,7 +43,7 @@ fn ids<T>(items: &[T], id: impl Fn(&T) -> &str) -> Vec<String> {
 #[test]
 fn every_scenario_has_difficulty_key_constraints_and_a_target_country() {
     let catalog = load_catalog().unwrap();
-    for id in [CROP_WATCH, CONNECT_THE_VILLAGES, SPACE_WEATHER_SENTINEL, AMAZON_WATCH] {
+    for id in [CROP_WATCH, CONNECT_THE_VILLAGES, SPACE_WEATHER_SENTINEL, AMAZON_WATCH, JAPAN_DISASTER_RESPONSE] {
         let s = catalog.scenario(id).unwrap_or_else(|| panic!("{id} is bundled"));
         assert!(!s.difficulty.is_empty() && !s.key_constraints.is_empty() && !s.why_it_matters.is_empty(), "{s:?}");
         assert!(!s.target_country.id.is_empty() && !s.target_country.name.is_empty(), "{s:?}");
@@ -52,6 +53,8 @@ fn every_scenario_has_difficulty_key_constraints_and_a_target_country() {
     assert_eq!(angolan, ["Easy", "Medium", "Hard"]);
     let amazon = catalog.scenario(AMAZON_WATCH).unwrap();
     assert_eq!((amazon.difficulty.as_str(), amazon.target_country.name.as_str()), ("Medium", "Brazil"));
+    let japan = catalog.scenario(JAPAN_DISASTER_RESPONSE).unwrap();
+    assert_eq!((japan.difficulty.as_str(), japan.target_country.name.as_str()), ("Hard", "Japan"));
 }
 
 #[test]
@@ -231,7 +234,7 @@ fn amazon_an_s_band_radio_cannot_keep_up_with_the_radar() {
 fn the_radar_is_not_the_answer_in_the_angolan_scenarios() {
     let catalog = load_catalog().unwrap();
     let radar = catalog.instrument("sar-radar").unwrap();
-    for (scenario, good) in known_goods().into_iter().filter(|(s, _)| *s != AMAZON_WATCH) {
+    for (scenario, good) in known_goods().into_iter().filter(|(s, _)| *s != AMAZON_WATCH && *s != JAPAN_DISASTER_RESPONSE) {
         let best_other = good.instruments.iter().map(|i| catalog.instrument(i).unwrap().fit[scenario]).fold(0.0, f64::max);
         assert!(radar.fit[scenario] < best_other / 2.0, "{scenario}: radar fit {}", radar.fit[scenario]);
     }
@@ -242,6 +245,47 @@ fn the_radar_is_not_the_answer_in_the_angolan_scenarios() {
     d.orbit = Some("geo".into());
     d.launch_vehicle = Some("geo-rideshare".into());
     assert!(!review(&d, CONNECT_THE_VILLAGES).can_launch);
+}
+
+// ---------------------------------------------------------------- Japan: first images after a disaster
+
+#[test]
+fn japan_the_known_good_radar_design_passes_launch_review_cleanly() {
+    let r = review(&japan_disaster_response_known_good(), JAPAN_DISASTER_RESPONSE);
+    assert!(r.can_launch && r.warnings.is_empty(), "{:#?} {:#?}", r.violations, r.warnings);
+}
+
+#[test]
+fn japan_the_known_good_radar_design_succeeds_on_a_fixed_seed_and_most_seeds() {
+    let catalog = load_catalog().unwrap();
+    let d = japan_disaster_response_known_good();
+    assert!(run(&catalog, &d, JAPAN_DISASTER_RESPONSE, 1).debrief.success);
+    assert!(success_rate(&d, JAPAN_DISASTER_RESPONSE) >= 0.85);
+}
+
+/// The radar's Data is the problem: an S-band radio sends only part of it, so the Science Value falls short.
+#[test]
+fn japan_an_s_band_radio_cannot_keep_up_with_the_radar_and_fails() {
+    let mut d = japan_disaster_response_known_good();
+    d.comms = Some(Pick::new("comms-s-band", FlightProven));
+    let r = review(&d, JAPAN_DISASTER_RESPONSE);
+    assert!(r.warnings.iter().any(|f| f.kind == FindingKind::DataAboveDownlink), "{:#?}", r.warnings);
+    assert_eq!(success_rate(&d, JAPAN_DISASTER_RESPONSE), 0.0);
+}
+
+#[test]
+fn japan_an_optical_design_falls_short() {
+    let mut d = japan_disaster_response_known_good();
+    d.instruments = vec!["multispectral-imager".into(), "thermal-imager".into(), "wide-camera".into()];
+    assert_eq!(success_rate(&d, JAPAN_DISASTER_RESPONSE), 0.0);
+    assert_eq!(success_rate(&crop_watch_known_good(), JAPAN_DISASTER_RESPONSE), 0.0);
+}
+
+#[test]
+fn japan_the_budget_is_tighter_than_the_cheapest_way_to_a_bigger_launcher() {
+    let mut d = japan_disaster_response_known_good();
+    d.launch_vehicle = Some("small-launcher".into());
+    assert!(has_violation(&review(&d, JAPAN_DISASTER_RESPONSE), FindingKind::OverBudget));
 }
 
 // ---------------------------------------------------------------- the Orbit drives Lifetime, Power and Data

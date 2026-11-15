@@ -17,7 +17,7 @@ volume_u = 2.0
 # Compressed scenes over Angola's farm belt each day.
 data_mb_per_day = 300.0
 needs_fine_pointing = true
-fit = { crop-watch = 1.0, connect-the-villages = 0.0, space-weather-sentinel = 0.0, amazon-watch = 0.25 }
+fit = { crop-watch = 1.0, connect-the-villages = 0.0, space-weather-sentinel = 0.0, amazon-watch = 0.25, japan-disaster-response = 0.15 }
 
 [[instruments]]
 id = "thermal-imager"
@@ -32,7 +32,7 @@ cost_usd = 400_000.0
 volume_u = 1.5
 data_mb_per_day = 250.0
 needs_fine_pointing = true
-fit = { crop-watch = 0.8, connect-the-villages = 0.0, space-weather-sentinel = 0.0, amazon-watch = 0.15 }
+fit = { crop-watch = 0.8, connect-the-villages = 0.0, space-weather-sentinel = 0.0, amazon-watch = 0.15, japan-disaster-response = 0.1 }
 
 [[instruments]]
 id = "wide-camera"
@@ -46,7 +46,7 @@ cost_usd = 50_000.0
 volume_u = 0.5
 data_mb_per_day = 60.0
 needs_fine_pointing = false
-fit = { crop-watch = 0.3, connect-the-villages = 0.0, space-weather-sentinel = 0.0, amazon-watch = 0.1 }
+fit = { crop-watch = 0.3, connect-the-villages = 0.0, space-weather-sentinel = 0.0, amazon-watch = 0.1, japan-disaster-response = 0.15 }
 
 # ---------------------------------------------------------------- Connect the Villages
 # For a communications payload, "Data" is the village traffic it carries; the spacecraft's comms band is the
@@ -66,7 +66,7 @@ volume_u = 4.0
 # About 2 GB of messages, calls and web pages a day for a pilot network of village terminals.
 data_mb_per_day = 2_000.0
 needs_fine_pointing = true
-fit = { crop-watch = 0.0, connect-the-villages = 1.0, space-weather-sentinel = 0.0, amazon-watch = 0.0 }
+fit = { crop-watch = 0.0, connect-the-villages = 1.0, space-weather-sentinel = 0.0, amazon-watch = 0.0, japan-disaster-response = 0.0 }
 
 [[instruments]]
 id = "store-and-forward"
@@ -80,7 +80,7 @@ cost_usd = 100_000.0
 volume_u = 0.5
 data_mb_per_day = 20.0
 needs_fine_pointing = false
-fit = { crop-watch = 0.0, connect-the-villages = 0.4, space-weather-sentinel = 0.0, amazon-watch = 0.0 }
+fit = { crop-watch = 0.0, connect-the-villages = 0.4, space-weather-sentinel = 0.0, amazon-watch = 0.0, japan-disaster-response = 0.0 }
 
 # ---------------------------------------------------------------- Space Weather Sentinel
 
@@ -97,7 +97,7 @@ volume_u = 1.0
 # Fine time resolution all around the orbit.
 data_mb_per_day = 300.0
 needs_fine_pointing = false
-fit = { crop-watch = 0.0, connect-the-villages = 0.0, space-weather-sentinel = 1.0, amazon-watch = 0.0 }
+fit = { crop-watch = 0.0, connect-the-villages = 0.0, space-weather-sentinel = 1.0, amazon-watch = 0.0, japan-disaster-response = 0.0 }
 
 [[instruments]]
 id = "ionosphere-probe"
@@ -111,7 +111,7 @@ cost_usd = 80_000.0
 volume_u = 0.5
 data_mb_per_day = 200.0
 needs_fine_pointing = false
-fit = { crop-watch = 0.0, connect-the-villages = 0.0, space-weather-sentinel = 0.8, amazon-watch = 0.0 }
+fit = { crop-watch = 0.0, connect-the-villages = 0.0, space-weather-sentinel = 0.8, amazon-watch = 0.0, japan-disaster-response = 0.0 }
 
 # ---------------------------------------------------------------- World Scenarios
 # Amazon Watch: clouds cover the rainforest on most passes, so the three cameras above have low fit there
@@ -132,4 +132,4 @@ volume_u = 6.0
 data_mb_per_day = 1_500.0
 needs_fine_pointing = true
 # Crop Watch: southern Angola's dry season is mostly clear, and a camera's colours say more about crop health.
-fit = { crop-watch = 0.1, connect-the-villages = 0.0, space-weather-sentinel = 0.0, amazon-watch = 1.0 }
+fit = { crop-watch = 0.1, connect-the-villages = 0.0, space-weather-sentinel = 0.0, amazon-watch = 1.0, japan-disaster-response = 1.0 }

@@ -85,6 +85,21 @@ const AUSTRALIA = [
   [125, -14.5], [122, -17.5], [121, -19.5],
 ];
 
+// Japan: three outlines (a country of islands): Honshu with Kyushu and Shikoku joined into one coarse shape,
+// Hokkaido, and Okinawa. Traced by eye; the coasts follow the ISLANDS shape below where they overlap.
+export const JAPAN = [
+  [
+    [130, 32], [131.2, 31.2], [131.9, 33], [133, 33.2], [134.7, 33.8], [135.8, 33.4], [137, 34.6], [138.8, 34.6],
+    [139.9, 35], [140.9, 35.7], [141, 38.3], [142, 39.6], [141.5, 41.4], [140.3, 41.2], [139.9, 39.9], [139.4, 38.3],
+    [137.3, 37.3], [136.7, 36.9], [135.5, 35.7], [133, 35.5], [131, 34.4], [130.9, 33.9], [129.7, 33.2],
+  ],
+  [
+    [140, 41.6], [141.2, 41.8], [143.3, 42], [145.3, 43.3], [144, 44], [142, 45.4], [141.6, 45], [141.3, 43.2],
+    [140.3, 43.3], [139.9, 42.5],
+  ],
+  [[128.3, 26.9], [128.35, 26.75], [127.95, 26.45], [127.85, 26.1], [127.65, 26.15], [127.75, 26.45], [127.85, 26.65]],
+];
+
 const ISLANDS = [
   // Great Britain
   [[-5.7, 50], [1.7, 52.6], [-1.8, 55.6], [-3, 58.6], [-5, 58.6], [-6.2, 56.5], [-5, 54.6], [-3, 53.4], [-5.2, 51.7]],
@@ -119,12 +134,14 @@ function inside(polygon, lon, lat) {
 
 // One outline per Target Country, keyed by the country id in data/scenarios.toml. Add a country here to make it
 // highlightable; a Scenario whose country has no outline here simply highlights nothing.
-export const COUNTRIES = { angola: ANGOLA, brazil: BRAZIL };
+export const COUNTRIES = { angola: ANGOLA, brazil: BRAZIL, japan: JAPAN };
 
 /** The id of the Target Country whose outline holds the point, or null. */
 export function countryAt(lon, lat) {
   for (const [id, outline] of Object.entries(COUNTRIES)) {
-    if (inside(outline, lon, lat)) return id;
+    // A country of islands is a list of outlines; the others are one outline (a list of [lon, lat] pairs).
+    const parts = Array.isArray(outline[0][0]) ? outline : [outline];
+    if (parts.some((part) => inside(part, lon, lat))) return id;
   }
   return null;
 }

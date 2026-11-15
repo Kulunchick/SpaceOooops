@@ -17,7 +17,7 @@ test('Scenario select and Brief work over the static background', async ({ page 
   for (const img of await page.locator('.scenario-card img').all()) {
     await expect.poll(() => img.evaluate((i) => i.complete && i.naturalWidth > 0)).toBe(true);
   }
-  await page.locator('.scenario-card', { hasText: 'Amazon Watch' }).scrollIntoViewIfNeeded();
+  await page.locator('.scenario-card', { hasText: 'Disaster Response' }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: 'test-results/scenario-select-fallback.png', fullPage: true });
   await page.locator('.scenario-card', { hasText: 'Space Weather Sentinel' }).getByRole('button', { name: 'Select' }).click();
   await expect(page.getByRole('heading', { name: 'Space Weather Sentinel' })).toBeVisible();

@@ -22,7 +22,8 @@ lifetime_cap_days = 300.0
 # Connect the Villages: a low satellite is over a village only a few minutes a day.
 # Space Weather Sentinel: flies through the ionosphere and the South Atlantic Anomaly many times a day.
 # Amazon Watch: the 52-degree Orbit crosses the Amazon often, but drag ends a CubeSat before the year is out.
-coverage = { crop-watch = 0.7, connect-the-villages = 0.05, space-weather-sentinel = 1.0, amazon-watch = 0.7 }
+# Disaster Response: the 52-degree Orbit passes over Japan (35 N) often and at changing times of day, but drag ends a CubeSat before the half year is out.
+coverage = { crop-watch = 0.7, connect-the-villages = 0.05, space-weather-sentinel = 1.0, amazon-watch = 0.7, japan-disaster-response = 0.8 }
 
 [[orbits]]
 id = "sso-600"
@@ -41,7 +42,8 @@ contact_minutes_per_day = 40.0
 # source: atmospheric drag keeps a CubeSat at 600 km up for well over 5 years; radiation limits parts to ~5 years.
 lifetime_cap_days = 1825.0
 # Space Weather Sentinel: 600 km is above the densest part of the ionosphere (peak ~300-400 km).
-coverage = { crop-watch = 1.0, connect-the-villages = 0.05, space-weather-sentinel = 0.6, amazon-watch = 1.0 }
+# Disaster Response: the sun-synchronous Orbit crosses Japan at the same local time every day with a clear view of the whole country.
+coverage = { crop-watch = 1.0, connect-the-villages = 0.05, space-weather-sentinel = 0.6, amazon-watch = 1.0, japan-disaster-response = 1.0 }
 
 [[orbits]]
 id = "geo"
@@ -63,4 +65,5 @@ lifetime_cap_days = 3650.0
 # Crop Watch: 36,000 km is too far for a CubeSat camera to see single fields.
 # Space Weather Sentinel: GEO is far outside the ionosphere and the South Atlantic Anomaly.
 # Amazon Watch: a CubeSat radar cannot make out forest clearings from 36,000 km.
-coverage = { crop-watch = 0.2, connect-the-villages = 1.0, space-weather-sentinel = 0.0, amazon-watch = 0.1 }
+# Disaster Response: a CubeSat radar cannot make out collapsed buildings or landslides from 36,000 km.
+coverage = { crop-watch = 0.2, connect-the-villages = 1.0, space-weather-sentinel = 0.0, amazon-watch = 0.1, japan-disaster-response = 0.05 }
