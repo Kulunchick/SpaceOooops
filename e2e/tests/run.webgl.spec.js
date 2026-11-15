@@ -123,19 +123,23 @@ test('speeding up the playback speeds up the spacecraft, and skipping leaves the
 
 test('with full motion, 4x plays a stretch without events about four times as fast as 1x', async ({ page }) => {
   const errors = collectErrors(page);
-  // Crop Watch with k = 799 has no Random Event of any kind before day 72, so no day plays slower for an event
-  // while both speeds are measured (1x crosses about 12 days a second, 4x about 49).
-  await seedRuns(page, 799);
+  // Crop Watch with k = 0 asks its first question on day 34 (the scientists' target) and has no other Random Event
+  // until day 130. The playback waits for the answer, so the stretch after it is measured whatever the launch
+  // took: 1x crosses about 12 days a second and 4x about 49, so both sweeps end long before day 130.
+  await seedRuns(page, 0);
   await launchCropWatch(page);
-  await page.waitForTimeout(200);
+  await expect(page.locator('.decision-prompt')).toBeVisible({ timeout: 30_000 });
+  await page.locator('.decision-option', { hasText: 'Target A' }).click();
+  // Day 34 itself plays slowly for its event; measure after it.
+  await page.waitForTimeout(2000);
   const slow = await sweep(page, 800);
   await page.getByRole('button', { name: '4×' }).click();
-  await page.waitForTimeout(100);
-  const fast = await sweep(page, 400);
-  // The stretch measured was free of events: none has reached the log yet.
-  await expect(page.locator('.event-log')).toContainText('No Random Events yet.');
+  await page.waitForTimeout(200);
+  const fast = await sweep(page, 500);
+  // The stretch measured was free of events: the newest entry in the log is still day 34's.
+  expect(await page.locator('.event-log li').first().textContent()).toContain('Day 34');
   // Per second, about four times as fast (frame timing on a software renderer makes it rough).
-  const ratio = (fast / 400) / (slow / 800);
+  const ratio = (fast / 500) / (slow / 800);
   expect(ratio).toBeGreaterThan(2.5);
   expect(ratio).toBeLessThan(6);
   expect(errors).toEqual([]);

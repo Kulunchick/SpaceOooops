@@ -156,7 +156,8 @@ test('a new Random Event shows as a link-interference effect with its Cue, and i
   await expect(page.locator('html')).toHaveAttribute('data-audio-last-cue', 'interference');
   await hold(page, false);
   await expect(canvas(page)).not.toHaveAttribute('data-effects', /linkInterference/, { timeout: 10_000 });
-  expect(await attr(page, 'data-event-fx')).toBe('');
+  // data-effects follows the Scene Spec, data-event-fx the next drawn frame: wait for the frame.
+  await expect.poll(() => attr(page, 'data-event-fx')).toBe('');
   await expect(page.locator('.event-log')).toContainText('The only key to the control room went on holiday');
   expect(errors).toEqual([]);
 });
