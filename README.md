@@ -3,6 +3,11 @@
 A browser game for the 2026 NASA Space Apps Challenge, "Space Mission Design Game". Play it here, with no install or login:
 https://kulunchick.github.io/SpaceOooops/
 
+30-second demo video: https://youtu.be/p-rJV9GkExQ
+
+Team SpaceOooops (Kyiv): Mykyta Kalachuk, Artem Voloshyn, Danilo Andronov, Mykhailo Korotaiev, Anastasiia Savenko,
+Mykola Krasovskyi.
+
 ## What it is
 
 Students rarely get to experiment with a whole space mission. SpaceOooops lets you design, launch and fly a small mission and
@@ -14,7 +19,10 @@ Orbit shortens the Lifetime. You can play solo or as a team of up to four on one
 1. Choose solo play, or team play with 2 to 4 players on one screen: each player owns one or more Roles and has a
    Personal Objective worth bonus points.
 2. Pick a Scenario and read the brief: objective, required Science Value, minimum Lifetime and Budget.
-   The three Scenarios are tied to Angola: Crop Watch (easy), Connect the Villages (medium) and Space Weather Sentinel (hard).
+   There are seven Scenarios. Three are set in Angola, home of the challenge author: Crop Watch (easy), Connect the
+   Villages (medium) and Space Weather Sentinel (hard). Four are set in countries of Space Apps partner agencies:
+   Glacier Watch (Argentina, easy), Amazon Watch (Brazil, medium), Cyclone Watch (India, medium) and Disaster Response
+   (Japan, hard).
 3. Design the mission in four Role tabs: Science (Instruments), Spacecraft (structure, power, attitude control), Launch & Orbit
    (Orbit and Launch Vehicle) and Budget & Comms. Live gauges show Budget, Mass, Power, Data and Lifetime, and every number
    has a "why it matters" tip. Crop Watch adds first-time hints.
@@ -87,6 +95,14 @@ Images, music and sound, as recorded in `data/credits.toml` (`ai_generated`):
 No image, music or sound effect in this game was made with AI tools.
 <!-- ai-assets:end -->
 
+Outside the game, in the submission material (`task/submission/`):
+
+- The demo video's voice-over was generated with ElevenLabs (AI-generated speech). This is also written in the video
+  file's metadata and its YouTube description. The footage is real gameplay.
+- The team logo is an AI-generated image. The video thumbnail and `team-logo-700x450.png` carry a visible
+  "AI-generated image" watermark; `team-logo.png` is the unmarked source file they are made from.
+- The text of the submission page was edited with AI assistance.
+
 ## Prerequisites
 
     rustup target add wasm32-unknown-unknown
@@ -129,3 +145,7 @@ Pushing to `main` runs `.github/workflows/deploy.yml`: `cargo test`, the release
   `main.css` (base and colour tokens), `design.css`, `run.css`,
   `decisions.css`, `learning.css`, `team.css`, `history.css`
 - `GLOSSARY.md` the game's terms; `docs/adr/` design decisions
+- `task/` the challenge text, its resources and the Space Apps submission guide
+- `task/submission/` the submission: `FIELDS.md` (every project-form field), `description.html` (the styled project
+  description), `images/` (gameplay screenshots) and `video/` (the demo, its English subtitles, the thumbnail, the
+  team logo, the recorded takes and the scripts that rebuild the demo; `tts.py` needs `ELEVEN_LABS_API_KEY` in `.env`)
