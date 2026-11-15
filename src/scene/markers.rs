@@ -47,9 +47,12 @@ pub(super) fn markers(screen: Screen, scenarios: &[Scenario], chosen: Option<&st
 
 /// The one Target Country the globe highlights: Angola on the title, Sources and Scenario select screens (and when
 /// no Scenario is chosen), the chosen Scenario's country on every screen after the choice.
-pub(super) fn highlighted_country(screen: Screen, scenarios: &[Scenario], chosen: Option<&str>) -> String {
+pub(super) fn highlighted_country(screen: Screen, scenarios: &[Scenario], chosen: Option<&str>, previewed: Option<&str>) -> String {
     let home = || crate::sim::HOME_COUNTRY.to_string();
-    if matches!(screen, Screen::Title | Screen::Sources | Screen::ScenarioSelect) {
+    if screen == Screen::ScenarioSelect {
+        return scenarios.iter().find(|s| Some(s.id.as_str()) == previewed).map_or_else(home, |s| s.target_country.id.clone());
+    }
+    if matches!(screen, Screen::Title | Screen::Sources) {
         return home();
     }
     scenarios
@@ -60,9 +63,12 @@ pub(super) fn highlighted_country(screen: Screen, scenarios: &[Scenario], chosen
 
 /// The Shot for Scenario select (the whole region) or the Brief (holding on the chosen marker).
 /// `None` for every other screen.
-pub(super) fn shot(screen: Screen, scenarios: &[Scenario], chosen: Option<&str>) -> Option<Shot> {
+pub(super) fn shot(screen: Screen, scenarios: &[Scenario], chosen: Option<&str>, previewed: Option<&str>) -> Option<Shot> {
     match screen {
-        Screen::ScenarioSelect => Some(Shot::Globe { lat: ANGOLA_CENTRE.0, lon: ANGOLA_CENTRE.1 }),
+        Screen::ScenarioSelect => Some(match scenarios.iter().find(|s| Some(s.id.as_str()) == previewed) {
+            Some(s) => Shot::Globe { lat: s.marker_lat, lon: s.marker_lon },
+            None => Shot::Globe { lat: ANGOLA_CENTRE.0, lon: ANGOLA_CENTRE.1 },
+        }),
         Screen::Brief => Some(match chosen_scenario(screen, scenarios, chosen) {
             Some(s) => Shot::Region { lat: s.marker_lat, lon: s.marker_lon },
             None => Shot::Globe { lat: ANGOLA_CENTRE.0, lon: ANGOLA_CENTRE.1 },
