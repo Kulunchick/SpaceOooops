@@ -329,8 +329,8 @@ flare_failure_multiplier = 20.0
 outage_daily_chance = 0.006
 outage_days = 3
 # New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
-new_events_min = 2
-new_events_max = 3
+new_events_min = 5
+new_events_max = 8
 
 # Ground stations, main first: JAXA's Tsukuba Space Center and its Okinawa Tracking and Communications Station (backup).
 # source: Tsukuba Space Center, 36 03 56.8 N 140 07 47.3 E = 36.066, 140.130 (Wikipedia, Tsukuba Space Center;
