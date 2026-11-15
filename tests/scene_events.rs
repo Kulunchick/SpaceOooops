@@ -88,6 +88,28 @@ fn each_of_the_six_kinds_is_in_the_scene_on_its_days_with_a_stable_id_and_nothin
 }
 
 #[test]
+fn an_effect_lasts_as_long_as_its_event_and_a_to_the_end_change_alone_shows_for_five_days() {
+    let days_of = |effects: &str| {
+        let c = catalog_with_events(
+            &format!(
+                "[[events]]\nid = \"t\"\ngroup = \"fantasy\"\ntitle = \"T\"\nlog = \"T.\"\nscene = \"visitor\"\neffects = [{effects}]\n"
+            ),
+            1,
+            1,
+        );
+        let r = run(&c, &crop_watch_known_good(), CROP_WATCH, 3);
+        fired(&r)[0].2
+    };
+    // The aliens' visit: 2 days, then an aftermath to the end of the Run that is not the visit.
+    let visit = r#"{ mechanic = "instruments-off", days = 2 }, { mechanic = "data", strength = 0.02, to_end = true, delay = 2 }"#;
+    assert_eq!(days_of(visit), 2);
+    assert_eq!(days_of(r#"{ mechanic = "downlink", strength = -0.5, days = 3 }"#), 3);
+    assert_eq!(days_of(r#"{ mechanic = "power", strength = -0.03, to_end = true }"#), 5);
+    assert_eq!(days_of(r#"{ mechanic = "data", strength = -0.3, days = 9 }"#), 5);
+    assert_eq!(days_of(r#"{ mechanic = "budget", strength = 1000.0 }"#), 1);
+}
+
+#[test]
 fn an_effect_never_outlasts_the_run() {
     let c = catalog_of(&SIX, 6);
     for d in [crop_watch_known_good(), all_basic_crop_watch()] {

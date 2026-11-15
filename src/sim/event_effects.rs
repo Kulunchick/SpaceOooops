@@ -150,15 +150,14 @@ pub(crate) fn start(effect: &EffectSpec, day: u32, st: &mut EventState, out: &mu
     }
 }
 
-/// How many days the scene shows an event whose `effects` applied: the longest timed one (a "to the end"
-/// effect counts as the cap), at least 1, at most 5.
+/// How many days the scene shows an event whose `effects` applied: the longest timed effect that starts on the
+/// event's day, at least 1, at most 5. A "to the end" effect is not a year-long animation: it counts as the cap
+/// only when the event has no effect of a set length, so an event never shows longer than it lasts (the aliens'
+/// two-day visit is not stretched by the change they leave behind).
 pub(crate) fn scene_days(effects: &[EffectSpec]) -> u32 {
     const CAP: u32 = 5;
-    effects
-        .iter()
-        .filter(|e| e.mechanic.is_timed())
-        .map(|e| if e.to_end { CAP } else { e.days.unwrap_or(1) })
-        .max()
-        .unwrap_or(1)
-        .clamp(1, CAP)
+    let timed = || effects.iter().filter(|e| e.mechanic.is_timed() && e.delay == 0);
+    let set = timed().filter_map(|e| e.days).max();
+    let to_end = timed().any(|e| e.to_end).then_some(CAP);
+    set.or(to_end).unwrap_or(1).clamp(1, CAP)
 }
