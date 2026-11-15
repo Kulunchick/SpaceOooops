@@ -4,10 +4,10 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Fantasy events show an "Unexplained" mark in the event log; lucky events are visually distinct; both are readable without colour alone
-- [ ] Every real event in the catalog file has a real-life line, and catalog tests fail when one is missing or a fantasy event has one
-- [ ] The Debrief lists the real-life line of each real event that happened in the Run, once
-- [ ] Helping the rescuers adds a separate Score line and leaves Science Value and Success unaffected by the bonus
-- [ ] GLOSSARY: the Random Event entry covers the new groups, and "Unexplained" is defined as the mark of a fantasy Random Event
+- [x] Fantasy events show an "Unexplained" mark in the event log; lucky events are visually distinct; both are readable without colour alone
+- [x] Every real event in the catalog file has a real-life line, and catalog tests fail when one is missing or a fantasy event has one
+- [x] The Debrief lists the real-life line of each real event that happened in the Run, once
+- [x] Helping the rescuers adds a separate Score line and leaves Science Value and Success unaffected by the bonus
+- [x] GLOSSARY: the Random Event entry covers the new groups, and "Unexplained" is defined as the mark of a fantasy Random Event

@@ -1,5 +1,6 @@
 //! What the Debrief says about the new Random Events that happened: the notes on their questions, the
 //! real-life line of every real event, and which Design choices caused or softened one.
+use super::event_catalog::EventGroup;
 use super::event_effects::EventState;
 
 /// Ticket 03 (04 for gambles): one note per question answered or defaulted, with its day:
@@ -28,9 +29,18 @@ fn sentence(note: &str) -> String {
 }
 
 /// Ticket 06: `{title}: {real_life}` for each real event that fired, once, in day order.
-#[allow(unused_variables)]
 pub(crate) fn real_life_lines(pool: &EventState) -> Vec<String> {
-    Vec::new()
+    let mut seen: Vec<&str> = Vec::new();
+    let mut lines = Vec::new();
+    for f in &pool.fired {
+        let Some(text) = f.spec.real_life.as_ref().filter(|_| f.spec.group == EventGroup::Real) else { continue };
+        if seen.contains(&f.spec.id.as_str()) {
+            continue;
+        }
+        seen.push(&f.spec.id);
+        lines.push(format!("{}: {}", f.spec.title, text.trim()));
+    }
+    lines
 }
 
 /// Ticket 05: one line per fired event with an `only` condition, a `more_likely` whose fact held, or a

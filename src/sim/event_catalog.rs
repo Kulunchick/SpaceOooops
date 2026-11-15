@@ -278,6 +278,9 @@ pub(crate) fn validate_effect(effect: &EffectSpec) -> Result<(), String> {
     if effect.mechanic == Mechanic::FailureChance && effect.strength > 0.0 {
         return Err(format!("'{name}' may only lower the failure chance, so no new event ends the Mission"));
     }
+    if effect.mechanic == Mechanic::ScoreBonus && effect.label.as_ref().is_none_or(|l| l.trim().is_empty()) {
+        return Err(format!("'{name}' needs a label for its Score line"));
+    }
     Ok(())
 }
 
