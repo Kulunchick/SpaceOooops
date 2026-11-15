@@ -116,15 +116,16 @@ operator = "CONAE (Argentina's National Space Activities Commission)"
 year = 2018
 orbit_class = "sso"
 spacecraft_class = "large"
-mass_kg = 1600.0
-size_note = "radar Earth-observation satellite, about 1,600 kg"
+mass_kg = 3000.0
+size_note = "radar Earth-observation satellite, about 3,000 kg"
 purposes = ["glaciers", "earth-observation"]
 blurb = "SAOCOM-1A, Argentina's L-band radar satellite, was launched on a Falcon 9 in October 2018 into a 620 km sun-synchronous orbit. Its survey of Antarctica studies how the continent's glaciers change, and its radar images the ground day and night through cloud."
 url = "https://www.eoportal.org/satellite-missions/saocom"
 # secondary (eoPortal, ESA-run catalogue): SAOCOM-1A launched 7/8 October 2018 on a Falcon 9 from Vandenberg;
 # "altitude = 619.6 km" sun-synchronous; payload an L-band polarimetric SAR; objectives include "monitoring
 # surveys of Antarctica (study of continental glacier evolution, global change indicators, etc.)". The page gives
-# both ~1600 kg (wet mass of each spacecraft) and 3050 kg for SAOCOM-1B; the lower figure is used. SAOCOM carries
+# about 1600 kg for the bus alone and 3,000 kg for SAOCOM-1A at launch (3,050 kg on Wikipedia; Argentina's government
+# announced "about 3,000 kg"); the launch mass is used, as for the other missions. SAOCOM carries
 # a radar, not a camera: it matches by objective and Orbit.
 verified = "secondary"
 

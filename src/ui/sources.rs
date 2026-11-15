@@ -156,7 +156,8 @@ pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
                     <Ext href="https://www.wikidata.org/wiki/Q42373251" label="Tierra del Fuego Ground Station, Wikidata" />
                     " (secondary source). SAOCOM: "
                     <Ext href="https://www.eoportal.org/satellite-missions/saocom" label="SAOCOM, eoPortal" />
-                    " (secondary source; the page gives two masses and the lower one is used)."
+                    " (secondary source; launch mass about 3,000 kg, as the page and Argentina's government give it for \
+                     SAOCOM-1A; its 1,600 kg is the bus alone)."
                 </li>
             </ul>
 
