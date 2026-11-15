@@ -334,6 +334,14 @@ function buildInstrument({ size, shape }) {
       g.add(arm);
       break;
     }
+    case 'weather-imager': {
+      // An electronics box with a short imager barrel looking down at the whole disc of Earth, and a small scan mirror.
+      g.add(box(w * 0.8, h * 0.35, d * 0.8, dark, 0, h * 0.175, 0));
+      g.add(cyl(r * 0.6, r * 0.6, h * 0.45, white, 10, 0, h * 0.575, 0));
+      g.add(cyl(r * 0.7, r * 0.6, h * 0.12, dark, 10, 0, h * 0.86, 0));
+      g.add(cyl(r * 0.42, r * 0.42, 0.003, lens, 10, 0, h * 0.925, 0));
+      break;
+    }
     case 'radar-panel': {
       // A low electronics box with a long, flat antenna panel unfolded across it, tiled with radiating patches.
       g.add(box(w * 0.7, h * 0.3, d * 0.7, dark, 0, h * 0.15, 0));

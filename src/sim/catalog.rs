@@ -299,6 +299,8 @@ pub enum InstrumentShape {
     ProbeBoom,
     /// A flat, unfolded radar antenna panel.
     RadarPanel,
+    /// A box with a downward-looking multi-band imager barrel.
+    WeatherImager,
 }
 
 /// How a Launch Vehicle looks: its class and real height.

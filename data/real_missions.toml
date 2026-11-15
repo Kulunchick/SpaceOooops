@@ -10,12 +10,14 @@ crop-watch = ["agriculture", "earth-observation"]
 connect-the-villages = ["remote-connectivity", "communications"]
 space-weather-sentinel = ["space-weather", "ionosphere", "radiation"]
 amazon-watch = ["deforestation", "earth-observation"]
+cyclone-watch = ["weather", "earth-observation"]
 
 # Plain words for each purpose tag, used in the "why this match" line.
 [purpose_words]
 agriculture = "farm monitoring"
 earth-observation = "imaging the ground"
 deforestation = "watching forests for clearing"
+weather = "watching the weather"
 remote-connectivity = "connecting remote places"
 communications = "communications"
 store-and-forward = "store-and-forward messaging"
@@ -86,6 +88,21 @@ url = "https://www.eoportal.org/satellite-missions/amazonia-1"
 # Imager camera, "the prime objective is to monitor deforestation". The USGS station page
 # https://landsat.usgs.gov/CUB confirms INPE's Cuiabá station tracks it (AMZ1). Amazonia-1 carries a camera, not
 # a radar: it matches by objective and Orbit.
+verified = "secondary"
+
+[[real_missions]]
+name = "INSAT-3DR"
+operator = "ISRO (Indian Space Research Organisation)"
+year = 2016
+orbit_class = "geo"
+spacecraft_class = "large"
+mass_kg = 2211.0
+size_note = "meteorological satellite, about 2.2 t at launch"
+purposes = ["weather", "earth-observation"]
+blurb = "INSAT-3DR, an Indian weather satellite, was launched on a GSLV rocket on 8 September 2016 into geostationary orbit at 74 degrees East to watch the weather over India and the seas around it, with a six-band imager and a 19-channel sounder."
+url = "https://www.eoportal.org/satellite-missions/insat-3dr"
+# secondary (eoPortal, ESA-run catalogue): launch 8 September 2016 (11:20 UTC) on GSLV-F05, liftoff mass 2211 kg,
+# geostationary at 74 deg East, a six-band Imager and a 19-channel Sounder, meteorological mission.
 verified = "secondary"
 
 # ---------------------------------------------------------------- communications for remote places

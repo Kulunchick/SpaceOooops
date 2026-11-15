@@ -204,6 +204,7 @@ fn every_known_good_design_is_matched_to_a_sensible_real_mission() {
         (CONNECT_THE_VILLAGES, connect_the_villages_known_good(), "Arcturus"),
         (SPACE_WEATHER_SENTINEL, space_weather_sentinel_known_good(), "Dellingr"),
         (AMAZON_WATCH, amazon_watch_known_good(), "Amazonia-1"),
+        (CYCLONE_WATCH, cyclone_watch_known_good(), "INSAT-3DR"),
     ];
     for (scenario, design, name) in expected {
         let m = fly(&design, scenario, 1).real_mission_match.expect("a match");

@@ -122,6 +122,17 @@ pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
                     <Ext href="https://www.eoportal.org/satellite-missions/amazonia-1" label="Amazonia-1, eoPortal" />
                     " (secondary source)."
                 </li>
+                <li>
+                    "India (Cyclone Watch), ISRO. Hassan station: "
+                    <Ext href="https://www.mcf.gov.in/website/tos" label="ISRO Master Control Facility, Transfer Orbit Services" />
+                    " (position). Bengaluru station: ISTRAC publishes only a postal address on "
+                    <Ext href="https://www.istrac.gov.in/" label="ISTRAC" />
+                    ", so its position is from "
+                    <Ext href="https://mapcarta.com/W801974072" label="ISTRAC Bengaluru, Mapcarta" />
+                    " (secondary source). INSAT-3DR: "
+                    <Ext href="https://www.eoportal.org/satellite-missions/insat-3dr" label="INSAT-3DR, eoPortal" />
+                    " (secondary source)."
+                </li>
             </ul>
 
             <h3>"Assets and licences"</h3>

@@ -82,6 +82,24 @@ pub fn amazon_watch_known_good() -> Design {
     }
 }
 
+pub const CYCLONE_WATCH: &str = "cyclone-watch";
+
+/// A 12U CubeSat with the weather imager on reaction wheels, body-mounted panels (GEO's sunlight is long), an 80 Wh
+/// battery and an S-band radio, in GEO on a GEO rideshare slot. Passes cleanly in India.
+pub fn cyclone_watch_known_good() -> Design {
+    Design {
+        instruments: vec!["weather-imager".to_string()],
+        structure: Some("cubesat-12u".to_string()),
+        solar: Some(Pick::new("solar-body", FlightProven)),
+        battery: Some(Pick::new("battery-l", FlightProven)),
+        attitude: Some(Pick::new("reaction-wheels", FlightProven)),
+        comms: Some(Pick::new("comms-s-band", FlightProven)),
+        computer_tier: FlightProven,
+        orbit: Some("geo".to_string()),
+        launch_vehicle: Some("geo-rideshare".to_string()),
+    }
+}
+
 /// A 6U CubeSat with a particle detector and an ionosphere probe in LEO 400 km, deployed from the space
 /// station, sending its heavy Data down over an X-band radio. Passes cleanly.
 pub fn space_weather_sentinel_known_good() -> Design {

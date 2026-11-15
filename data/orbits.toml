@@ -22,7 +22,8 @@ lifetime_cap_days = 300.0
 # Connect the Villages: a low satellite is over a village only a few minutes a day.
 # Space Weather Sentinel: flies through the ionosphere and the South Atlantic Anomaly many times a day.
 # Amazon Watch: the 52-degree Orbit crosses the Amazon often, but drag ends a CubeSat before the year is out.
-coverage = { crop-watch = 0.7, connect-the-villages = 0.05, space-weather-sentinel = 1.0, amazon-watch = 0.7 }
+# Cyclone Watch: a 52-degree Orbit passes over the Bay of Bengal for a few minutes at a time and misses most storms.
+coverage = { crop-watch = 0.7, connect-the-villages = 0.05, space-weather-sentinel = 1.0, amazon-watch = 0.7, cyclone-watch = 0.1 }
 
 [[orbits]]
 id = "sso-600"
@@ -41,7 +42,8 @@ contact_minutes_per_day = 40.0
 # source: atmospheric drag keeps a CubeSat at 600 km up for well over 5 years; radiation limits parts to ~5 years.
 lifetime_cap_days = 1825.0
 # Space Weather Sentinel: 600 km is above the densest part of the ionosphere (peak ~300-400 km).
-coverage = { crop-watch = 1.0, connect-the-villages = 0.05, space-weather-sentinel = 0.6, amazon-watch = 1.0 }
+# Cyclone Watch: a polar Orbit passes over the Bay of Bengal about twice a day, so a storm is seen only briefly.
+coverage = { crop-watch = 1.0, connect-the-villages = 0.05, space-weather-sentinel = 0.6, amazon-watch = 1.0, cyclone-watch = 0.15 }
 
 [[orbits]]
 id = "geo"
@@ -63,4 +65,5 @@ lifetime_cap_days = 3650.0
 # Crop Watch: 36,000 km is too far for a CubeSat camera to see single fields.
 # Space Weather Sentinel: GEO is far outside the ionosphere and the South Atlantic Anomaly.
 # Amazon Watch: a CubeSat radar cannot make out forest clearings from 36,000 km.
-coverage = { crop-watch = 0.2, connect-the-villages = 1.0, space-weather-sentinel = 0.0, amazon-watch = 0.1 }
+# Cyclone Watch: at 36,000 km the whole Bay of Bengal is in view all day, every day.
+coverage = { crop-watch = 0.2, connect-the-villages = 1.0, space-weather-sentinel = 0.0, amazon-watch = 0.1, cyclone-watch = 1.0 }

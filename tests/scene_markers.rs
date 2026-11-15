@@ -27,6 +27,7 @@ fn country_centre(id: &str) -> ((f64, f64), f64) {
     match id {
         "angola" => ((-12.5, 17.5), 9.0),
         "brazil" => ((-10.0, -53.0), 20.0),
+        "india" => ((22.0, 79.0), 15.0),
         other => panic!("no known centre for Target Country '{other}'"),
     }
 }
@@ -144,6 +145,15 @@ fn hovering_the_brazil_card_turns_the_globe_to_its_pin_and_outlines_brazil() {
     let spec = select_spec(&catalog, Some("amazon-watch"));
     assert_eq!(spec.shot, Shot::Globe { lat: amazon.marker_lat, lon: amazon.marker_lon });
     assert_eq!(spec.highlighted_country, "brazil");
+}
+
+#[test]
+fn hovering_the_india_card_turns_the_globe_to_its_pin_and_outlines_india() {
+    let catalog = load_catalog().unwrap();
+    let cyclone = catalog.scenario("cyclone-watch").expect("the India Scenario is bundled");
+    let spec = select_spec(&catalog, Some("cyclone-watch"));
+    assert_eq!(spec.shot, Shot::Globe { lat: cyclone.marker_lat, lon: cyclone.marker_lon });
+    assert_eq!(spec.highlighted_country, "india");
 }
 
 #[test]

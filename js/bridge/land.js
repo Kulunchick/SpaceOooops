@@ -41,6 +41,26 @@ export const BRAZIL = [
   [-60.7, 5.2], [-59.9, 4.5], [-59.8, 2.5], [-58.8, 1.2], [-56.5, 1.9], [-54.6, 2.3],
 ];
 
+// India: the coast follows EURASIA's points (the east coast a little further out, so Chennai stands on land); the inland borders are coarse, traced by eye from the ranges and rivers
+// they follow (Kashmir as India shows it, Bangladesh left out).
+export const INDIA = [
+  // West coast from the Rann of Kutch south to Cape Comorin, then the east coast up to the Bangladesh border
+  [68.5, 23.5], [72.5, 21.5], [73, 18], [76.5, 9.5], [78, 8.1], [79.4, 10.3], [80.5, 13.3], [80.3, 15.8], [82.3, 16.9], [83.5, 17.9], [85, 19.4], [86.5, 20],
+  [88, 21.5], [88.9, 21.9],
+  // Bangladesh, round its west and north sides
+  [88.6, 23.5], [88.3, 24.7], [88.4, 26], [89.5, 26], [90.6, 25.2], [92, 25.1], [92.3, 23.8], [92.2, 22.6],
+  // Myanmar and the far north-east
+  [93.2, 23.3], [94.3, 24.3], [94.6, 25.6], [95.3, 26.8], [97, 28.2], [95.5, 29.1], [92.5, 28.2],
+  // Bhutan, Sikkim, Nepal
+  [91.7, 27.6], [91.9, 26.9], [89.8, 26.7], [88.9, 27.1], [88.8, 27.9], [88.1, 27.9], [88.1, 26.4], [87, 26.4],
+  [84, 27.3], [81.5, 30.1],
+  // Tibet and Kashmir
+  [80.2, 30.2], [79, 31], [78.7, 32.4], [79.5, 33.2], [78.8, 34.3], [77.8, 35.5], [76.5, 35.7], [74.3, 34.8],
+  // Pakistan, down to the Rann of Kutch
+  [74.2, 33.2], [74.6, 32.5], [74.5, 31.4], [74.5, 30.3], [73, 29.2], [71.1, 27.8], [70.5, 26.5], [70, 25],
+  [69.5, 24.2],
+];
+
 const MADAGASCAR = [[49.3, -12], [50.4, -15.5], [47.4, -25], [45, -25.5], [43.6, -23], [44.4, -16.2], [47, -14.5]];
 
 const EURASIA = [
@@ -119,7 +139,7 @@ function inside(polygon, lon, lat) {
 
 // One outline per Target Country, keyed by the country id in data/scenarios.toml. Add a country here to make it
 // highlightable; a Scenario whose country has no outline here simply highlights nothing.
-export const COUNTRIES = { angola: ANGOLA, brazil: BRAZIL };
+export const COUNTRIES = { angola: ANGOLA, brazil: BRAZIL, india: INDIA };
 
 /** The id of the Target Country whose outline holds the point, or null. */
 export function countryAt(lon, lat) {

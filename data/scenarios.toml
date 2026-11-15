@@ -225,3 +225,65 @@ lon = -56.07
 name = "Alcântara"
 lat = -2.34
 lon = -44.42
+
+[[scenarios]]
+id = "cyclone-watch"
+name = "Cyclone Watch"
+difficulty = "Medium"
+objective = "Watch the Bay of Bengal and India's east coast for a year from geostationary Orbit, following each cyclone as it forms, grows and comes ashore."
+why_it_matters = "Cyclones form over the warm Bay of Bengal and strike India's east coast, in the months before and after the summer monsoon. A cyclone changes hour by hour, so what saves lives is a picture every few minutes: where the storm is, how fast it is growing, which coast it will reach. A satellite in a low Orbit passes over the bay for a few minutes and is gone, and a storm can grow while it is away. A weather satellite in geostationary Orbit (GEO) hangs over the same spot and watches all day. It is the same Orbit that holds the relay over Angola in Connect the Villages, but there it keeps a dish aimed at villages and here it keeps a camera on a storm."
+required_science_value = 100.0
+# A full year covers both cyclone seasons, before and after the monsoon.
+min_lifetime_days = 365
+# source: game estimate. The launch to GEO alone costs millions, as in Connect the Villages, and the weather imager
+# is cheaper than the village relay.
+budget_usd = 6_000_000.0
+# Globe marker: Odisha, beside the Bay of Bengal, where many cyclones come ashore.
+marker_lat = 20.2
+marker_lon = 85.7
+# Placeholder art (own work); swap the file or this path when the team supplies images.
+illustration = "assets/images/scenarios/cyclone-watch.svg"
+key_constraints = [
+    "A cyclone changes by the hour: a low Orbit passes over the bay for minutes and misses most storms.",
+    "Only a satellite in geostationary Orbit (GEO) watches the same spot all day.",
+    "The launch to GEO is expensive, and the affordable slot carries only 18 kg.",
+]
+tutorial_hints = [
+    "Start on the Science tab: the weather imager is made for watching storms. Cameras made for the ground see only a thin strip.",
+    "On the Launch & Orbit tab, compare the Orbits: which one keeps the Bay of Bengal in view all day? Check the Launch Vehicle can carry your Mass there.",
+    "The imager must be pointed at the bay: on the Spacecraft tab pick an Attitude control part that can hold it steady.",
+    "In GEO the Sun shines almost all the time, so you need less battery than in a low Orbit: watch the Power gauge.",
+]
+# Game-tuned: the weather imager sending ~500 MB a day from GEO for a year earns about 1.5x the requirement; the
+# same imager in a low Orbit sees the bay too rarely to earn a tenth of it.
+science_value_per_gb = 0.82
+# The country the Scenario serves (id keys the globe outline).
+target_country = { id = "india", name = "India" }
+
+[scenarios.events]
+# source: NOAA SWPC - strong (X-class) flares a few times a year near solar maximum.
+solar_flare_daily_chance = 0.004
+flare_safe_mode_days = 2
+# GEO lies outside most of the magnetosphere's shielding, so a flare hits harder than in low Orbit.
+flare_failure_multiplier = 30.0
+# Two ISTRAC stations that back each other up: outages about twice a year.
+outage_daily_chance = 0.006
+outage_days = 3
+# New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
+new_events_min = 2
+new_events_max = 3
+
+# Ground stations, main first: ISRO's ISTRAC in Bengaluru, and the Master Control Facility at Hassan (backup).
+# source: mapcarta / Wikimapia map entries for ISTRAC, Peenya, Bengaluru: 13.035 N, 77.51 E (secondary; ISTRAC
+# publishes only the postal address, https://www.istrac.gov.in/).
+[[scenarios.ground_stations]]
+name = "Bengaluru"
+lat = 13.03
+lon = 77.51
+
+# source: ISRO Master Control Facility, Transfer Orbit Services page (https://www.mcf.gov.in/website/tos): Hassan,
+# 13.07 N, 76.098 E.
+[[scenarios.ground_stations]]
+name = "Hassan"
+lat = 13.07
+lon = 76.1

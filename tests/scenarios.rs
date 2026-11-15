@@ -24,12 +24,13 @@ fn has_violation(r: &LaunchReview, kind: FindingKind) -> bool {
     r.violations.iter().any(|f| f.kind == kind)
 }
 
-fn known_goods() -> [(&'static str, Design); 4] {
+fn known_goods() -> [(&'static str, Design); 5] {
     [
         (CROP_WATCH, crop_watch_known_good()),
         (CONNECT_THE_VILLAGES, connect_the_villages_known_good()),
         (SPACE_WEATHER_SENTINEL, space_weather_sentinel_known_good()),
         (AMAZON_WATCH, amazon_watch_known_good()),
+        (CYCLONE_WATCH, cyclone_watch_known_good()),
     ]
 }
 
@@ -42,7 +43,7 @@ fn ids<T>(items: &[T], id: impl Fn(&T) -> &str) -> Vec<String> {
 #[test]
 fn every_scenario_has_difficulty_key_constraints_and_a_target_country() {
     let catalog = load_catalog().unwrap();
-    for id in [CROP_WATCH, CONNECT_THE_VILLAGES, SPACE_WEATHER_SENTINEL, AMAZON_WATCH] {
+    for id in [CROP_WATCH, CONNECT_THE_VILLAGES, SPACE_WEATHER_SENTINEL, AMAZON_WATCH, CYCLONE_WATCH] {
         let s = catalog.scenario(id).unwrap_or_else(|| panic!("{id} is bundled"));
         assert!(!s.difficulty.is_empty() && !s.key_constraints.is_empty() && !s.why_it_matters.is_empty(), "{s:?}");
         assert!(!s.target_country.id.is_empty() && !s.target_country.name.is_empty(), "{s:?}");
@@ -61,7 +62,7 @@ fn the_full_catalog_is_bundled() {
     assert_eq!(ids(&catalog.structures, |o| &o.id), ["cubesat-3u", "cubesat-6u", "cubesat-12u", "smallsat"]);
     assert_eq!(ids(&catalog.batteries, |o| &o.id), ["battery-s", "battery-m", "battery-l"]);
     assert_eq!(ids(&catalog.comms, |o| &o.id), ["comms-uhf", "comms-s-band", "comms-x-band"]);
-    assert!((6..=8).contains(&catalog.instruments.len()), "{}", catalog.instruments.len());
+    assert!((6..=9).contains(&catalog.instruments.len()), "{}", catalog.instruments.len());
     assert!(catalog.launch_vehicles.len() >= 5);
     assert!(catalog.launch_vehicles.iter().all(|lv| !lv.real_example.is_empty() && !lv.why.is_empty()));
     // every Orbit is reachable and rated for every Scenario; every Scenario has Instruments that suit it
@@ -242,6 +243,39 @@ fn the_radar_is_not_the_answer_in_the_angolan_scenarios() {
     d.orbit = Some("geo".into());
     d.launch_vehicle = Some("geo-rideshare".into());
     assert!(!review(&d, CONNECT_THE_VILLAGES).can_launch);
+}
+
+// ---------------------------------------------------------------- Cyclone Watch: only GEO watches a storm all day
+
+/// The tempting cheap way: the same weather imager on a SmallSat rideshare to SSO. It launches, but a low Orbit passes over
+/// the Bay of Bengal for minutes a day and misses most storms.
+#[test]
+fn cyclone_a_weather_imager_in_a_low_orbit_launches_but_falls_short() {
+    let mut d = cyclone_watch_known_good();
+    d.orbit = Some("sso-600".into());
+    d.launch_vehicle = Some("smallsat-rideshare".into());
+    let r = review(&d, CYCLONE_WATCH);
+    assert!(r.can_launch, "{:#?}", r.violations);
+    assert_eq!(success_rate(&d, CYCLONE_WATCH), 0.0);
+}
+
+#[test]
+fn cyclone_every_camera_from_geo_still_falls_short() {
+    let mut d = cyclone_watch_known_good();
+    d.instruments = vec!["multispectral-imager".into(), "thermal-imager".into(), "wide-camera".into()];
+    assert!(review(&d, CYCLONE_WATCH).can_launch, "{:#?}", review(&d, CYCLONE_WATCH).violations);
+    assert_eq!(success_rate(&d, CYCLONE_WATCH), 0.0);
+}
+
+/// The imager is no shortcut elsewhere: in every other Scenario it is a poor Instrument.
+#[test]
+fn the_weather_imager_is_not_the_answer_outside_india() {
+    let catalog = load_catalog().unwrap();
+    let imager = catalog.instrument("weather-imager").unwrap();
+    for (scenario, good) in known_goods().into_iter().filter(|(s, _)| *s != CYCLONE_WATCH) {
+        let best_other = good.instruments.iter().map(|i| catalog.instrument(i).unwrap().fit[scenario]).fold(0.0, f64::max);
+        assert!(imager.fit[scenario] < best_other / 2.0, "{scenario}: weather imager fit {}", imager.fit[scenario]);
+    }
 }
 
 // ---------------------------------------------------------------- the Orbit drives Lifetime, Power and Data
