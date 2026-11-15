@@ -99,3 +99,22 @@ fn the_rescue_event_costs_two_days_of_science_and_pays_a_separate_score_line() {
     let free = q.options.iter().find(|o| o.id == q.default).unwrap();
     assert!(free.effects.iter().all(|f| f.mechanic != Mechanic::ScoreBonus));
 }
+
+#[test]
+fn helping_the_rescuers_is_worth_40_points_less_than_the_whole_budget_bonus() {
+    let c = load_catalog().unwrap();
+    let d = crop_watch_known_good();
+    let (seed, prompt) = (0..200)
+        .find_map(|seed| {
+            let r = run(&c, &d, CROP_WATCH, seed);
+            let p = r.timeline.iter().flat_map(|t| &t.events).filter_map(|e| e.prompt.clone()).find(|p| p.id.ends_with("rescuers-ask-for-flood-images"));
+            p.map(|p| (seed, p))
+        })
+        .expect("a Run that meets the rescuers");
+    let help = prompt.options.iter().find(|o| o.id == "help").unwrap();
+    assert!(help.consequence.contains("40 points"), "{}", help.consequence);
+    let r = run_with_decisions(&c, &d, CROP_WATCH, seed, &[Decision { prompt_id: prompt.id.clone(), choice: "help".into() }]);
+    let line = r.debrief.score.lines.iter().find(|l| l.kind == ScoreLineKind::EventBonus).expect("the rescue line");
+    assert_eq!(line.points, 40.0);
+    assert!(line.points < c.scoring.budget_margin_points);
+}

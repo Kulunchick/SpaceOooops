@@ -465,12 +465,12 @@ default = "decline"
 [[events.question.options]]
 id = "help"
 label = "Help the rescuers"
-consequence = "The Instruments are off for 2 days, and the Score gets a bonus of 150 points."
+consequence = "The Instruments are off for 2 days, and the Score gets a bonus of 40 points."
 log = "You pointed the spacecraft at the flood for 2 days. The rescuers thanked you."
 note = "the spacecraft imaged the flood for the rescuers, losing 2 days of planned science for a Score bonus"
 effects = [
   { mechanic = "instruments-off", days = 2 },
-  { mechanic = "score-bonus", strength = 150.0, label = "Helped rescuers with flood images" },
+  { mechanic = "score-bonus", strength = 40.0, label = "Helped rescuers with flood images" },
 ]
 
 [[events.question.options]]
