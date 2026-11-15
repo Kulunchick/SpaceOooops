@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SpaceOooops: Detailed Project Description</title>
+<style>
+  /* Only for viewing this file. The editor keeps the headings, bold, lists and links, not these colours. */
+  body { max-width: 760px; margin: 32px auto; padding: 0 16px; font: 16px/1.55 system-ui, sans-serif; color: #1b1f24; background: #fff; }
+  .howto { background: #fff7e0; border: 1px solid #e0b440; padding: 12px 16px; border-radius: 6px; font-size: 14px; }
+  .img { border: 2px dashed #8aa; color: #466; padding: 10px 14px; margin: 14px 0; font-size: 14px; border-radius: 6px; }
+</style>
+</head>
+<body>
+
+<div class="howto">
+<b>How to paste (this yellow box is not part of the text):</b><br>
+1. In the browser, select everything from "Play it" down to the last line (click before "Play it", then Shift+click after the last line) and copy it.<br>
+2. Clear the "Detailed Project Description" field and paste. Headings, bold, lists and links come along.<br>
+3. Each dashed box marks a place for a picture: delete the box's text and use <b>Insert → Inline Image</b> with the file it names, from <code>task/submission/images/</code>.<br>
+4. Optional: where the first dashed box is, <b>Insert → Youtube Video</b> with https://youtu.be/p-rJV9GkExQ.
+</div>
+
+<h2>Play it</h2>
+<p><b>Game</b> (free, no install, no login): <a href="https://kulunchick.github.io/SpaceOooops/">https://kulunchick.github.io/SpaceOooops/</a><br>
+<b>Source code:</b> <a href="https://github.com/Kulunchick/SpaceOooops">https://github.com/Kulunchick/SpaceOooops</a><br>
+<b>30-second demo:</b> <a href="https://youtu.be/p-rJV9GkExQ">https://youtu.be/p-rJV9GkExQ</a></p>
+
+<p class="img">[Insert → Youtube Video: https://youtu.be/p-rJV9GkExQ]</p>
+
+<hr>
+
+<h2>What it does</h2>
+<p>SpaceOooops is a game about the <b>trade-offs of space mission design</b>. One Mission has four steps: <b>Design → Launch Review → Run → Debrief</b>.</p>
+<ol>
+  <li><b>Choose how to play:</b> solo, or a team of 2 to 4 players on one screen.</li>
+  <li><b>Pick a Scenario</b> and read its brief: the objective, the Science Value required, the minimum Lifetime and the Budget. There are seven Scenarios. Three are set in <b>Angola</b>, home of the challenge author: Crop Watch (easy), Connect the Villages (medium) and Space Weather Sentinel (hard). Four more are set in countries of Space Apps partner agencies: Amazon Watch (Brazil), Glacier Watch (Argentina), Cyclone Watch (India) and Disaster Response (Japan).</li>
+  <li><b>Design the mission</b> in four Role tabs:
+    <ul>
+      <li><b>Science:</b> 9 Instruments, each with its own Mass, Power, cost, Data and fit to the Scenario.</li>
+      <li><b>Spacecraft:</b> structure from a CubeSat 3U to a 100 kg SmallSat, solar panels, battery, attitude control and onboard computer, each in a Basic or Flight-proven reliability tier.</li>
+      <li><b>Launch &amp; Orbit:</b> 3 Orbits (400 km low Earth orbit, 600 km sun-synchronous, geostationary) and 6 Launch Vehicle classes.</li>
+      <li><b>Budget &amp; Comms:</b> UHF, S-band or X-band radio.</li>
+    </ul>
+    Live gauges show Budget, Mass, Power, Data and Lifetime, and every number has a "why it matters" tip. Easy Scenarios add first-time hints.</li>
+</ol>
+
+<p class="img">[Insert → Inline Image: images/1-design.jpg. A heavy radar turns four gauges red.]</p>
+
+<ol start="4">
+  <li><b>Pass the Launch Review.</b> It blocks a Design that breaks a hard constraint, for example a spacecraft too heavy for its Launch Vehicle, and says why. In team play every Role votes Go or No-Go, and a No-Go shows its objection.</li>
+</ol>
+
+<p class="img">[Insert → Inline Image: images/2-launch-review.jpg. Four broken constraints, each explained.]</p>
+
+<ol start="5">
+  <li><b>Watch the Run:</b> a day-by-day simulation over a 3D orbit animation with live dashboards. Random Events happen along the way. Some pause the Run and ask you to decide: enter safe mode for a solar flare or ride it out, wait out a ground-station outage or buy time on another station, dodge debris or risk it. Some options are gambles with a stated chance. If you skip a question, the spacecraft takes the safe default.</li>
+</ol>
+
+<p class="img">[Insert → Inline Image: images/3-run-solar-flare.jpg. A solar flare wave reaches the spacecraft in safe mode.]</p>
+
+<ol start="6">
+  <li><b>Read the Debrief:</b> success or failure, the Score line by line, the causes in plain language with this Run's numbers, your decisions and their effects, each Role's Personal Objective, a Real-Mission Match and a comparison with your previous Run. Then change the Design and fly again.</li>
+</ol>
+
+<p class="img">[Insert → Inline Image: images/5-debrief.jpg. The Debrief explains why.]</p>
+
+<p>Every Run is saved in the browser's history with a <b>Load this Design</b> button. <b>Share design</b> copies a link that opens the same Scenario and Design in any browser.</p>
+
+<hr>
+
+<h2>How it works</h2>
+<p>All game rules live in one <b>simulation module written in Rust</b>, with no user-interface code in it. It computes the resource budgets, runs the Launch Review, flies the Run from a seed (the same seed and Design always give the same Run) and builds the Debrief. Every game number sits in plain data files with its source written next to it, and values we tuned for play are marked as game estimates.</p>
+<p>The user interface is built with <b>Leptos</b> and compiled to <b>WebAssembly</b>. A low-poly 3D scene (Earth, the spacecraft model built from the chosen parts, the launch, the orbit) is drawn with <b>three.js</b> behind the interface. Without WebGL the game falls back to a static background and stays fully playable. There is no backend: the game is a set of static files on GitHub Pages.</p>
+
+<hr>
+
+<h2>Benefits and intended impact</h2>
+<ul>
+  <li><b>The whole mission at once.</b> Students see every part together, not one topic at a time. Changing one part moves five gauges.</li>
+  <li><b>No single correct answer.</b> Different combinations of Instruments, Orbits and Launch Vehicles can meet the same objective.</li>
+  <li><b>The game explains why.</b> The Launch Review and the Debrief give causes and numbers, not only pass or fail.</li>
+  <li><b>Failure is cheap.</b> A Run takes minutes, and the comparison with the previous Run shows what the change did.</li>
+  <li><b>Real negotiation in team play.</b> Each Role has a Personal Objective that pulls against the others: Budget &amp; Comms wants to spend under 80% of the Budget while Science wants more Science Value.</li>
+  <li><b>Links to real missions.</b> The Real-Mission Match connects the player's Design to one of 13 real missions, such as NASA's Dellingr CubeSat, AngoSat-2, Amazonia-1, ALOS-2, SAOCOM and INSAT-3DR.</li>
+</ul>
+<p>We hope teachers and space clubs can use it as a <b>20-minute classroom activity</b>: one shared screen and four students arguing over one spacecraft.</p>
+
+<hr>
+
+<h2>Creativity</h2>
+<ul>
+  <li><b>Three kinds of Random Events:</b> real (each with a short note on how it happens to real missions), lucky (good news) and <b>Unexplained</b> (clearly marked fantasy events, such as a space cat chasing the downlink beam or aliens borrowing the satellite). The jokes keep players reading the event log, where the real engineering lessons are.</li>
+  <li><b>Go/No-Go vote and Personal Objectives</b> turn a single-player optimisation puzzle into a team discussion.</li>
+  <li><b>The 3D spacecraft is built from the parts the player picked</b>, and a failed Mission ends with a matching fate: tumbling, dark, re-entry or adrift.</li>
+</ul>
+
+<p class="img">[Insert → Inline Image: images/4-run-unexplained-event.jpg. An "Unexplained" event: aliens borrow the satellite.]</p>
+
+<hr>
+
+<h2>Factors we considered</h2>
+<ul>
+  <li><b>Access and cost:</b> free, runs in a browser, no install, no account, no server. Nothing is sent anywhere; history stays in the browser.</li>
+  <li><b>Low-end devices:</b> Low/High Graphics and Full/Reduced Motion settings, a non-WebGL fallback, and layouts tested at phone width.</li>
+  <li><b>Readability:</b> body text uses Atkinson Hyperlegible, a typeface designed for legibility. Concepts are explained in simple terms inside the game, with a glossary of terms used the same way on every screen.</li>
+  <li><b>Honesty about numbers:</b> the in-game Sources page lists where values come from and says which are primary sources, secondary sources or game estimates.</li>
+  <li><b>Energy:</b> static hosting and client-side simulation, so no servers run for the game.</li>
+</ul>
+
+<hr>
+
+<h2>Tools and languages</h2>
+<p>Rust, WebAssembly, Leptos 0.8, Trunk, JavaScript, three.js 0.186.1, CSS, TOML data files, Playwright browser tests, GitHub Actions and GitHub Pages. The simulation is covered by native Rust tests, and the release build is checked by browser tests before every deploy.</p>
+
+<hr>
+
+<h2>Use of AI tools</h2>
+<p>The idea, the game design and the specification are the team's own work. The <b>code</b> was written with Claude Code, an AI coding assistant by Anthropic, working from the team's specification; this is also stated in the repository README and on the in-game Sources page. The <b>text</b> of this submission was edited with AI assistance. The <b>voice-over</b> of the demo video was generated with ElevenLabs. The <b>team logo</b>, used as the video thumbnail, is an AI-generated image and carries a visible "AI-generated image" watermark. No image, music or sound effect inside the game was made with AI tools, and the demo video and the screenshots above show real gameplay.</p>
+
+<h2>Notices</h2>
+<p>SpaceOooops uses no NASA logos, insignia, mission patches or flags. Real missions are named in plain text only, as factual references. SpaceOooops is not endorsed by NASA.</p>
+
+</body>
+</html>
