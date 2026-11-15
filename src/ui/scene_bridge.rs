@@ -146,6 +146,8 @@ pub fn SceneLayer() -> impl IntoView {
     let spec = Memo::new(move |_| {
         let screen = state.screen.get();
         let chosen = state.scenario_id.get();
+        // Only Scenario select shows the preview; read it only there so other screens do not rebuild on hover.
+        let previewed = if screen == scene::Screen::ScenarioSelect { state.previewed_scenario.get() } else { String::new() };
         // Solo play never votes, so only team play puts vote lamps on the tower.
         let votes: Vec<Option<bool>> = if state.team.with(|t| t.solo) { Vec::new() } else { state.votes.get().to_vec() };
         let launching = state.launching.get();
@@ -162,6 +164,7 @@ pub fn SceneLayer() -> impl IntoView {
                         design: Some(design),
                         scenarios: &c.scenarios,
                         chosen: Some(&chosen),
+                        previewed: Some(&previewed),
                         run: run.as_ref(),
                         playback,
                         ..SceneInputs::on(screen)

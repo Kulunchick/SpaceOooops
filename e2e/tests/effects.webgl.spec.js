@@ -89,7 +89,8 @@ test('a ground station outage turns the main beacon dark until contact returns',
   await page.getByRole('button', { name: /Wait it out/ }).click();
   await expect(canvas(page)).toHaveAttribute('data-stations', 'primary:dark backup:on');
   await hold(page, true);
-  await expect(page.locator('html')).toHaveAttribute('data-audio-last-cue', 'outage');
+  // A new Random Event can start on the same day (k = 10: link interference on day 8), and its Cue comes second.
+  await expect(page.locator('html')).toHaveAttribute('data-audio-last-cue', /^(outage|interference)$/);
   // No Data comes down while waiting, so no beam.
   expect(await attr(page, 'data-contact')).toBe('');
   await shot(page, 'outage');
@@ -133,5 +134,43 @@ test('a failed Component sparks and goes dark on the model, and a skip leaves no
   await expect(page.locator('.verdict-title')).toBeVisible();
   await expect(canvas(page)).toHaveAttribute('data-effects', '');
   await expect(canvas(page)).toHaveAttribute('data-dark-parts', '');
+  expect(errors).toEqual([]);
+});
+
+test('a new Random Event shows as a link-interference effect with its Cue, and is gone after its day', async ({ page }) => {
+  const errors = collectErrors(page);
+  // Crop Watch, k = 50: link-interference events on days 113, 217 and 355, no question to wait for.
+  await seedRuns(page, 50);
+  await launch(page);
+  await page.getByRole('button', { name: '4×' }).click();
+  await expect(canvas(page)).toHaveAttribute('data-effects', /linkInterference/, { timeout: 40_000 });
+  await hold(page, true);
+  await page.waitForTimeout(200);
+  expect(await attr(page, 'data-event-fx')).toMatch(/^linkInterference:/);
+  await shot(page, 'link-interference');
+  // Paused, the effect stays exactly where it is.
+  const during = await attr(page, 'data-event-fx');
+  await page.waitForTimeout(200);
+  expect(await attr(page, 'data-event-fx')).toBe(during);
+  await expect(page.locator('html')).toHaveAttribute('data-audio-last-cue', 'interference');
+  await hold(page, false);
+  await expect(canvas(page)).not.toHaveAttribute('data-effects', /linkInterference/, { timeout: 10_000 });
+  expect(await attr(page, 'data-event-fx')).toBe('');
+  expect(errors).toEqual([]);
+});
+
+test('a fly-by is drawn beside the spacecraft and plays its Cue', async ({ page }) => {
+  const errors = collectErrors(page);
+  // Crop Watch, k = 11: a fly-by on day 192 (two days long).
+  await seedRuns(page, 11);
+  await launch(page);
+  await page.getByRole('button', { name: '4×' }).click();
+  await expect(canvas(page)).toHaveAttribute('data-effects', /flyBy/, { timeout: 40_000 });
+  await hold(page, true);
+  await page.waitForTimeout(200);
+  expect(await attr(page, 'data-event-fx')).toMatch(/flyBy:/);
+  await shot(page, 'fly-by');
+  await expect(page.locator('html')).toHaveAttribute('data-audio-last-cue', 'fly-by');
+  await hold(page, false);
   expect(errors).toEqual([]);
 });

@@ -15,6 +15,8 @@ pub struct AppState {
     pub catalog: StoredValue<Catalog>,
     pub screen: RwSignal<Screen>,
     pub scenario_id: RwSignal<String>,
+    /// The Scenario card hovered or focused on Scenario select (empty = none); the globe follows it.
+    pub previewed_scenario: RwSignal<String>,
     pub design: RwSignal<Design>,
     pub tab: RwSignal<Role>,
     /// Launch Review of the current Design, recomputed on every change.
@@ -67,6 +69,7 @@ impl AppState {
             catalog,
             screen: RwSignal::new(Screen::Title),
             scenario_id,
+            previewed_scenario: RwSignal::new(String::new()),
             design,
             tab: RwSignal::new(Role::Science),
             review,

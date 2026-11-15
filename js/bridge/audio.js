@@ -195,7 +195,8 @@ function crackle(at, length, level = 0.4) {
   sourcesStarted += 1;
 }
 
-// Random Event Cues have no sample: each is synthesised here so it is recognisable (not checked by ear).
+// Random Event Cues have no sample: each is synthesised here so it is recognisable (not checked by ear). Both the
+// older and the new Random Events' Cues are listed (see src/scene/cues.rs).
 const SYNTHS = {
   // Solar flare: a two-tone alarm, three cycles.
   flare: () => {
@@ -215,6 +216,32 @@ const SYNTHS = {
   battery: () => {
     note('triangle', 392, 392, 0, 0.12, 0.3);
     note('triangle', 294, 294, 0.16, 0.18, 0.3);
+  },
+  // New Random Events (More Random Events 08). Fly-by: a whoosh that rises and falls.
+  'fly-by': () => {
+    note('sawtooth', 200, 900, 0, 0.35, 0.1);
+    note('sawtooth', 900, 200, 0.35, 0.4, 0.1);
+  },
+  // Hit: a thud with a crackle.
+  hit: () => {
+    note('sine', 180, 45, 0, 0.3, 0.5);
+    crackle(0, 0.25, 0.4);
+  },
+  // Link interference: a warble of static.
+  interference: () => {
+    crackle(0, 0.5, 0.35);
+    note('square', 700, 500, 0, 0.5, 0.06);
+  },
+  // Panel shading: a slow fall into a dull hum.
+  shading: () => note('triangle', 440, 150, 0, 0.7, 0.25),
+  // Bonus: a bright two-note chime.
+  bonus: () => {
+    note('sine', 880, 880, 0, 0.25, 0.3);
+    note('sine', 1320, 1320, 0.14, 0.5, 0.3);
+  },
+  // Visitor: a soft, strange three-note hum.
+  visitor: () => {
+    [330, 415, 494].forEach((f, i) => note('sine', f, f * 1.02, i * 0.2, 0.5, 0.2));
   },
   // Debrief, Success: a rising major arpeggio (C E G C) ending on a held chord.
   success: () => {

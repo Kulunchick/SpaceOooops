@@ -34,6 +34,21 @@ test('Scenario select shows three cards with illustrations over the clear scene'
   expect(errors).toEqual([]);
 });
 
+test('hovering or focusing a card turns the globe without errors', async ({ page }) => {
+  const errors = collectErrors(page);
+  await openScenarioSelect(page);
+  const cards = page.locator('.scenario-card');
+  for (let i = 0; i < await cards.count(); i++) {
+    await cards.nth(i).hover();
+    await page.waitForTimeout(150);
+  }
+  await page.mouse.move(5, 5);
+  await cards.first().getByRole('button', { name: 'Select' }).focus();
+  await page.waitForTimeout(150);
+  await expect(page.locator('.scene-layer')).toHaveAttribute('data-scene', 'live');
+  expect(errors).toEqual([]);
+});
+
 test('choosing a Scenario flies the camera and a click skips the flight', async ({ page }) => {
   const errors = collectErrors(page);
   await openScenarioSelect(page);

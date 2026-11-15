@@ -67,6 +67,8 @@ pub struct SceneInputs<'a> {
     pub scenarios: &'a [Scenario],
     /// The id of the chosen Scenario (empty or unknown means none).
     pub chosen: Option<&'a str>,
+    /// The Scenario card hovered or focused on Scenario select; the globe turns to its pin (unknown means none).
+    pub previewed: Option<&'a str>,
     /// The Run being played back (Run screen); the orbit view reads its timeline.
     pub run: Option<&'a RunResult>,
     /// The Run playback position in days elapsed, fractional (0 at launch). The scene's only clock for the Run.
@@ -85,6 +87,7 @@ impl SceneInputs<'static> {
             design: None,
             scenarios: &[],
             chosen: None,
+            previewed: None,
             votes: &[],
             launching: false,
             run: None,
@@ -135,7 +138,7 @@ pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
     let orbit = orbit::for_inputs(inputs);
     let debrief = debrief::for_inputs(inputs);
     SceneSpec {
-        shot: markers::shot(inputs.screen, inputs.scenarios, inputs.chosen)
+        shot: markers::shot(inputs.screen, inputs.scenarios, inputs.chosen, inputs.previewed)
             .or_else(|| debrief.as_ref().map(shot::for_debrief))
             .or_else(|| orbit.as_ref().map(|o| Shot::Orbit { radius: o.radius }))
             .unwrap_or_else(|| shot::for_screen(inputs.screen)),
@@ -144,7 +147,7 @@ pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
         hangar: hangar::for_inputs(inputs),
         pad: pad::for_inputs(inputs),
         markers: markers::markers(inputs.screen, inputs.scenarios, inputs.chosen),
-        highlighted_country: markers::highlighted_country(inputs.screen, inputs.scenarios, inputs.chosen),
+        highlighted_country: markers::highlighted_country(inputs.screen, inputs.scenarios, inputs.chosen, inputs.previewed),
         orbit,
         effects: effects::for_inputs(inputs),
         stations: effects::stations_for(inputs),
