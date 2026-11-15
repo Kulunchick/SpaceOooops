@@ -59,6 +59,8 @@ export const INDIA = [
   // Pakistan, down to the Rann of Kutch
   [74.2, 33.2], [74.6, 32.5], [74.5, 31.4], [74.5, 30.3], [73, 29.2], [71.1, 27.8], [70.5, 26.5], [70, 25],
   [69.5, 24.2],
+];
+
 // Argentina: the Atlantic coast follows SOUTH_AMERICA's points; the Argentine half of Tierra del Fuego is part of
 // the same polygon (joined across the Strait of Magellan) because CONAE's backup station stands there; the
 // inland borders are coarse, traced by eye from the Andes ridge, the Bermejo and Pilcomayo, Paraguay, Paraná and
@@ -159,8 +161,7 @@ function inside(polygon, lon, lat) {
 
 // One outline per Target Country, keyed by the country id in data/scenarios.toml. Add a country here to make it
 // highlightable; a Scenario whose country has no outline here simply highlights nothing.
-export const COUNTRIES = { angola: ANGOLA, brazil: BRAZIL, india: INDIA };
-export const COUNTRIES = { angola: ANGOLA, brazil: BRAZIL, argentina: ARGENTINA };
+export const COUNTRIES = { angola: ANGOLA, brazil: BRAZIL, india: INDIA, argentina: ARGENTINA };
 
 /** The id of the Target Country whose outline holds the point, or null. */
 export function countryAt(lon, lat) {
