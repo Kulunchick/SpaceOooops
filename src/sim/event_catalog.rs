@@ -282,8 +282,43 @@ pub(crate) fn validate_effect(effect: &EffectSpec) -> Result<(), String> {
 }
 
 /// Ticket 03: exactly two options, distinct ids, the default exists and is free, a question XOR effects + log.
-fn validate_question(_e: &EventSpec) -> Result<(), String> {
-    Ok(())
+fn validate_question(e: &EventSpec) -> Result<(), String> {
+    let Some(q) = &e.question else { return Ok(()) };
+    if !e.effects.is_empty() {
+        return Err("an event with a question has its effects on its options, not on the event".to_string());
+    }
+    if q.text.trim().is_empty() {
+        return Err("the question needs text".to_string());
+    }
+    if q.options.len() != 2 {
+        return Err(format!("a question has exactly two options, not {}", q.options.len()));
+    }
+    if q.options[0].id == q.options[1].id {
+        return Err("the two options need distinct ids".to_string());
+    }
+    for o in &q.options {
+        let id = &o.id;
+        if !is_kebab_case(id) {
+            return Err(format!("option id '{id}' must be kebab-case"));
+        }
+        if o.label.trim().is_empty() || o.consequence.trim().is_empty() || o.note.trim().is_empty() {
+            return Err(format!("option '{id}' needs a label, a consequence and a note"));
+        }
+        if o.log.trim().is_empty() {
+            return Err(format!("option '{id}' needs log text"));
+        }
+        if !o.cost_usd.is_finite() || o.cost_usd < 0.0 {
+            return Err(format!("option '{id}' must cost a non-negative amount of US$"));
+        }
+        for effect in &o.effects {
+            validate_effect(effect).map_err(|m| format!("option '{id}': {m}"))?;
+        }
+    }
+    match q.options.iter().find(|o| o.id == q.default) {
+        None => Err(format!("the default '{}' is not one of the options", q.default)),
+        Some(o) if o.cost_usd > 0.0 => Err(format!("the default option '{}' must be free (cost_usd = 0)", o.id)),
+        Some(_) => Ok(()),
+    }
 }
 
 /// Ticket 04: `chance` and `bad` both or neither, chance in 0..=1.

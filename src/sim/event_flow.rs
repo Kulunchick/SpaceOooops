@@ -1,7 +1,8 @@
 //! A planned new Random Event on its day: which text and effects apply (the event's own, a Design
 //! mitigation's, or the outcome of the option chosen for its question), the effects started, and the
 //! Random Event for the timeline.
-use super::decisions::{Decision, DecisionPrompt};
+use super::decisions::{Decision, DecisionOption, DecisionPrompt, chosen};
+use super::review::money;
 use super::design_facts::Facts;
 use super::event_catalog::{EffectSpec, EventSpec, Mechanic, Mitigation, OptionSpec, QuestionSpec};
 use super::event_effects::{DayOutcome, EventState, Fired, scene_days, start};
@@ -105,24 +106,61 @@ struct Asked {
 /// Ticket 03: the question as a `DecisionPrompt` (id `day-{day}-event-{event id}`, consequences from
 /// `consequence`, an option the Budget left cannot pay for unavailable), and the player's answer by
 /// `decisions::chosen`, or the default.
-#[allow(unused_variables)]
 fn ask(spec: &EventSpec, q: &QuestionSpec, day: u32, budget_left_usd: f64, decisions: &[Decision]) -> Asked {
-    let option = q.options.iter().position(|o| o.id == q.default).unwrap_or(0);
-    Asked { prompt: None, option, by_player: false }
+    let left = budget_left_usd.max(0.0);
+    let options = q
+        .options
+        .iter()
+        .map(|o| {
+            let affordable = o.cost_usd <= left;
+            DecisionOption {
+                id: o.id.clone(),
+                label: o.label.clone(),
+                consequence: consequence(o, budget_left_usd),
+                available: affordable,
+                unavailable_reason: (!affordable).then(|| {
+                    format!(
+                        "Not enough Budget: this costs {}, but only {} of the Budget is left.",
+                        money(o.cost_usd),
+                        money(left)
+                    )
+                }),
+            }
+        })
+        .collect();
+    let prompt = DecisionPrompt {
+        id: format!("day-{day}-event-{}", spec.id),
+        day,
+        question: q.text.clone(),
+        options,
+        default: q.default.clone(),
+    };
+    let (id, by_player) = chosen(&prompt, decisions);
+    let option = q.options.iter().position(|o| o.id == id).unwrap_or(0);
+    Asked { prompt: Some(prompt), option, by_player }
 }
 
-/// Ticket 04: an option's consequence as the player reads it: the data text, the price against the Budget
+/// Tickets 03, 04: an option's consequence as the player reads it: the data text, the price against the Budget
 /// left, and for a gamble its odds.
-#[allow(dead_code, unused_variables)]
 fn consequence(o: &OptionSpec, budget_left_usd: f64) -> String {
-    o.consequence.clone()
+    if o.cost_usd <= 0.0 {
+        return o.consequence.clone();
+    }
+    let left = budget_left_usd.max(0.0);
+    if o.cost_usd > left {
+        format!("{} Would cost {} of Budget.", o.consequence, money(o.cost_usd))
+    } else {
+        format!("{} Costs {} of the {} of Budget left.", o.consequence, money(o.cost_usd), money(left))
+    }
 }
 
 /// Tickets 03, 04: the outcome of the chosen option: its own log and effects, or for a gamble whose planned
 /// `roll` missed its `chance`, the `bad` ones. Returns (log, effects, good).
-#[allow(unused_variables)]
 fn outcome(o: &OptionSpec, roll: f64) -> (String, Vec<EffectSpec>, bool) {
-    (o.log.clone(), o.effects.clone(), true)
+    match (&o.bad, o.chance) {
+        (Some(bad), Some(chance)) if roll >= chance => (bad.log.clone(), bad.effects.clone(), false),
+        _ => (o.log.clone(), o.effects.clone(), true),
+    }
 }
 
 /// Ticket 05: the event's mitigation when its Design fact holds.

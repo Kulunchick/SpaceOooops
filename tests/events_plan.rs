@@ -86,7 +86,7 @@ fn the_same_seed_gives_the_same_new_events_and_other_seeds_give_others() {
 
 #[test]
 fn a_run_gets_its_count_of_new_events_each_once_on_distinct_days_and_none_ends_the_mission() {
-    let on = load_catalog().unwrap();
+    let on = with_new_events(load_catalog().unwrap(), 6, 8); // the shipped 2 to 3 are all questions (03), so passive events would not show
     let off = legacy_catalog();
     let tuning = &on.scenario(CROP_WATCH).unwrap().events;
     let (min, max) = (tuning.new_events_min as usize, tuning.new_events_max as usize);
@@ -123,9 +123,20 @@ fn a_new_event_carries_its_catalog_id_group_and_scene_and_logs_its_text() {
         let spec = c.events.iter().find(|s| s.id == catalog.id).expect("a catalog id");
         assert_eq!(catalog.group, spec.group);
         assert_eq!(catalog.scene, spec.scene);
-        assert_eq!(e.text, spec.log);
         assert!((1..=5).contains(&catalog.scene_days));
-        assert!(e.prompt.is_none() && e.choice.is_none() && e.component.is_none());
+        assert!(e.component.is_none());
+        match &spec.question {
+            // a question event asks, and logs the text of the option that applied (ticket 03)
+            Some(q) => {
+                assert!(e.prompt.is_some());
+                let option = q.options.iter().find(|o| Some(&o.id) == e.choice.as_ref()).expect("an option id");
+                assert_eq!(e.text, option.log);
+            }
+            None => {
+                assert_eq!(e.text, spec.log);
+                assert!(e.prompt.is_none() && e.choice.is_none());
+            }
+        }
     }
 }
 
