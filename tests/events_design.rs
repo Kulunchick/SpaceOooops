@@ -13,16 +13,8 @@ fn event(id: &str, extra: &str) -> String {
     )
 }
 
-fn error(toml: &str) -> String {
-    parse_events(toml).expect_err("should be rejected").to_string()
-}
-
-fn new_events(r: &RunResult) -> Vec<&RandomEvent> {
-    r.timeline.iter().flat_map(|t| t.events.iter().filter(|e| e.kind == EventKind::Catalog)).collect()
-}
-
 fn ids(r: &RunResult) -> Vec<String> {
-    new_events(r).iter().map(|e| e.catalog.as_ref().unwrap().id.clone()).collect()
+    new_events(r).iter().map(|(_, e)| e.catalog.as_ref().unwrap().id.clone()).collect()
 }
 
 fn final_science(r: &RunResult) -> f64 {
@@ -46,7 +38,7 @@ fn an_unknown_design_fact_is_rejected_with_the_fact_named() {
         ("more_likely = { fact = \"nonsense\", weight = 2 }", "nonsense"),
         ("mitigation = { fact = \"large-computer\", scale = 0.0, log = \"Fine.\" }", "large-computer"),
     ] {
-        let msg = error(&event("odd-one", field));
+        let msg = parse_error(&event("odd-one", field));
         assert!(msg.contains(named), "{msg}");
     }
     assert!(parse_events(&event("fine-one", "only = \"low-orbit\"")).is_ok());
@@ -55,7 +47,7 @@ fn an_unknown_design_fact_is_rejected_with_the_fact_named() {
 #[test]
 fn a_more_likely_weight_is_two_to_four() {
     for weight in [0, 1, 5] {
-        let msg = error(&event("odd-one", &format!("more_likely = {{ fact = \"low-orbit\", weight = {weight} }}")));
+        let msg = parse_error(&event("odd-one", &format!("more_likely = {{ fact = \"low-orbit\", weight = {weight} }}")));
         assert!(msg.contains("odd-one") && msg.contains("weight"), "{msg}");
     }
     for weight in [2, 3, 4] {
@@ -67,11 +59,11 @@ fn a_more_likely_weight_is_two_to_four() {
 fn a_mitigation_scale_lies_in_zero_to_one_and_is_zero_for_instruments_off() {
     let m = |scale: &str| format!("mitigation = {{ fact = \"computer-flight-proven\", scale = {scale}, log = \"Shrugged off.\" }}");
     for scale in ["-0.1", "1.0", "1.5"] {
-        let msg = error(&event("odd-one", &m(scale)));
+        let msg = parse_error(&event("odd-one", &m(scale)));
         assert!(msg.contains("odd-one") && msg.contains("scale"), "{scale}: {msg}");
     }
     // Instruments off cannot be scaled, so a mitigation of it must remove it.
-    let msg = error(&event("odd-one", &m("0.5")));
+    let msg = parse_error(&event("odd-one", &m("0.5")));
     assert!(msg.contains("odd-one") && msg.contains("instruments-off"), "{msg}");
     assert!(parse_events(&event("fine-one", &m("0.0"))).is_ok());
     let power = event("fine-two", &m("0.5")).replace("{ mechanic = \"instruments-off\", days = 2 }", "{ mechanic = \"power\", strength = -0.1, to_end = true }");
@@ -180,8 +172,8 @@ fn a_mitigated_event_is_in_the_log_with_its_own_text_and_does_nothing() {
             continue; // the Run ended before the event's day
         }
         assert_eq!(events.len(), 1, "seed {seed}");
-        assert_eq!(events[0].text, "The Flight-proven computer shrugged it off.");
-        assert!(events[0].catalog.as_ref().unwrap().softened);
+        assert_eq!(events[0].1.text, "The Flight-proven computer shrugged it off.");
+        assert!(events[0].1.catalog.as_ref().unwrap().softened);
         assert_eq!(final_science(&r), final_science(&run(&none, &proven, CROP_WATCH, seed)), "seed {seed}: no effect");
 
         let r = run(&c, &basic, CROP_WATCH, seed);
@@ -190,8 +182,8 @@ fn a_mitigated_event_is_in_the_log_with_its_own_text_and_does_nothing() {
             continue; // the Basic computer failed before the event's day
         }
         checked += 1;
-        assert_eq!(events[0].text, "Log of bit-flip.");
-        assert!(!events[0].catalog.as_ref().unwrap().softened);
+        assert_eq!(events[0].1.text, "Log of bit-flip.");
+        assert!(!events[0].1.catalog.as_ref().unwrap().softened);
         assert!(final_science(&r) < final_science(&run(&none, &basic, CROP_WATCH, seed)), "seed {seed}: Instruments off costs Science Value");
     }
     assert!(checked >= 10, "only {checked} Runs reached the event");

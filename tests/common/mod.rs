@@ -3,10 +3,25 @@
 #![allow(dead_code)]
 
 use spaceooops::sim::{
-    Catalog, Design, Pick,
+    Catalog, Design, EventKind, Pick, RandomEvent, RunResult,
     ReliabilityTier::{Basic, FlightProven},
     load_catalog, parse_events,
 };
+
+/// The new Random Events of a Run, with their days.
+pub fn new_events(r: &RunResult) -> Vec<(u32, &RandomEvent)> {
+    r.timeline.iter().flat_map(|t| t.events.iter().filter(|e| e.kind == EventKind::Catalog).map(move |e| (t.day, e))).collect()
+}
+
+/// Share of `day` (1-based) the Instruments ran.
+pub fn operating_on(r: &RunResult, day: u32) -> f64 {
+    r.timeline[day as usize - 1].operating_fraction
+}
+
+/// The message `parse_events` rejects a `data/events.toml`-shaped text with.
+pub fn parse_error(toml: &str) -> String {
+    parse_events(toml).expect_err("the entry should be rejected").to_string()
+}
 
 /// The shipped catalog with the new Random Events switched off in every Scenario: a Run is as before them.
 /// Behaviour tests that pin numbers use this, so new events added later never move their thresholds.

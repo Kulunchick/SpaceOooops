@@ -71,10 +71,6 @@ fn decide(p: &DecisionPrompt, choice: &str) -> Decision {
     Decision { prompt_id: p.id.clone(), choice: choice.to_string() }
 }
 
-fn operating(r: &RunResult, day: u32) -> f64 {
-    r.timeline[day as usize - 1].operating_fraction
-}
-
 #[test]
 fn a_question_event_carries_a_prompt_with_two_options_and_a_default() {
     let c = one_question(15000.0);
@@ -98,15 +94,15 @@ fn the_players_choice_applies_that_options_mechanic_and_no_answer_applies_the_de
     let d = crop_watch_known_good();
     let plain = run(&c, &d, CROP_WATCH, 3);
     let p = event_prompts(&plain).remove(0);
-    assert_eq!(operating(&plain, p.day), 0.0, "the default has the Instruments off");
+    assert_eq!(operating_on(&plain, p.day), 0.0, "the default has the Instruments off");
     let waited = run_with_decisions(&c, &d, CROP_WATCH, 3, &[decide(&p, "wait")]);
     assert_eq!(plain.timeline, waited.timeline);
     let paid = run_with_decisions(&c, &d, CROP_WATCH, 3, &[decide(&p, "pay")]);
     assert_ne!(paid.timeline, plain.timeline);
     // paying changes nothing but the Budget: the same Run as without the event on the days it would have held
     let none = run(&legacy_catalog(), &d, CROP_WATCH, 3);
-    assert_eq!(operating(&paid, p.day), operating(&none, p.day));
-    assert_eq!(operating(&paid, p.day + 1), operating(&none, p.day + 1));
+    assert_eq!(operating_on(&paid, p.day), operating_on(&none, p.day));
+    assert_eq!(operating_on(&paid, p.day + 1), operating_on(&none, p.day + 1));
     // an invalid answer, or one to another question, is the default
     assert_eq!(plain, run_with_decisions(&c, &d, CROP_WATCH, 3, &[decide(&p, "nonsense")]));
     let elsewhere = Decision { prompt_id: "elsewhere".into(), choice: "pay".into() };

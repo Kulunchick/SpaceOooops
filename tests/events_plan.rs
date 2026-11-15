@@ -19,11 +19,6 @@ fn basic_design() -> Design {
     d
 }
 
-/// The new Random Events of a Run, with their days.
-fn new_events(r: &RunResult) -> Vec<(u32, &RandomEvent)> {
-    r.timeline.iter().flat_map(|t| t.events.iter().filter(|e| e.kind == EventKind::Catalog).map(move |e| (t.day, e))).collect()
-}
-
 /// The built-in Random Events of a Run (battery shortfalls aside, which depend on the state), with their days.
 fn built_in_events(r: &RunResult) -> Vec<(u32, EventKind, Option<String>)> {
     r.timeline

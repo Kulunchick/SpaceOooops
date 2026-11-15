@@ -57,6 +57,12 @@ pub struct CatalogEvent {
     pub can_cost_science: bool,
 }
 
+/// The id of a new Random Event on its day, `day-{day}-event-{event id}`: its question's prompt id and its scene
+/// effect's id, both stable for the same Run.
+pub fn catalog_event_id(day: u32, event_id: &str) -> String {
+    format!("day-{day}-event-{event_id}")
+}
+
 /// The Component kinds that carry a Reliability Tier and can fail, in their fixed draw order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum ComponentKind {

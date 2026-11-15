@@ -157,7 +157,7 @@ pub fn all(run: &RunResult, tuning: Option<&EventTuning>) -> Vec<Effect> {
                         SceneEffect::BonusGlow => EffectKind::BonusGlow,
                         SceneEffect::Visitor => EffectKind::Visitor { model: c.model.clone() },
                     };
-                    push(format!("day-{}-event-{}", t.day, c.id), kind, start, f64::from(c.scene_days.max(1)));
+                    push(crate::sim::catalog_event_id(t.day, &c.id), kind, start, f64::from(c.scene_days.max(1)));
                 }
             }
         }

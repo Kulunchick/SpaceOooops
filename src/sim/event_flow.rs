@@ -140,7 +140,7 @@ fn ask(spec: &EventSpec, q: &QuestionSpec, day: u32, budget_left_usd: f64, decis
         })
         .collect();
     let prompt = DecisionPrompt {
-        id: format!("day-{day}-event-{}", spec.id),
+        id: super::events::catalog_event_id(day, &spec.id),
         day,
         question: q.text.clone(),
         options,

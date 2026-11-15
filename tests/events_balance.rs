@@ -127,11 +127,6 @@ fn references(c: &Catalog) -> Vec<(String, Design)> {
     c.scenarios.iter().map(|s| (s.id.clone(), reference(&s.id))).collect()
 }
 
-/// The new Random Events of a Run, with their days.
-fn new_events(r: &RunResult) -> Vec<(u32, &RandomEvent)> {
-    r.timeline.iter().flat_map(|t| t.events.iter().filter(|e| e.kind == EventKind::Catalog).map(move |e| (t.day, e))).collect()
-}
-
 /// A small deterministic generator, so the sweep is the same on every machine.
 struct Lcg(u64);
 

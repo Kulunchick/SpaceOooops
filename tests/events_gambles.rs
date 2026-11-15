@@ -57,10 +57,6 @@ fn risk(p: &DecisionPrompt) -> Decision {
     Decision { prompt_id: p.id.clone(), choice: "risk".to_string() }
 }
 
-fn operating(r: &RunResult, day: u32) -> f64 {
-    r.timeline[day as usize - 1].operating_fraction
-}
-
 fn event_text(r: &RunResult, day: u32) -> String {
     r.timeline[day as usize - 1].events.iter().find(|e| e.catalog.is_some()).unwrap().text.clone()
 }
@@ -73,7 +69,7 @@ fn a_gamble_that_always_goes_well_applies_the_good_outcome() {
     let p = prompt_of(&plain);
     let r = run_with_decisions(&c, &d, CROP_WATCH, 3, &[risk(&p)]);
     assert_eq!(event_text(&r, p.day), "The risk paid off.");
-    assert_eq!(operating(&r, p.day), 1.0);
+    assert_eq!(operating_on(&r, p.day), 1.0);
     let note = r.debrief.decisions.iter().find(|n| n.contains("Gamble g-one")).unwrap();
     assert!(note.contains("you chose \"Risk it\". The gamble paid off: the risk paid off."), "{note}");
 }
@@ -86,8 +82,8 @@ fn a_gamble_that_always_fails_applies_the_bad_outcome() {
     let p = prompt_of(&plain);
     let r = run_with_decisions(&c, &d, CROP_WATCH, 3, &[risk(&p)]);
     assert_eq!(event_text(&r, p.day), "The risk failed.");
-    assert_eq!(operating(&r, p.day), 0.0);
-    assert_eq!(operating(&r, p.day + 2), 0.0);
+    assert_eq!(operating_on(&r, p.day), 0.0);
+    assert_eq!(operating_on(&r, p.day + 2), 0.0);
     let note = r.debrief.decisions.iter().find(|n| n.contains("Gamble g-one")).unwrap();
     assert!(
         note.contains("you chose \"Risk it\". The gamble failed: the Instruments went off for 3 days."),
