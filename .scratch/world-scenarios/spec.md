@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: resolved
 
 # Spec: World Scenarios
 
@@ -194,3 +194,7 @@ WebGL end-to-end smoke run (the select screen renders and hovering a card does n
   is closest to Crop Watch.
 - Partner agencies behind the choice: Brazilian Space Agency, JAXA, ISRO, National Space Activities Commission of
   Argentina (CONAE), alongside the Angola National Space Programme Management Office.
+
+## Comments
+
+- 2026-11-15: Resolved on branch `more-random-events` (one integration branch for both specs), tickets 01 to 08. Deviations: Glacier Watch's minimum Lifetime is two years, not several, and its known-good Design wins on about 85% of seeds (Component failures over 730 days; a longer Lifetime drops it under the test's floor); its backup station is Tolhuin, Tierra del Fuego, because the Ushuaia station is only planned; Disaster Response's known-good Design launches with one Budget-margin warning, because a Budget tight enough to rule out the dearest part in every slot leaves no Design the 15% margin; Amazonia-1 and SAOCOM match by objective and Orbit, not by Instrument; India lists a backup station (Hassan); the Sun follows the camera on globe and region Shots so a highlighted country is lit.

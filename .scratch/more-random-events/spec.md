@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: resolved
 
 # Spec: More Random Events
 
@@ -160,3 +160,4 @@ the log with its mark, a question can be answered, and the fallback (no WebGL) p
 ## Comments
 
 - 2026-11-15: Agreed priority for the deadline day: this spec goes first and in full (all 59 events, questions, 3D effects, star models, sounds), before `.scratch/world-scenarios/`. Checkpoint at 20:00 local time; if behind, cut event sounds, then star models other than the UFO, then unfinished 3D effects (those events stay log-only). This supersedes the thin-slice suggestion in Further Notes.
+- 2026-11-15: Resolved on branch `more-random-events`, tickets 01 to 09. Decided during the work, each within the rule that an event is rewritten to fit the mechanics: event 15 is softened by a Flight-proven computer (the catalog has one computer); "optics off" is plain Instruments off; a failure chance can only be lowered; a Power or downlink loss applies after the Design's margin so it costs every Design, and gains were rewritten to Data or Science Value; a scene effect lasts as long as its event, at most 5 days; the rescue bonus is 40 Score points. Rewritten events are listed under Comments in ticket 07.
