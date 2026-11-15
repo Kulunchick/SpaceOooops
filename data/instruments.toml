@@ -8,7 +8,7 @@ optical = true
 # Visual only (3D model).
 shape = "telescope"
 name = "Multispectral imager"
-why = "A camera that sees red, green, blue and near-infrared light. Healthy plants reflect near-infrared strongly, so it shows crop stress before it is visible to the eye."
+why = "A camera that sees red, green, blue and near-infrared light. Plants, water, ice and bare ground reflect these colours differently, so it tells them apart, and it shows stressed plants before the eye can."
 # source: commercial CubeSat multispectral imagers (~5 m resolution) weigh ~1.2-1.5 kg and take ~2U.
 mass_kg = 1.5
 power_w = 3.0
@@ -39,7 +39,7 @@ id = "wide-camera"
 optical = true
 shape = "wide-camera"
 name = "Wide-field camera"
-why = "A small, cheap colour camera with a wide view. It does not need precise pointing, but its coarse pictures show little detail about crops."
+why = "A small, cheap colour camera with a wide view. It does not need precise pointing, but its coarse pictures show little fine detail."
 mass_kg = 0.4
 power_w = 1.0
 cost_usd = 50_000.0

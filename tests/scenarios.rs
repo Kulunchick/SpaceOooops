@@ -89,6 +89,20 @@ fn the_full_catalog_is_bundled() {
     }
 }
 
+/// Story 37: the Design screen shows one catalog in every Scenario, so no Instrument's explanation talks about one
+/// Scenario's subject or country.
+#[test]
+fn every_instrument_explanation_reads_correctly_in_any_scenario() {
+    let c = load_catalog().unwrap();
+    let words = ["crop", "farm", "angola", "brazil", "japan", "india", "argentin", "amazon"];
+    for i in &c.instruments {
+        let why = i.why.to_lowercase();
+        for w in words {
+            assert!(!why.contains(w), "{}: names '{w}': {}", i.id, i.why);
+        }
+    }
+}
+
 // ---------------------------------------------------------------- ground stations by name
 
 #[test]
