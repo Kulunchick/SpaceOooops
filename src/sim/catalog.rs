@@ -297,6 +297,8 @@ pub enum InstrumentShape {
     ParticleStack,
     /// A sphere probe on a long boom.
     ProbeBoom,
+    /// A flat, unfolded radar antenna panel.
+    RadarPanel,
 }
 
 /// How a Launch Vehicle looks: its class and real height.

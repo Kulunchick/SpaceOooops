@@ -43,7 +43,21 @@ export function hasWebGL() {
   }
 }
 
+// The Sun's resting place: it lights Africa from the upper right. On the globe and region Shots (Scenario select,
+// Brief) it moves with the camera instead, keeping this same angle to it, so every Target Country is lit as Angola is.
+const SUN_HOME = new THREE.Vector3(5, 2, 4);
+const SUN_LEAD = Math.atan2(SUN_HOME.x, SUN_HOME.z) - (17.5 * Math.PI) / 180;
+let sunFollows = false;
+
+function followSun() {
+  const lon = Math.atan2(camera.position.x, camera.position.z) + SUN_LEAD;
+  const r = Math.hypot(SUN_HOME.x, SUN_HOME.z);
+  sunLight.position.set(Math.sin(lon) * r, SUN_HOME.y, Math.cos(lon) * r);
+}
+
 function buildWorld() {
+  // The Run and Debrief scenes keep the Sun's position at creation to restore it later: give them the resting one.
+  sunLight.position.copy(SUN_HOME);
   const { earth, clouds, stars, highlight } = createEarth(quality);
   highlight(spec?.highlightedCountry ?? 'angola');
   const craft = createTitleCraft();
@@ -119,6 +133,7 @@ function frame(dt, seconds) {
   // The title craft gives way to the Design's own spacecraft during the Run.
   world.orbit.visible = !world.run.active && !world.debrief.active;
   rig.update(dt, seconds, reducedMotion);
+  if (sunFollows) followSun();
   markers?.update(seconds, reducedMotion);
   renderer.domElement.dataset.flying = String(rig.flying);
   world.hangar.frame(dt, t);
@@ -175,7 +190,15 @@ export async function init(canvas, initialQuality = 'high') {
 export function apply(sceneSpec) {
   spec = sceneSpec;
   if (rig) rig.setShot(sceneSpec.shot);
+  const follows = ['globe', 'region'].includes(sceneSpec.shot?.kind);
+  if (sunFollows && !follows && sunLight) sunLight.position.copy(SUN_HOME);
+  sunFollows = follows;
   world?.highlight(sceneSpec.highlightedCountry ?? 'angola');
+  // For browser tests: the highlighted Target Country and where the Shot looks.
+  if (canvasEl) {
+    canvasEl.dataset.highlight = sceneSpec.highlightedCountry ?? 'angola';
+    canvasEl.dataset.shotAt = sceneSpec.shot?.lat == null ? '' : `${sceneSpec.shot.lat},${sceneSpec.shot.lon}`;
+  }
   world?.hangar.apply(sceneSpec, reducedMotion);
   world?.run.apply(sceneSpec, reducedMotion);
   world?.effects.apply(sceneSpec);

@@ -9,11 +9,13 @@
 crop-watch = ["agriculture", "earth-observation"]
 connect-the-villages = ["remote-connectivity", "communications"]
 space-weather-sentinel = ["space-weather", "ionosphere", "radiation"]
+amazon-watch = ["deforestation", "earth-observation"]
 
 # Plain words for each purpose tag, used in the "why this match" line.
 [purpose_words]
 agriculture = "farm monitoring"
 earth-observation = "imaging the ground"
+deforestation = "watching forests for clearing"
 remote-connectivity = "connecting remote places"
 communications = "communications"
 store-and-forward = "store-and-forward messaging"
@@ -67,6 +69,23 @@ purposes = ["agriculture", "earth-observation"]
 blurb = "EOS SAT-1 is an agriculture-focused satellite in a 540 km sun-synchronous orbit that tracks soil moisture, expected harvests and crop growth."
 url = "https://www.eoportal.org/satellite-missions/eos-sat-1"
 # secondary (eoPortal); the operator's blog https://eos.com/blog/eosda-sent-its-first-agro-satellite-on-jan-3-to-orbit/ confirms the purpose.
+verified = "secondary"
+
+[[real_missions]]
+name = "Amazonia-1"
+operator = "INPE (Brazil's National Institute for Space Research), for the Brazilian Space Agency"
+year = 2021
+orbit_class = "sso"
+spacecraft_class = "large"
+mass_kg = 637.0
+size_note = "Earth-observation satellite, about 637 kg"
+purposes = ["deforestation", "earth-observation"]
+blurb = "Amazonia-1, a Brazilian Earth-observation satellite, was launched on an Indian PSLV rocket on 28 February 2021 into a 752 km sun-synchronous orbit to watch for deforestation, above all in the Amazon."
+url = "https://www.eoportal.org/satellite-missions/amazonia-1"
+# secondary (eoPortal, ESA-run catalogue): launch 28 February 2021 on PSLV-C51, 637 kg, 752 km SSO, Wide Field
+# Imager camera, "the prime objective is to monitor deforestation". The USGS station page
+# https://landsat.usgs.gov/CUB confirms INPE's Cuiabá station tracks it (AMZ1). Amazonia-1 carries a camera, not
+# a radar: it matches by objective and Orbit.
 verified = "secondary"
 
 # ---------------------------------------------------------------- communications for remote places

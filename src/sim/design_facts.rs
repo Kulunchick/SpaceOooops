@@ -4,7 +4,8 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
-use super::design::Design;
+use super::catalog::{AntennaKind, SolarLayout};
+use super::design::{Design, ReliabilityTier};
 use super::resources::Resolved;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -47,7 +48,17 @@ impl DesignFact {
 /// The facts that hold for one Design.
 pub(crate) type Facts = BTreeSet<DesignFact>;
 
-/// Which facts hold for the Design. Ticket 05 fills this, one line per fact.
-pub(crate) fn facts(_r: &Resolved, _d: &Design) -> Facts {
-    Facts::new()
+/// Which facts hold for the Design, one line per fact.
+pub(crate) fn facts(r: &Resolved, d: &Design) -> Facts {
+    let checks = [
+        (DesignFact::LowOrbit, r.orbit.is_some_and(|o| o.altitude_km < 2000.0)),
+        (DesignFact::HighOrbit, r.orbit.is_some_and(|o| o.altitude_km >= 2000.0)),
+        (DesignFact::DeployablePanels, r.solar.is_some_and(|(s, _)| s.layout == SolarLayout::Wings)),
+        (DesignFact::Camera, r.instruments.iter().any(|i| i.optical)),
+        (DesignFact::UhfRadio, r.comms.is_some_and(|(c, _)| c.antenna == AntennaKind::Whip)),
+        (DesignFact::PreciseAttitude, r.attitude.is_some_and(|(a, _)| a.fine_pointing)),
+        (DesignFact::AttitudeBasic, r.attitude.is_some_and(|(_, t)| t == ReliabilityTier::Basic)),
+        (DesignFact::ComputerFlightProven, d.computer_tier == ReliabilityTier::FlightProven),
+    ];
+    checks.into_iter().filter(|(_, holds)| *holds).map(|(fact, _)| fact).collect()
 }

@@ -10,6 +10,8 @@ use super::state::{AppState, Screen};
 pub fn ScenarioSelectScreen() -> impl IntoView {
     let state = expect_context::<AppState>();
     let scenarios = state.catalog.with_value(|c| scenarios_in_card_order(&c.scenarios).into_iter().cloned().collect::<Vec<_>>());
+    // Leaving the screen (a card click, Back) drops the preview so the next visit rests on Angola.
+    on_cleanup(move || state.previewed_scenario.set(String::new()));
     view! {
         <section class="screen scenario-screen">
             <h2 class="lp-display scenario-title">"Choose a Scenario"</h2>
@@ -19,8 +21,15 @@ pub fn ScenarioSelectScreen() -> impl IntoView {
                     .into_iter()
                     .map(|s| {
                         let id = s.id.clone();
+                        let (hover_id, focus_id) = (s.id.clone(), s.id.clone());
                         view! {
-                            <article class="lp-panel scenario-card">
+                            <article
+                                class="lp-panel scenario-card"
+                                on:mouseenter=move |_| state.previewed_scenario.set(hover_id.clone())
+                                on:focusin=move |_| state.previewed_scenario.set(focus_id.clone())
+                                on:mouseleave=move |_| state.previewed_scenario.set(String::new())
+                                on:focusout=move |_| state.previewed_scenario.set(String::new())
+                            >
                                 <div class="illustration-slot">
                                     <img src=s.illustration.clone() alt="" width="320" height="180" />
                                 </div>

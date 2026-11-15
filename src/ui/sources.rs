@@ -102,6 +102,28 @@ pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
                 "."
             </p>
 
+            <h3>"World Scenarios: ground stations and real missions"</h3>
+            <p>
+                "Each Scenario outside Angola uses real ground stations of its country's space agency and compares "
+                "your Design with one of that country's real missions. Station positions are rounded."
+            </p>
+            <ul class="sources-list">
+                <li>
+                    "Brazil (Amazon Watch), Brazilian Space Agency (AEB) and INPE. Cuiab\u{e1} station: "
+                    <Ext href="https://landsat.usgs.gov/CUB" label="INPE Cuiab\u{e1} ground station, USGS Landsat station list" />
+                    " (position, and Amazonia-1 among the satellites it tracks). Alc\u{e2}ntara station: "
+                    <Ext
+                        href="https://www.gov.br/pt-br/servicos/obter-servico-de-rastreio-e-controle-para-instituicoes-nacionais-ou-internacionais-inpe"
+                        label="INPE tracking and control service, gov.br"
+                    />
+                    " (the Cuiab\u{e1} and Alc\u{e2}ntara stations), placed at the "
+                    <Ext href="https://en.wikipedia.org/wiki/Alc%C3%A2ntara_Space_Center" label="Alc\u{e2}ntara Space Center, Wikipedia" />
+                    " (secondary source). Amazonia-1: "
+                    <Ext href="https://www.eoportal.org/satellite-missions/amazonia-1" label="Amazonia-1, eoPortal" />
+                    " (secondary source)."
+                </li>
+            </ul>
+
             <h3>"Assets and licences"</h3>
             <p>
                 "Every external asset shipped with the game, with its author, source and licence. "
