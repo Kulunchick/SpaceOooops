@@ -98,9 +98,21 @@ function inside(polygon, lon, lat) {
   return hit;
 }
 
-/** What covers the ground at a point: 'angola', 'ice', 'land' or 'ocean'. */
+// One outline per Target Country, keyed by the country id in data/scenarios.toml. Add a country here to make it
+// highlightable; a Scenario whose country has no outline here simply highlights nothing.
+export const COUNTRIES = { angola: ANGOLA };
+
+/** The id of the Target Country whose outline holds the point, or null. */
+export function countryAt(lon, lat) {
+  for (const [id, outline] of Object.entries(COUNTRIES)) {
+    if (inside(outline, lon, lat)) return id;
+  }
+  return null;
+}
+
+/** What covers the ground at a point: 'ice', 'land' or 'ocean'. Country outlines count as land. */
 export function surfaceAt(lon, lat) {
-  if (inside(ANGOLA, lon, lat)) return 'angola';
+  if (countryAt(lon, lat)) return 'land';
   if (lat < -66 || inside(GREENLAND, lon, lat)) return 'ice';
   if (LAND.some((p) => inside(p, lon, lat))) return 'land';
   if (Math.abs(lat) > 76) return 'ice';

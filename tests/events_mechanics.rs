@@ -149,3 +149,155 @@ fn playback_slows_on_a_day_with_a_new_event() {
     // Without the event the same day is crossed at full speed.
     assert!(advance(&without, start, 5.0, 0.25) > start + 1.0);
 }
+
+// ---- ticket 02: the remaining mechanics
+
+/// Data made so far (stored + delivered + lost).
+fn made(s: &DaySnapshot) -> f64 {
+    s.stored_data_mb + s.delivered_data_mb + s.lost_data_mb
+}
+
+fn made_on(r: &RunResult, day: u32) -> f64 {
+    let at = |d: u32| if d == 0 { 0.0 } else { made(&r.timeline[d as usize - 1]) };
+    at(day) - at(day - 1)
+}
+
+#[test]
+fn data_lost_for_a_day_makes_no_data_that_day_and_nothing_changes_before() {
+    let (with, without, day) = flown(&one_event(r#"{ mechanic = "data", strength = -1.0, days = 1 }"#), 2);
+    assert_eq!(made_on(&with, day), 0.0);
+    assert!(made_on(&without, day) > 0.0);
+    assert!(made_on(&with, day + 1) > 0.0, "Data is made again the next day");
+    for t in 1..day {
+        assert_eq!(with.timeline[t as usize - 1], without.timeline[t as usize - 1], "day {t} is as before");
+    }
+}
+
+#[test]
+fn an_extra_day_of_data_doubles_that_days_data() {
+    let (with, without, day) = flown(&one_event(r#"{ mechanic = "extra-data-day" }"#), 2);
+    let (a, b) = (made_on(&with, day), made_on(&without, day));
+    assert!((a - 2.0 * b).abs() < 1e-6 * b.max(1.0), "{a} against {b}");
+    assert!((made_on(&with, day + 1) - made_on(&without, day + 1)).abs() < 1e-9, "only that day");
+}
+
+#[test]
+fn less_room_for_data_loses_data_while_it_lasts() {
+    // Data is only held overnight when the downlink cannot take it all, so the link is cut too.
+    let (with, without, day) = flown(
+        &one_event(r#"{ mechanic = "storage", strength = -1.0, days = 2 }, { mechanic = "downlink", strength = -1.0, days = 2 }"#),
+        3,
+    );
+    assert!(with.timeline[day as usize + 1].lost_data_mb > without.timeline[day as usize + 1].lost_data_mb);
+    for t in 1..day {
+        assert_eq!(with.timeline[t as usize - 1], without.timeline[t as usize - 1], "day {t} is as before");
+    }
+}
+
+#[test]
+fn worse_pointing_makes_less_data_from_pointing_instruments() {
+    let (with, without, day) = flown(&one_event(r#"{ mechanic = "pointing", strength = -1.0, days = 2 }"#), 3);
+    assert!(made_on(&with, day) < made_on(&without, day), "day {day}");
+    assert!(made_on(&with, day + 1) < made_on(&without, day + 1));
+    assert_eq!(made_on(&with, day + 2), made_on(&without, day + 2), "back to normal");
+}
+
+#[test]
+fn a_smaller_battery_drains_deeper_for_its_days_and_never_raises_the_one_time_shortfall() {
+    let (with, without, day) =
+        flown(&one_event(r#"{ mechanic = "battery-capacity", strength = -0.5, days = 3 }"#), 4);
+    holds_on(&with, &without, day..=day + 2, |s| s.battery_charge, |on, off| on < off);
+    assert!(!with.timeline.iter().flat_map(|t| &t.events).any(|e| e.kind == EventKind::BatteryShortfall));
+}
+
+#[test]
+fn a_lower_failure_chance_changes_only_the_threshold_not_the_random_draws() {
+    let c = one_event(r#"{ mechanic = "failure-chance", strength = -1.0, to_end = true }"#);
+    let d = crop_watch_known_good();
+    let off = legacy_catalog();
+    let days_of = |r: &RunResult, kind: fn(EventKind) -> bool, from: u32, to: u32| -> Vec<u32> {
+        r.timeline
+            .iter()
+            .filter(|t| t.day >= from && t.day <= to && t.events.iter().any(|e| kind(e.kind)))
+            .map(|t| t.day)
+            .collect()
+    };
+    for seed in 0..40 {
+        let with = run(&c, &d, CROP_WATCH, seed);
+        let without = run(&off, &d, CROP_WATCH, seed);
+        let day = event_day(&with);
+        let last = with.timeline.len().min(without.timeline.len()) as u32;
+        let flare = |k: EventKind| k == EventKind::SolarFlare;
+        let outage = |k: EventKind| k == EventKind::GroundStationOutage;
+        let fail = |k: EventKind| k == EventKind::ComponentFailure;
+        assert_eq!(days_of(&with, flare, 1, last), days_of(&without, flare, 1, last), "seed {seed}");
+        assert_eq!(days_of(&with, outage, 1, last), days_of(&without, outage, 1, last), "seed {seed}");
+        assert_eq!(days_of(&with, fail, 1, day - 1), days_of(&without, fail, 1, day - 1), "seed {seed}");
+        assert!(days_of(&with, fail, day, u32::MAX).is_empty(), "seed {seed}");
+    }
+}
+
+#[test]
+fn money_spent_goes_through_the_extra_cost_path() {
+    let (with, without, _) = flown(&one_event(r#"{ mechanic = "budget", strength = -20000.0 }"#), 1);
+    let spent = with.debrief.stats.total_cost_usd - without.debrief.stats.total_cost_usd;
+    assert!((spent - 20000.0).abs() < 1e-6, "{spent}");
+}
+
+#[test]
+fn money_gained_raises_the_budget_left_and_shows_in_the_score() {
+    let (with, without, _) = flown(&one_event(r#"{ mechanic = "budget", strength = 20000.0 }"#), 1);
+    assert_eq!(with.debrief.stats.total_cost_usd, without.debrief.stats.total_cost_usd, "gained money is not a cost");
+    let margin = |r: &RunResult| {
+        r.debrief.score.lines.iter().find(|l| l.kind == ScoreLineKind::BudgetMargin).unwrap().points
+    };
+    assert!(margin(&with) > margin(&without), "{} against {}", margin(&with), margin(&without));
+}
+
+#[test]
+fn a_science_bonus_adds_its_share_of_the_required_science_value() {
+    let (with, without, day) = flown(&one_event(r#"{ mechanic = "science-bonus", strength = 0.03 }"#), 1);
+    let extra = with.timeline[day as usize - 1].science_value - without.timeline[day as usize - 1].science_value;
+    let want = 0.03 * with.debrief.stats.required_science_value;
+    assert!((extra - want).abs() < 1e-6, "{extra} against {want}");
+}
+
+#[test]
+fn an_event_with_two_effects_applies_both() {
+    let (with, without, day) = flown(
+        &one_event(
+            r#"{ mechanic = "instruments-off", days = 1 }, { mechanic = "data", strength = 1.0, to_end = true }"#,
+        ),
+        2,
+    );
+    assert_eq!(with.timeline[day as usize - 1].operating_fraction, 0.0);
+    assert!(without.timeline[day as usize - 1].operating_fraction > 0.0);
+    assert!(made_on(&with, day + 1) > made_on(&without, day + 1) * 1.5, "the Data gain lasts");
+}
+
+#[test]
+fn no_new_mechanic_fails_a_component_or_ends_the_run() {
+    let d = crop_watch_known_good();
+    let off = legacy_catalog();
+    for effects in [
+        r#"{ mechanic = "data", strength = -1.0, days = 1 }"#,
+        r#"{ mechanic = "storage", strength = -1.0, days = 2 }"#,
+        r#"{ mechanic = "pointing", strength = -1.0, days = 2 }"#,
+        r#"{ mechanic = "battery-capacity", strength = -0.9, days = 3 }"#,
+        r#"{ mechanic = "budget", strength = -1000000.0 }"#,
+        r#"{ mechanic = "science-bonus", strength = 0.03 }"#,
+        r#"{ mechanic = "extra-data-day" }"#,
+    ] {
+        let c = one_event(effects);
+        for seed in 0..10 {
+            let with = run(&c, &d, CROP_WATCH, seed);
+            let without = run(&off, &d, CROP_WATCH, seed);
+            assert_eq!(
+                with.timeline.last().unwrap().failed_components,
+                without.timeline.last().unwrap().failed_components,
+                "{effects} seed {seed}"
+            );
+            assert_eq!(with.timeline.len(), without.timeline.len(), "{effects} seed {seed}");
+        }
+    }
+}

@@ -9,7 +9,7 @@
 //! starting on day `k` has `start = k - 1` and is active for `start < playback <= start + days`.
 use serde::Serialize;
 
-use crate::sim::{EventKind, EventTuning, RunResult, SceneEffect};
+use crate::sim::{EventKind, EventTuning, RunResult, Scenario, SceneEffect};
 
 use super::{SceneInputs, Screen};
 
@@ -84,11 +84,12 @@ pub struct Station {
     pub lon: f64,
 }
 
-/// The ground stations of the Run, main station first.
-pub fn stations() -> Vec<Station> {
-    [(PRIMARY, -8.92, 13.18), (BACKUP, -25.89, 27.69)]
+/// The ground stations of the Run, main station first, from the chosen Scenario's own list.
+pub fn stations(scenario: &Scenario) -> Vec<Station> {
+    [PRIMARY, BACKUP]
         .into_iter()
-        .map(|(id, lat, lon)| Station { id: id.to_string(), lat, lon })
+        .zip(&scenario.ground_stations)
+        .map(|(id, g)| Station { id: id.to_string(), lat: g.lat, lon: g.lon })
         .collect()
 }
 
@@ -226,7 +227,11 @@ fn tuning<'a>(inputs: &SceneInputs<'a>) -> Option<&'a EventTuning> {
 }
 
 pub(super) fn stations_for(inputs: &SceneInputs) -> Vec<Station> {
-    if inputs.screen == Screen::Run && inputs.run.is_some() { stations() } else { Vec::new() }
+    let scenario = inputs.catalog.zip(inputs.chosen).and_then(|(c, id)| c.scenario(id));
+    match scenario {
+        Some(s) if inputs.screen == Screen::Run && inputs.run.is_some() => stations(s),
+        _ => Vec::new(),
+    }
 }
 
 pub(super) fn for_inputs(inputs: &SceneInputs) -> Vec<Effect> {

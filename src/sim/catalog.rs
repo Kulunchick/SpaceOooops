@@ -29,8 +29,39 @@ pub struct Scenario {
     pub tutorial_hints: Vec<String>,
     /// Science Value per GB delivered by an Instrument with fit 1.0 over an Orbit with coverage 1.0.
     pub science_value_per_gb: f64,
+    /// The country this Scenario serves: card label and the globe's highlight. Required.
+    pub target_country: TargetCountry,
     /// Random Event chances and severity in this Scenario.
     pub events: EventTuning,
+    /// The Mission's ground stations, main station first, then the backup (at least one). Visual only.
+    pub ground_stations: Vec<GroundStation>,
+}
+
+/// A named ground station on the globe (degrees).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GroundStation {
+    pub name: String,
+    pub lat: f64,
+    pub lon: f64,
+}
+
+/// A Scenario's Target Country: `id` keys the outline in the JS land mask, `name` is shown to the player.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TargetCountry {
+    pub id: String,
+    pub name: String,
+}
+
+/// The Target Country highlighted where no Scenario is in play (title, Sources, Scenario select).
+pub const HOME_COUNTRY: &str = "angola";
+
+/// Scenarios in the order the cards list them: Angolan ones first, then by difficulty (Easy, Medium, Hard);
+/// ties keep catalog order.
+pub fn scenarios_in_card_order(scenarios: &[Scenario]) -> Vec<&Scenario> {
+    let rank = |d: &str| ["Easy", "Medium", "Hard"].iter().position(|x| *x == d).unwrap_or(usize::MAX);
+    let mut ordered: Vec<&Scenario> = scenarios.iter().collect();
+    ordered.sort_by_key(|s| (s.target_country.id != HOME_COUNTRY, rank(&s.difficulty)));
+    ordered
 }
 
 /// Per-Scenario Random Event chances (per day) and severity.
@@ -632,11 +663,12 @@ pub fn load_catalog() -> Result<Catalog, CatalogError> {
         objectives_preview_seed: objectives.preview_seed,
         events,
     };
-    validate(&catalog)?;
+    validate_catalog(&catalog)?;
     Ok(catalog)
 }
 
-fn validate(c: &Catalog) -> Result<(), CatalogError> {
+/// Checks the catalog is consistent: unique ids, no dangling references, no missing coverage or fit numbers.
+pub fn validate_catalog(c: &Catalog) -> Result<(), CatalogError> {
     let option_ids = c
         .structures.iter().map(|o| &o.id)
         .chain(c.solar_panels.iter().map(|o| &o.id))
@@ -665,6 +697,19 @@ fn validate(c: &Catalog) -> Result<(), CatalogError> {
             return Err(CatalogError::Invalid(format!("orbit '{}' has coverage for unknown scenario '{key}'", orbit.id)));
         }
     }
+    // A missing number would silently count as zero, so every Scenario needs one for every Orbit and Instrument.
+    for s in &c.scenarios {
+        for orbit in &c.orbits {
+            if !orbit.coverage.contains_key(&s.id) {
+                return Err(CatalogError::Invalid(format!("orbit '{}' has no coverage for scenario '{}'", orbit.id, s.id)));
+            }
+        }
+        for instrument in &c.instruments {
+            if !instrument.fit.contains_key(&s.id) {
+                return Err(CatalogError::Invalid(format!("instrument '{}' has no fit for scenario '{}'", instrument.id, s.id)));
+            }
+        }
+    }
     for lv in &c.launch_vehicles {
         if let Some(key) = lv.capacity_kg.keys().find(|k| !orbit_ids.contains(k.as_str())) {
             return Err(CatalogError::Invalid(format!("launch vehicle '{}' has capacity to unknown orbit '{key}'", lv.id)));
@@ -673,6 +718,11 @@ fn validate(c: &Catalog) -> Result<(), CatalogError> {
     for o in &c.objectives {
         if let Some(key) = o.scenario.as_ref().filter(|k| !scenario_ids.contains(k.as_str())) {
             return Err(CatalogError::Invalid(format!("objective '{}' is for unknown scenario '{key}'", o.id)));
+        }
+    }
+    for s in &c.scenarios {
+        if s.ground_stations.is_empty() {
+            return Err(CatalogError::Invalid(format!("scenario '{}' has no ground station", s.id)));
         }
     }
     for s in &c.scenarios {

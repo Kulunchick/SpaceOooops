@@ -22,12 +22,60 @@ fn each_scenarios_marker_position_comes_from_its_data() {
     }
 }
 
+/// Rough centre of each Target Country (degrees) and the radius within which its Scenarios' markers must sit.
+fn country_centre(id: &str) -> ((f64, f64), f64) {
+    match id {
+        "angola" => ((-12.5, 17.5), 9.0),
+        other => panic!("no known centre for Target Country '{other}'"),
+    }
+}
+
 #[test]
-fn markers_sit_in_angola_and_stay_apart_at_the_select_shot() {
+fn a_scenario_without_a_target_country_fails_to_load() {
+    let missing = include_str!("../data/scenarios.toml").replacen("target_country = ", "target_county = ", 1);
+    let parsed: toml::Table = toml::from_str(&missing).unwrap();
+    let first = parsed["scenarios"].as_array().unwrap()[0].clone();
+    assert!(first.try_into::<spaceooops::sim::Scenario>().is_err());
+}
+
+#[test]
+fn cards_list_angola_first_then_by_difficulty() {
+    let catalog = load_catalog().unwrap();
+    let ordered = spaceooops::sim::scenarios_in_card_order(&catalog.scenarios);
+    assert_eq!(ordered.len(), catalog.scenarios.len());
+    let rank = |d: &str| ["Easy", "Medium", "Hard"].iter().position(|x| *x == d).unwrap_or(99);
+    let keys: Vec<(bool, usize)> =
+        ordered.iter().map(|s| (s.target_country.id != "angola", rank(&s.difficulty))).collect();
+    assert!(keys.windows(2).all(|w| w[0] <= w[1]), "{keys:?}");
+}
+
+#[test]
+fn the_highlighted_country_follows_the_screen() {
+    let catalog = load_catalog().unwrap();
+    use Screen::*;
+    for screen in [Title, Sources, ScenarioSelect] {
+        let spec = spec_on(&catalog, screen, Some("space-weather-sentinel"));
+        assert_eq!(spec.highlighted_country, "angola", "{screen:?}");
+    }
+    for s in &catalog.scenarios {
+        for screen in [Brief, TeamSetup, Design, LaunchReview, Run, Debrief] {
+            let spec = spec_on(&catalog, screen, Some(&s.id));
+            assert_eq!(spec.highlighted_country, s.target_country.id, "{screen:?}");
+        }
+    }
+    assert_eq!(spec_on(&catalog, Design, None).highlighted_country, "angola");
+    let json = scene::to_json(&spec_on(&catalog, Brief, Some("crop-watch")));
+    let v: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(v["highlightedCountry"], "angola");
+}
+
+#[test]
+fn markers_sit_near_their_target_country_and_stay_apart() {
     let catalog = load_catalog().unwrap();
     for s in &catalog.scenarios {
-        assert!((-18.1..=-4.3).contains(&s.marker_lat), "{} latitude {}", s.id, s.marker_lat);
-        assert!((11.6..=24.1).contains(&s.marker_lon), "{} longitude {}", s.id, s.marker_lon);
+        let (centre, radius) = country_centre(&s.target_country.id);
+        let away = angle_between(centre, (s.marker_lat, s.marker_lon));
+        assert!(away <= radius, "{} marker is {away:.1} degrees from {}", s.id, s.target_country.name);
     }
     for (i, a) in catalog.scenarios.iter().enumerate() {
         for b in &catalog.scenarios[i + 1..] {

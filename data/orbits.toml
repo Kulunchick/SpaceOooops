@@ -45,7 +45,7 @@ coverage = { crop-watch = 1.0, connect-the-villages = 0.05, space-weather-sentin
 [[orbits]]
 id = "geo"
 name = "Geostationary Orbit, 35,786 km (GEO)"
-why = "So high that one orbit takes a whole day: the satellite hangs over the same spot on the equator, always in view of Angola and of its ground station. Almost always in sunlight, but very far away and expensive to reach."
+why = "So high that one orbit takes a whole day: the satellite hangs over the same spot on the equator, always in view of the target region and of its ground station. Almost always in sunlight, but very far away and expensive to reach."
 altitude_km = 35_786.0
 orbit_class = "geo"
 # source: a geostationary orbit lies in the equatorial plane.

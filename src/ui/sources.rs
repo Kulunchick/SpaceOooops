@@ -96,7 +96,8 @@ pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
             <p>
                 "The challenge text and video name GGPEN, the Angolan National Space Program Management Office "
                 "(Gabinete de Gest\u{e3}o do Programa Espacial Nacional), as the author of the Space Mission Design Game "
-                "challenge. The game's three Scenarios are tied to Angola for that reason. Official site: "
+                "challenge. Angola is therefore the game's home: its three first Scenarios are set there. Other countries are "
+                "chosen from the partner agencies of Space Apps. Official site: "
                 <Ext href="https://ggpen.gov.ao" label="ggpen.gov.ao" />
                 "."
             </p>

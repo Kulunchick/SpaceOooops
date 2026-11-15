@@ -4,11 +4,11 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Each new mechanic is covered through the Run interface with a one-event test catalog: snapshots, cost or Science Value move as the event states
-- [ ] Money spent goes through the existing extra-cost path; money gained raises the Budget left and shows in the Score's unspent-Budget bonus
-- [ ] A scaled failure chance changes only the threshold, not the number or order of random draws
-- [ ] An event with two effects (for example Instruments off, then a permanent Power gain) applies both
-- [ ] No mechanic marks a Component as failed or ends the Run
-- [ ] All events of `events-draft.md` without a question and without a Design condition are in the catalog file and load
+- [x] Each new mechanic is covered through the Run interface with a one-event test catalog: snapshots, cost or Science Value move as the event states
+- [x] Money spent goes through the existing extra-cost path; money gained raises the Budget left and shows in the Score's unspent-Budget bonus
+- [x] A scaled failure chance changes only the threshold, not the number or order of random draws
+- [x] An event with two effects (for example Instruments off, then a permanent Power gain) applies both
+- [x] No mechanic marks a Component as failed or ends the Run
+- [x] All events of `events-draft.md` without a question and without a Design condition are in the catalog file and load

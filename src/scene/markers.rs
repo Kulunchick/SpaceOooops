@@ -45,6 +45,19 @@ pub(super) fn markers(screen: Screen, scenarios: &[Scenario], chosen: Option<&st
         .collect()
 }
 
+/// The one Target Country the globe highlights: Angola on the title, Sources and Scenario select screens (and when
+/// no Scenario is chosen), the chosen Scenario's country on every screen after the choice.
+pub(super) fn highlighted_country(screen: Screen, scenarios: &[Scenario], chosen: Option<&str>) -> String {
+    let home = || crate::sim::HOME_COUNTRY.to_string();
+    if matches!(screen, Screen::Title | Screen::Sources | Screen::ScenarioSelect) {
+        return home();
+    }
+    scenarios
+        .iter()
+        .find(|s| Some(s.id.as_str()) == chosen)
+        .map_or_else(home, |s| s.target_country.id.clone())
+}
+
 /// The Shot for Scenario select (the whole region) or the Brief (holding on the chosen marker).
 /// `None` for every other screen.
 pub(super) fn shot(screen: Screen, scenarios: &[Scenario], chosen: Option<&str>) -> Option<Shot> {
