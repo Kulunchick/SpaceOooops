@@ -712,3 +712,241 @@ note = "the dragon fled"
 effects = []
 chance = 0.7
 bad = { log = "The dragon was not impressed and scratched a panel. The spacecraft makes 3% less Power for the rest of the Mission.", note = "the dragon scratched a panel and Power fell by 3% for good", effects = [{ mechanic = "power", strength = -0.03, to_end = true }] }
+
+# ==== 05: events that depend on the Design ===================================
+# Conditions (only, more_likely), mitigations, and `when` effects; 12, 17 and 21 ask a question.
+# ============================================================================
+
+[[events]]
+id = "micrometeoroid-through-a-panel"
+group = "real"
+title = "A micrometeoroid went through a panel"
+log = "A grain of space dust the size of a sand speck punched through a solar panel: 5% less Power for the rest of the Mission."
+scene = "hit"
+real_life = "Space is full of tiny fast particles, and spacecraft panels collect small pits and holes from them over the years. Large wings catch more of them."
+more_likely = { fact = "deployable-panels", weight = 2 }
+effects = [{ mechanic = "power", strength = -0.05, to_end = true }]
+
+[[events]]
+id = "bit-flipped-by-a-cosmic-ray"
+group = "real"
+title = "A cosmic ray flipped a bit"
+log = "A cosmic ray flipped one bit in the computer's memory. It rebooted to be safe: Instruments off for 1 day."
+scene = "hit"
+real_life = "Charged particles can flip a bit in memory (a single-event upset). Computers built and tested for space use error-correcting memory, so they notice and fix it."
+mitigation = { fact = "computer-flight-proven", scale = 0.0, log = "A cosmic ray flipped one bit in the computer's memory. The Flight-proven computer corrected it without even rebooting." }
+effects = [{ mechanic = "instruments-off", days = 1 }]
+
+[[events]]
+id = "a-bad-week-over-the-south-atlantic"
+group = "real"
+title = "A bad week over the South Atlantic"
+log = "The spacecraft crossed the South Atlantic Anomaly again and again. Radiation noise speckled the images: 40% less Data for 3 days."
+scene = "link-interference"
+real_life = "Over the South Atlantic Earth's magnetic field dips and radiation reaches lower down, so low-orbit satellites see noisy images and glitches there."
+only = "low-orbit"
+effects = [{ mechanic = "data", strength = -0.4, days = 3 }]
+
+[[events]]
+id = "geomagnetic-storm-puffs-up-the-atmosphere"
+group = "real"
+title = "A geomagnetic storm puffed up the atmosphere"
+log = "A storm on the Sun heated and puffed up the thin upper atmosphere. The extra drag pushed the spacecraft around: pointing was 50% worse for 3 days."
+scene = "link-interference"
+real_life = "Solar storms swell Earth's upper atmosphere; in 2022 a storm dragged a batch of freshly launched satellites down to a fiery end."
+only = "low-orbit"
+effects = [{ mechanic = "pointing", strength = -0.5, days = 3 }]
+
+[[events]]
+id = "atomic-oxygen-eats-the-coating"
+group = "real"
+title = "Atomic oxygen ate the coating"
+log = "Single oxygen atoms, which are common in low Orbit, slowly ate the coating on the panels: 3% less Power for the rest of the Mission."
+scene = "panel-shading"
+real_life = "In low Orbit a spacecraft flies through a thin gas of single oxygen atoms that erodes plastics and coatings, so designers protect surfaces against it."
+only = "low-orbit"
+effects = [{ mechanic = "power", strength = -0.03, to_end = true }]
+
+[[events]]
+id = "static-discharge-on-the-hull"
+group = "real"
+title = "Static discharge on the hull"
+log = "Charge built up on the hull until it sparked. The radio went quiet to recover: no downlink for 1 day."
+scene = "hit"
+real_life = "Spacecraft charge up in the hot, thin plasma of high Orbits and can discharge in a spark that upsets electronics."
+more_likely = { fact = "high-orbit", weight = 3 }
+effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]
+
+[[events]]
+id = "the-moon-blinds-the-star-tracker"
+group = "real"
+title = "The Moon blinded the star tracker"
+log = "The bright Moon slid into the star tracker's view and washed out the stars. The spacecraft lost its fine aim: pointing was 50% worse for 1 day."
+scene = "fly-by"
+real_life = "Star trackers find their direction by recognising star patterns, and the Sun, the Moon or Earth's glow in their view can blind them for a while."
+only = "precise-attitude"
+effects = [{ mechanic = "pointing", strength = -0.5, days = 1 }]
+
+[[events]]
+id = "a-panel-did-not-open-all-the-way"
+group = "real"
+title = "A panel did not open all the way"
+scene = "panel-shading"
+real_life = "Solar wings have stuck part way open on real spacecraft; operators have tried shaking them loose with the attitude control, and sometimes it worked."
+only = "deployable-panels"
+
+[events.question]
+text = "One solar wing opened only part way. Try to shake it open with the reaction wheels?"
+default = "leave"
+
+[[events.question.options]]
+id = "shake"
+label = "Shake it with the reaction wheels"
+consequence = "Free. It probably opens, but if it does not, the spacecraft wobbles."
+log = "The reaction wheels shook the wing and it clicked fully open."
+note = "the wing opened"
+effects = []
+chance = 0.6
+bad = { log = "The shaking did not free the wing and the spacecraft wobbled: pointing was 50% worse for 2 days.", note = "the wing stayed stuck and the spacecraft wobbled", effects = [{ mechanic = "pointing", strength = -0.5, days = 2 }] }
+
+[[events.question.options]]
+id = "leave"
+label = "Leave it"
+consequence = "Free, but the panel gives 10% less Power for the rest of the Mission."
+log = "The wing was left half open: 10% less Power for the rest of the Mission."
+note = "the wing stayed half open"
+effects = [{ mechanic = "power", strength = -0.1, to_end = true }]
+
+[[events]]
+id = "storage-full-of-debug-logs"
+group = "real"
+title = "Storage full of debug logs"
+log = "The flight software wrote debug logs into the Data storage until it was half full: half the room for Data for 2 days."
+scene = "link-interference"
+real_life = "Debug logging left switched on has filled the storage of real spacecraft; a computer with more headroom would not notice."
+mitigation = { fact = "computer-flight-proven", scale = 0.0, log = "The flight software wrote debug logs into the Data storage. The Flight-proven computer cleaned them up on its own and nothing was lost." }
+effects = [{ mechanic = "storage", strength = -0.5, days = 2 }]
+
+[[events]]
+id = "a-reaction-wheel-starts-to-vibrate"
+group = "real"
+title = "A reaction wheel started to vibrate"
+log = "A reaction wheel began to vibrate and blurred the pictures: 30% less Data for 3 days."
+scene = "hit"
+real_life = "A worn wheel bearing makes a spacecraft jitter, which blurs images; simple attitude control with little margin suffers more."
+more_likely = { fact = "attitude-basic", weight = 3 }
+effects = [{ mechanic = "data", strength = -0.3, days = 3 }]
+
+[[events]]
+id = "the-lens-cover-froze-shut"
+group = "real"
+title = "The lens cover froze shut"
+scene = "panel-shading"
+real_life = "Covers and doors on cold instruments have stuck on real missions; warming them in the Sun is the classic fix."
+only = "camera"
+
+[events.question]
+text = "The lens cover froze shut. Warm it in the Sun, or wait for it to thaw by itself?"
+default = "wait"
+
+[[events.question.options]]
+id = "warm"
+label = "Warm it in the Sun"
+consequence = "Free. The Instruments are off for 1 day while the spacecraft turns toward the Sun."
+log = "The spacecraft turned the camera toward the Sun and the cover thawed: Instruments off for 1 day."
+note = "the cover thawed after a day in the Sun"
+effects = [{ mechanic = "instruments-off", days = 1 }]
+
+[[events.question.options]]
+id = "wait"
+label = "Wait"
+consequence = "Free, but the Instruments stay blind for 3 days."
+log = "The cover thawed only by itself, slowly: Instruments off for 3 days."
+note = "the cover stayed shut for 3 days"
+effects = [{ mechanic = "instruments-off", days = 3 }]
+
+[[events]]
+id = "condensation-on-the-lens"
+group = "real"
+title = "Condensation on the lens"
+scene = "panel-shading"
+real_life = "Moisture trapped in a camera before launch can condense on a cold lens in orbit; teams bake spacecraft in a vacuum chamber to drive it out."
+only = "camera"
+
+[events.question]
+text = "Moisture has condensed on the lens. Bake it off, or shoot through it?"
+default = "shoot"
+
+[[events.question.options]]
+id = "bake"
+label = "Bake it off"
+consequence = "Free. The Instruments are off for 1 day while the lens warms."
+log = "The lens was warmed until the moisture boiled off: Instruments off for 1 day."
+note = "the lens was baked clear"
+effects = [{ mechanic = "instruments-off", days = 1 }]
+
+[[events.question.options]]
+id = "shoot"
+label = "Shoot through it"
+consequence = "Free, but the pictures are foggy: 30% less Data for 5 days."
+log = "The camera kept shooting through the fog: 30% less Data for 5 days."
+note = "the pictures were foggy"
+effects = [{ mechanic = "data", strength = -0.3, days = 5 }]
+
+[[events]]
+id = "radio-amateur-jams-the-frequency"
+group = "real"
+title = "A radio amateur jammed the frequency by accident"
+log = "A radio amateur with a powerful transmitter used your frequency by accident: 50% less downlink for 2 days."
+scene = "link-interference"
+real_life = "The UHF band is shared with amateur radio, and a strong ground transmitter on a close frequency can drown out a small satellite's signal."
+only = "uhf-radio"
+effects = [{ mechanic = "downlink", strength = -0.5, days = 2 }]
+
+[[events]]
+id = "a-space-whale-swims-past"
+group = "fantasy"
+title = "A space whale swims past"
+log = "A space whale swam between the spacecraft and the Sun and blocked the light: half the Power for 1 day. With a camera aboard there is a photo nobody will believe."
+scene = "visitor"
+model = "whale"
+effects = [{ mechanic = "power", strength = -0.5, days = 1 }, { mechanic = "science-bonus", strength = 0.02, when = "camera" }]
+
+[[events]]
+id = "a-busload-of-alien-tourists"
+group = "fantasy"
+title = "A busload of alien tourists"
+log = "A busload of alien tourists took flash photos of the spacecraft and blinded the camera: Instruments off for 1 day."
+scene = "visitor"
+only = "camera"
+effects = [{ mechanic = "instruments-off", days = 1 }]
+
+[[events]]
+id = "radio-amateurs-pick-up-your-signal"
+group = "lucky"
+title = "Radio amateurs around the world picked up your signal"
+log = "Radio amateurs around the world picked up your signal and passed the Data on: 50% more downlink for 3 days."
+scene = "bonus-glow"
+real_life = "Amateurs have received, decoded and relayed the signals of small satellites, and some missions depend on them."
+only = "uhf-radio"
+effects = [{ mechanic = "downlink", strength = 0.5, days = 3 }]
+
+[[events]]
+id = "a-rare-sight-lands-in-frame"
+group = "lucky"
+title = "A rare sight landed in frame"
+log = "A volcano erupted just as the camera passed over it. The picture is worth a lot to scientists: bonus Science Value."
+scene = "bonus-glow"
+real_life = "Satellite cameras have caught eruptions, algal blooms and auroras by luck of timing, and those pictures often make the news."
+only = "camera"
+effects = [{ mechanic = "science-bonus", strength = 0.03 }]
+
+[[events]]
+id = "a-photo-goes-viral"
+group = "lucky"
+title = "A photo from the satellite went viral"
+log = "One of the satellite's photos went viral. A foundation noticed and gave a grant of $70,000."
+scene = "bonus-glow"
+real_life = "Pictures from small satellites often win public attention, and attention brings grants and sponsors."
+only = "camera"
+effects = [{ mechanic = "budget", strength = 70000.0 }]
