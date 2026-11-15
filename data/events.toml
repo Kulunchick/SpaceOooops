@@ -445,3 +445,270 @@ log = "The panels turned out to make 3% more Power than the datasheet promised, 
 scene = "bonus-glow"
 real_life = "Datasheets are conservative; real solar cells often beat their rated output early in life."
 effects = [{ mechanic = "power", strength = 0.03, to_end = true }]
+
+# ==== 04: gamble options ====================================================
+# Each question has one safe free default and one gamble (chance + bad outcome).
+# ============================================================================
+
+[[events]]
+id = "debris-on-a-collision-course"
+group = "real"
+title = "Debris on a collision course"
+scene = "fly-by"
+real_life = "Operators get warnings about close approaches with debris all the time, and each one is a judgement call between a costly manoeuvre and a small risk."
+more_likely = { fact = "low-orbit", weight = 3 }
+
+[events.question]
+text = "A piece of debris will pass very close to the spacecraft. Dodge it?"
+default = "dodge"
+
+[[events.question.options]]
+id = "dodge"
+label = "Dodge"
+consequence = "The Instruments are off for 2 days while the spacecraft manoeuvres."
+log = "The spacecraft dodged the debris. The Instruments were off for 2 days."
+note = "the spacecraft dodged and the Instruments were off for 2 days"
+effects = [{ mechanic = "instruments-off", days = 2 }]
+
+[[events.question.options]]
+id = "risk-it"
+label = "Risk it"
+consequence = "No manoeuvre, but a hit would damage a panel (5% less Power for good)."
+log = "The debris missed the spacecraft by a few metres."
+note = "the debris missed"
+effects = []
+chance = 0.8
+bad = { log = "The debris clipped a panel. The spacecraft makes 5% less Power for the rest of the Mission.", note = "the debris hit a panel and Power fell by 5% for good", effects = [{ mechanic = "power", strength = -0.05, to_end = true }] }
+
+[[events]]
+id = "meteor-shower"
+group = "real"
+title = "Meteor shower"
+scene = "hit"
+real_life = "Meteor showers raise the number of tiny particles in orbit, and operators sometimes turn sensitive surfaces away from the stream."
+
+[events.question]
+text = "A meteor shower is coming. Turn the spacecraft edge-on?"
+default = "turn"
+
+[[events.question.options]]
+id = "turn"
+label = "Turn edge-on"
+consequence = "Safe, but the Instruments are off for 1 day."
+log = "The spacecraft turned edge-on and rode out the shower. The Instruments were off for 1 day."
+note = "the spacecraft turned edge-on and the Instruments were off for 1 day"
+effects = [{ mechanic = "instruments-off", days = 1 }]
+
+[[events.question.options]]
+id = "keep-working"
+label = "Keep working"
+consequence = "No downtime, but a hit would cost 3% of the Power for good."
+log = "The meteors fell around the spacecraft and none of them hit."
+note = "no meteor hit"
+effects = []
+chance = 0.7
+bad = { log = "A meteor hit the panels. The spacecraft makes 3% less Power for the rest of the Mission.", note = "a meteor hit the panels and Power fell by 3% for good", effects = [{ mechanic = "power", strength = -0.03, to_end = true }] }
+
+[[events]]
+id = "software-update-on-a-friday-evening"
+group = "real"
+title = "Software update on a Friday evening"
+scene = "link-interference"
+real_life = "Operators avoid uploading new flight software before a weekend, because a bad upload then has nobody on hand to fix it."
+
+[events.question]
+text = "The new flight software is ready, and it is Friday evening. Upload it now?"
+default = "wait"
+
+[[events.question.options]]
+id = "wait"
+label = "Wait for Monday"
+consequence = "Nothing changes."
+log = "The update waited for Monday. Nothing changed."
+note = "the update waited for Monday"
+effects = []
+
+[[events.question.options]]
+id = "upload-now"
+label = "Upload now"
+consequence = "If it works, 10% more Data for 5 days. If not, the Instruments are off for 3 days."
+log = "The update worked at the first try: 10% more Data for 5 days."
+note = "the update worked and brought 10% more Data for 5 days"
+effects = [{ mechanic = "data", strength = 0.1, days = 5 }]
+chance = 0.6
+bad = { log = "The update had a bug and the spacecraft rebooted. The Instruments were off for 3 days.", note = "the update had a bug and the Instruments were off for 3 days", effects = [{ mechanic = "instruments-off", days = 3 }] }
+
+[[events]]
+id = "neighbour-on-the-same-frequency"
+group = "real"
+title = "A neighbour on the same frequency"
+scene = "link-interference"
+real_life = "Satellites on neighbouring frequencies can drown each other out, and operators usually settle it by agreeing a schedule."
+
+[events.question]
+text = "Another spacecraft transmits on your frequency. Agree a schedule with its operator?"
+default = "agree"
+
+[[events.question.options]]
+id = "agree"
+label = "Agree a schedule"
+consequence = "Fair, but the downlink is 20% lower for 4 days."
+log = "The two operators agreed a schedule. The downlink was 20% lower for 4 days."
+note = "a schedule was agreed and the downlink was 20% lower for 4 days"
+effects = [{ mechanic = "downlink", strength = -0.2, days = 4 }]
+
+[[events.question.options]]
+id = "shout"
+label = "Shout over them"
+consequence = "If they back down, nothing is lost. If not, there is no downlink for 2 days."
+log = "The neighbour backed down and the downlink stayed clear."
+note = "the neighbour backed down"
+effects = []
+chance = 0.6
+bad = { log = "Both spacecraft shouted and neither was heard. No downlink for 2 days.", note = "both shouted at once and there was no downlink for 2 days", effects = [{ mechanic = "downlink", strength = -1.0, days = 2 }] }
+
+[[events]]
+id = "inspector-satellite-comes-close"
+group = "real"
+title = "A rival agency's inspector satellite comes right up close"
+scene = "visitor"
+model = "inspector"
+real_life = "Some satellites exist to inspect other satellites from close range, and nobody can be sure what they are looking at."
+
+[events.question]
+text = "A rival agency's inspector satellite has come right up close. Close the lens covers?"
+default = "close"
+
+[[events.question.options]]
+id = "close"
+label = "Close the lens covers and wait"
+consequence = "Safe, but the Instruments are off for 2 days."
+log = "The spacecraft closed its lens covers until the inspector left. The Instruments were off for 2 days."
+note = "the lens covers were closed and the Instruments were off for 2 days"
+effects = [{ mechanic = "instruments-off", days = 2 }]
+
+[[events.question.options]]
+id = "ignore"
+label = "Ignore it"
+consequence = "No downtime, but the inspector might accidentally dazzle the camera with a laser (Instruments off for 3 days)."
+log = "The inspector looked around and left without a word."
+note = "the inspector left without doing anything"
+effects = []
+chance = 0.7
+bad = { log = "The inspector's laser accidentally dazzled the camera. The Instruments were off for 3 days.", note = "the inspector accidentally dazzled the camera and the Instruments were off for 3 days", effects = [{ mechanic = "instruments-off", days = 3 }] }
+
+[[events]]
+id = "schoolchildren-hack-the-link"
+group = "real"
+title = "Schoolchildren try to hack the link"
+scene = "link-interference"
+real_life = "Students with a home-built ground station sometimes find an unprotected satellite link and send it their own commands or music."
+
+[events.question]
+text = "Schoolchildren are trying to hack the link. Change the keys?"
+default = "change-keys"
+
+[[events.question.options]]
+id = "change-keys"
+label = "Change the keys"
+consequence = "Safe, but there is no downlink for 1 day."
+log = "The operators changed the keys. No downlink for 1 day."
+note = "the keys were changed and there was no downlink for 1 day"
+effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]
+
+[[events.question.options]]
+id = "ignore"
+label = "Ignore them"
+consequence = "If they give up, nothing is lost. If not, their playlist takes 60% of the downlink for 3 days."
+log = "The schoolchildren got bored and gave up."
+note = "the schoolchildren gave up"
+effects = []
+chance = 0.6
+bad = { log = "The schoolchildren broadcast their playlist through the link. The downlink was 60% lower for 3 days.", note = "the schoolchildren broadcast their playlist and the downlink was 60% lower for 3 days", effects = [{ mechanic = "downlink", strength = -0.6, days = 3 }] }
+
+[[events]]
+id = "scientists-argue-where-to-look"
+group = "real"
+title = "The scientists argue about where to look"
+scene = "bonus-glow"
+real_life = "Mission teams often disagree about which target is the best use of limited observing time, and the plan changes more than once."
+
+[events.question]
+text = "The scientists cannot agree where to look. Which target do you choose?"
+default = "target-a"
+
+[[events.question.options]]
+id = "target-a"
+label = "Target A"
+consequence = "The ordinary, well-understood target. Nothing changes."
+log = "The spacecraft observed the ordinary target, as planned."
+note = "the ordinary target was observed"
+effects = []
+
+[[events.question.options]]
+id = "target-b"
+label = "Target B"
+consequence = "If it is a find, the Mission earns a bonus of 3% of the Science Value it needs. If not, 2 days of Data are lost."
+log = "Target B turned out to be a real find: a bonus of 3% of the Science Value the Mission needs."
+note = "target B turned out to be a find and brought a Science Value bonus"
+effects = [{ mechanic = "science-bonus", strength = 0.03 }]
+chance = 0.5
+bad = { log = "Target B was empty sky. 2 days of Data were lost.", note = "target B was empty sky and 2 days of Data were lost", effects = [{ mechanic = "data", strength = -1.0, days = 2 }] }
+
+[[events]]
+id = "ufo-parks-alongside"
+group = "fantasy"
+title = "A UFO parks alongside"
+scene = "visitor"
+model = "ufo"
+
+[events.question]
+text = "A UFO has parked alongside the spacecraft. Say hello?"
+default = "debris"
+
+[[events.question.options]]
+id = "debris"
+label = "Pretend to be debris"
+consequence = "Safe, but the Instruments are off for 1 day."
+log = "The spacecraft pretended to be debris until the UFO left. The Instruments were off for 1 day."
+note = "the spacecraft played dead and the Instruments were off for 1 day"
+effects = [{ mechanic = "instruments-off", days = 1 }]
+
+[[events.question.options]]
+id = "say-hello"
+label = "Say hello"
+consequence = "If they are friendly, a Science Value bonus of 2% that nobody will believe. If not, they shade the panels: 50% less Power for 2 days."
+log = "The visitors were friendly and shared some data nobody will believe: a bonus of 2% of the Science Value the Mission needs."
+note = "the visitors were friendly and shared data nobody will believe"
+effects = [{ mechanic = "science-bonus", strength = 0.02 }]
+chance = 0.5
+bad = { log = "The visitors parked right in front of the Sun. The panels made 50% less Power for 2 days.", note = "the visitors shaded the panels and Power was 50% lower for 2 days", effects = [{ mechanic = "power", strength = -0.5, days = 2 }] }
+
+[[events]]
+id = "dragon-takes-the-satellite-for-something-shiny"
+group = "fantasy"
+title = "A dragon takes the satellite for something shiny"
+scene = "fly-by"
+model = "dragon"
+
+[events.question]
+text = "A dragon is circling the spacecraft, attracted by the shine. Dim the lights?"
+default = "dim"
+
+[[events.question.options]]
+id = "dim"
+label = "Dim the lights"
+consequence = "Safe, but the Instruments are off for 2 days."
+log = "The spacecraft dimmed its lights until the dragon lost interest. The Instruments were off for 2 days."
+note = "the lights were dimmed and the Instruments were off for 2 days"
+effects = [{ mechanic = "instruments-off", days = 2 }]
+
+[[events.question.options]]
+id = "scare-it-off"
+label = "Scare it off by radio"
+consequence = "If it flees, nothing is lost. If not, it scratches a panel (3% less Power for good)."
+log = "A loud radio call scared the dragon off."
+note = "the dragon fled"
+effects = []
+chance = 0.7
+bad = { log = "The dragon was not impressed and scratched a panel. The spacecraft makes 3% less Power for the rest of the Mission.", note = "the dragon scratched a panel and Power fell by 3% for good", effects = [{ mechanic = "power", strength = -0.03, to_end = true }] }

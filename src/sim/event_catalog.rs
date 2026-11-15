@@ -322,7 +322,27 @@ fn validate_question(e: &EventSpec) -> Result<(), String> {
 }
 
 /// Ticket 04: `chance` and `bad` both or neither, chance in 0..=1.
-fn validate_gamble(_e: &EventSpec) -> Result<(), String> {
+fn validate_gamble(e: &EventSpec) -> Result<(), String> {
+    let Some(q) = &e.question else { return Ok(()) };
+    for o in &q.options {
+        let id = &o.id;
+        match (o.chance, &o.bad) {
+            (None, None) => {}
+            (Some(_), None) => return Err(format!("option '{id}' has a chance but no bad outcome (bad)")),
+            (None, Some(_)) => return Err(format!("option '{id}' has a bad outcome but no chance")),
+            (Some(chance), Some(bad)) => {
+                if !(0.0..=1.0).contains(&chance) {
+                    return Err(format!("option '{id}': chance must be between 0 and 1, not {chance}"));
+                }
+                if bad.log.trim().is_empty() || bad.note.trim().is_empty() {
+                    return Err(format!("option '{id}': the bad outcome (bad) needs a log and a note"));
+                }
+                for effect in &bad.effects {
+                    validate_effect(effect).map_err(|m| format!("option '{id}', bad outcome: {m}"))?;
+                }
+            }
+        }
+    }
     Ok(())
 }
 

@@ -11,11 +11,12 @@ pub(crate) fn question_notes(pool: &EventState) -> Vec<(u32, String)> {
             let q = f.spec.question.as_ref()?;
             let o = q.options.get(f.option?)?;
             let note = match (&o.bad, f.good) {
-                (Some(bad), false) => &bad.note,
-                _ => &o.note,
+                (Some(bad), false) => format!("The gamble failed: {}", bad.note.trim()),
+                (Some(_), true) => format!("The gamble paid off: {}", o.note.trim()),
+                _ => sentence(&o.note),
             };
             let who = if f.by_player { "you chose" } else { "no answer was given, so by default the spacecraft chose" };
-            Some((f.day, format!("Day {}, {}: {who} \"{}\". {}.", f.day, f.spec.title, o.label, sentence(note))))
+            Some((f.day, format!("Day {}, {}: {who} \"{}\". {}.", f.day, f.spec.title, o.label, note.trim_end_matches('.'))))
         })
         .collect()
 }

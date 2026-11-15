@@ -143,14 +143,18 @@ fn ask(spec: &EventSpec, q: &QuestionSpec, day: u32, budget_left_usd: f64, decis
 /// Tickets 03, 04: an option's consequence as the player reads it: the data text, the price against the Budget
 /// left, and for a gamble its odds.
 fn consequence(o: &OptionSpec, budget_left_usd: f64) -> String {
-    if o.cost_usd <= 0.0 {
-        return o.consequence.clone();
+    let mut text = o.consequence.clone();
+    if o.cost_usd > 0.0 {
+        let left = budget_left_usd.max(0.0);
+        text = if o.cost_usd > left {
+            format!("{text} Would cost {} of Budget.", money(o.cost_usd))
+        } else {
+            format!("{text} Costs {} of the {} of Budget left.", money(o.cost_usd), money(left))
+        };
     }
-    let left = budget_left_usd.max(0.0);
-    if o.cost_usd > left {
-        format!("{} Would cost {} of Budget.", o.consequence, money(o.cost_usd))
-    } else {
-        format!("{} Costs {} of the {} of Budget left.", o.consequence, money(o.cost_usd), money(left))
+    match (o.chance, &o.bad) {
+        (Some(chance), Some(_)) => format!("{text} A gamble: about {} in 10 it goes well.", (chance * 10.0).round() as u32),
+        _ => text,
     }
 }
 
