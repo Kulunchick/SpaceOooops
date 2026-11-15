@@ -104,8 +104,9 @@ fn a_run_gets_its_count_of_new_events_each_once_on_distinct_days_and_none_ends_t
         assert_eq!(ids.len(), events.len(), "seed {seed}: an event repeats");
         let days: BTreeSet<u32> = events.iter().map(|(day, _)| *day).collect();
         assert_eq!(days.len(), events.len(), "seed {seed}: two events on one day");
-        assert_eq!(r.debrief.stats.days_survived, before.debrief.stats.days_survived, "seed {seed}: the Run's end moved");
-        assert_eq!(r.timeline.len(), before.timeline.len(), "seed {seed}");
+        // A new event never ends the Run sooner; "Quiet Sun" (a lower failure chance) may let it last longer.
+        assert!(r.debrief.stats.days_survived >= before.debrief.stats.days_survived, "seed {seed}: the Run ended sooner");
+        assert!(r.timeline.len() >= before.timeline.len(), "seed {seed}");
         seen.extend(ids.into_iter().map(str::to_string));
     }
     assert_eq!(seen.len(), on.events.len(), "every event shows up in a sweep");

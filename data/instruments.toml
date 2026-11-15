@@ -16,7 +16,7 @@ volume_u = 2.0
 # Compressed scenes over Angola's farm belt each day.
 data_mb_per_day = 300.0
 needs_fine_pointing = true
-fit = { crop-watch = 1.0 }
+fit = { crop-watch = 1.0, connect-the-villages = 0.0, space-weather-sentinel = 0.0 }
 
 [[instruments]]
 id = "thermal-imager"
@@ -30,7 +30,7 @@ cost_usd = 400_000.0
 volume_u = 1.5
 data_mb_per_day = 250.0
 needs_fine_pointing = true
-fit = { crop-watch = 0.8 }
+fit = { crop-watch = 0.8, connect-the-villages = 0.0, space-weather-sentinel = 0.0 }
 
 [[instruments]]
 id = "wide-camera"
@@ -43,7 +43,7 @@ cost_usd = 50_000.0
 volume_u = 0.5
 data_mb_per_day = 60.0
 needs_fine_pointing = false
-fit = { crop-watch = 0.3 }
+fit = { crop-watch = 0.3, connect-the-villages = 0.0, space-weather-sentinel = 0.0 }
 
 # ---------------------------------------------------------------- Connect the Villages
 # For a communications payload, "Data" is the village traffic it carries; the spacecraft's comms band is the
@@ -63,7 +63,7 @@ volume_u = 4.0
 # About 2 GB of messages, calls and web pages a day for a pilot network of village terminals.
 data_mb_per_day = 2_000.0
 needs_fine_pointing = true
-fit = { connect-the-villages = 1.0 }
+fit = { crop-watch = 0.0, connect-the-villages = 1.0, space-weather-sentinel = 0.0 }
 
 [[instruments]]
 id = "store-and-forward"
@@ -77,7 +77,7 @@ cost_usd = 100_000.0
 volume_u = 0.5
 data_mb_per_day = 20.0
 needs_fine_pointing = false
-fit = { connect-the-villages = 0.4 }
+fit = { crop-watch = 0.0, connect-the-villages = 0.4, space-weather-sentinel = 0.0 }
 
 # ---------------------------------------------------------------- Space Weather Sentinel
 
@@ -94,7 +94,7 @@ volume_u = 1.0
 # Fine time resolution all around the orbit.
 data_mb_per_day = 300.0
 needs_fine_pointing = false
-fit = { space-weather-sentinel = 1.0 }
+fit = { crop-watch = 0.0, connect-the-villages = 0.0, space-weather-sentinel = 1.0 }
 
 [[instruments]]
 id = "ionosphere-probe"
@@ -108,4 +108,4 @@ cost_usd = 80_000.0
 volume_u = 0.5
 data_mb_per_day = 200.0
 needs_fine_pointing = false
-fit = { space-weather-sentinel = 0.8 }
+fit = { crop-watch = 0.0, connect-the-villages = 0.0, space-weather-sentinel = 0.8 }

@@ -9,9 +9,9 @@ logic is unchanged.
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] A Scenario without at least one ground station fails catalog loading
-- [ ] The Scene Spec's ground stations come from the current Scenario
-- [ ] The three existing Scenarios show the same stations as before
-- [ ] The scene effects test checks that a Scenario's stations come from its own data, not that they are in Angola
+- [x] A Scenario without at least one ground station fails catalog loading
+- [x] The Scene Spec's ground stations come from the current Scenario
+- [x] The three existing Scenarios show the same stations as before
+- [x] The scene effects test checks that a Scenario's stations come from its own data, not that they are in Angola
