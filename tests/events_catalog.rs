@@ -1,5 +1,5 @@
 //! The new Random Events are data (`data/events.toml`): the shipped file loads, and a broken entry fails with a
-//! message that names the file, the event and what is wrong (More Random Events, ticket 01).
+//! message that names the file, the event and what is wrong (More Random Events).
 use std::collections::BTreeSet;
 
 use spaceooops::sim::*;
@@ -100,6 +100,13 @@ fn an_instant_effect_has_no_length() {
 fn a_share_stays_within_minus_one_and_one() {
     let msg = error(&GOOD.replace("{ mechanic = \"instruments-off\", days = 2 }", "{ mechanic = \"downlink\", strength = -1.5, days = 1 }"));
     assert!(msg.contains("test-event") && msg.contains("downlink"), "{msg}");
+}
+
+#[test]
+fn the_event_log_marks_fantasy_events_unexplained_and_lucky_ones_lucky() {
+    assert_eq!(EventGroup::Fantasy.mark(), Some("Unexplained"));
+    assert_eq!(EventGroup::Lucky.mark(), Some("Lucky"));
+    assert_eq!(EventGroup::Real.mark(), None);
 }
 
 #[test]

@@ -23,7 +23,7 @@ pub struct EventSpec {
     pub log: String,
     /// What the 3D scene shows.
     pub scene: SceneEffect,
-    /// A star model for a fly-by or a visitor (ticket 09).
+    /// A star model for a fly-by or a visitor.
     #[serde(default)]
     pub model: Option<String>,
     /// How this happens in real life, for the Debrief. Required for real events, forbidden for fantasy ones.
@@ -50,6 +50,17 @@ pub enum EventGroup {
     /// Shown with the "Unexplained" mark.
     Fantasy,
     Lucky,
+}
+
+impl EventGroup {
+    /// The text mark the event log shows beside the event, so the difference never rests on colour alone.
+    pub fn mark(self) -> Option<&'static str> {
+        match self {
+            EventGroup::Fantasy => Some("Unexplained"),
+            EventGroup::Lucky => Some("Lucky"),
+            EventGroup::Real => None,
+        }
+    }
 }
 
 /// The reusable 3D effect an event shows.
@@ -310,7 +321,7 @@ pub(crate) fn validate_effect(effect: &EffectSpec) -> Result<(), String> {
     Ok(())
 }
 
-/// Ticket 03: exactly two options, distinct ids, the default exists and is free, a question XOR effects + log.
+/// Exactly two options, distinct ids, the default exists and is free, a question XOR effects + log.
 fn validate_question(e: &EventSpec) -> Result<(), String> {
     let Some(q) = &e.question else { return Ok(()) };
     if !e.effects.is_empty() {
@@ -350,7 +361,7 @@ fn validate_question(e: &EventSpec) -> Result<(), String> {
     }
 }
 
-/// Ticket 04: `chance` and `bad` both or neither, chance in 0..=1.
+/// `chance` and `bad` both or neither, chance in 0..=1.
 fn validate_gamble(e: &EventSpec) -> Result<(), String> {
     let Some(q) = &e.question else { return Ok(()) };
     for o in &q.options {
@@ -400,7 +411,7 @@ fn validate_design(e: &EventSpec) -> Result<(), String> {
     Ok(())
 }
 
-/// Ticket 09: the model is a known name, and only with a fly-by or a visitor.
+/// The model is a known name, and only with a fly-by or a visitor.
 fn validate_model(e: &EventSpec) -> Result<(), String> {
     let Some(model) = &e.model else { return Ok(()) };
     if !STAR_MODELS.contains(&model.as_str()) {
@@ -424,7 +435,7 @@ const DENIED_COUNTRIES: [&str; 20] = [
     "France", "French", "German", "Israel", "Iran", "Korea", "Britain", "British", "Ukrain",
 ];
 
-/// Ticket 07: no event text names a real country or agency (the game jokes about "a rival agency" only). The
+/// No event text names a real country or agency (the game jokes about "a rival agency" only). The
 /// pool's size and split are pinned by the catalog tests, as a test catalog may hold a single event.
 fn validate_pool(events: &[EventSpec]) -> Result<(), String> {
     for e in events {

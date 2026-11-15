@@ -9,8 +9,8 @@ use std::f64::consts::PI;
 
 use leptos::prelude::*;
 use spaceooops::scene::orbit;
-use spaceooops::sim::EventKind;
 
+use super::event_log::icon;
 use crate::ui::format::{num, percent};
 use crate::ui::state::AppState;
 
@@ -73,16 +73,6 @@ fn geometry(state: AppState) -> Geometry {
             squash: 0.5,
         },
     })
-}
-
-fn event_icon(kind: EventKind) -> &'static str {
-    match kind {
-        EventKind::ComponentFailure => "\u{2716}",
-        EventKind::SolarFlare => "\u{2600}",
-        EventKind::GroundStationOutage => "\u{1F4E1}",
-        EventKind::BatteryShortfall => "\u{1F50B}",
-        EventKind::Catalog => "\u{2604}",
-    }
 }
 
 #[component]
@@ -156,7 +146,7 @@ pub fn OrbitView() -> impl IntoView {
         let newest = state.run_result.with_untracked(|r| {
             r.as_ref().and_then(|r| {
                 r.timeline.get(from..=cur)?.iter().rev().find_map(|d| {
-                    d.events.last().map(|e| format!("Day {}: {} {}", d.day, event_icon(e.kind), e.text))
+                    d.events.last().map(|e| format!("Day {}: {} {}", d.day, icon(e.kind, e.catalog.as_ref().map(|c| c.group)), e.text))
                 })
             })
         });

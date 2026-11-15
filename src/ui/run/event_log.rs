@@ -38,7 +38,7 @@ pub fn EventLog() -> impl IntoView {
                             <li class=event_class(kind, group)>
                                 <span class="event-day">{format!("Day {day}")}</span>
                                 <span class="event-icon">{icon(kind, group)}</span>
-                                {mark(group).map(|m| view! { <span class="event-mark">{m}</span> })}
+                                {group.and_then(EventGroup::mark).map(|m| view! { <span class="event-mark">{m}</span> })}
                                 {text}
                             </li>
                         }
@@ -49,7 +49,8 @@ pub fn EventLog() -> impl IntoView {
     }
 }
 
-fn icon(kind: EventKind, group: Option<EventGroup>) -> &'static str {
+/// The icon of a Random Event, in the event log and the orbit view's caption.
+pub(super) fn icon(kind: EventKind, group: Option<EventGroup>) -> &'static str {
     match (kind, group) {
         (EventKind::Catalog, Some(EventGroup::Fantasy)) => "\u{2753}",
         (EventKind::Catalog, Some(EventGroup::Lucky)) => "\u{2605}",
@@ -58,15 +59,6 @@ fn icon(kind: EventKind, group: Option<EventGroup>) -> &'static str {
         (EventKind::GroundStationOutage, _) => "\u{1F4E1}",
         (EventKind::BatteryShortfall, _) => "\u{1F50B}",
         (EventKind::Catalog, _) => "\u{2604}",
-    }
-}
-
-/// The text mark of a fantasy or lucky event, so the difference never rests on colour alone.
-fn mark(group: Option<EventGroup>) -> Option<&'static str> {
-    match group {
-        Some(EventGroup::Fantasy) => Some("Unexplained"),
-        Some(EventGroup::Lucky) => Some("Lucky"),
-        _ => None,
     }
 }
 
