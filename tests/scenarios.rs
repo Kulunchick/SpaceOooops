@@ -74,7 +74,7 @@ fn the_full_catalog_is_bundled() {
     assert_eq!(ids(&catalog.structures, |o| &o.id), ["cubesat-3u", "cubesat-6u", "cubesat-12u", "smallsat"]);
     assert_eq!(ids(&catalog.batteries, |o| &o.id), ["battery-s", "battery-m", "battery-l"]);
     assert_eq!(ids(&catalog.comms, |o| &o.id), ["comms-uhf", "comms-s-band", "comms-x-band"]);
-    assert!((6..=9).contains(&catalog.instruments.len()), "{}", catalog.instruments.len());
+    assert_eq!(catalog.instruments.len(), 9, "{}", catalog.instruments.len());
     assert!(catalog.launch_vehicles.len() >= 5);
     assert!(catalog.launch_vehicles.iter().all(|lv| !lv.real_example.is_empty() && !lv.why.is_empty()));
     // every Orbit is reachable and rated for every Scenario; every Scenario has Instruments that suit it
@@ -288,22 +288,34 @@ fn amazon_an_s_band_radio_cannot_keep_up_with_the_radar() {
     assert!(r.warnings.iter().any(|f| f.kind == FindingKind::DataAboveDownlink), "{:#?}", r.warnings);
 }
 
-/// The radar is no shortcut in Angola: there it is both unaffordable and poorly suited.
-#[test]
-fn the_radar_is_not_the_answer_in_the_angolan_scenarios() {
+/// Whether an Instrument is a shortcut in a Scenario, tried through Runs two ways: swapped into the Scenario's
+/// known-good Design, and on its own known-good spacecraft. Each either cannot launch or wins less often (and earns
+/// less Science Value) than the known-good Design.
+fn assert_no_shortcut(instrument: &str, its_spacecraft: Design, scenario: &str, good: &Design) {
     let catalog = load_catalog().unwrap();
-    let radar = catalog.instrument("sar-radar").unwrap();
+    let seeds = 0..60u64;
+    let flown = |d: &Design| -> (usize, f64) {
+        let runs: Vec<_> = seeds.clone().map(|seed| run(&catalog, d, scenario, seed).debrief).collect();
+        (runs.iter().filter(|r| r.success).count(), runs.iter().map(|r| r.stats.science_value).sum::<f64>())
+    };
+    let (good_wins, good_value) = flown(good);
+    let swapped = Design { instruments: vec![instrument.to_string()], ..good.clone() };
+    for d in [swapped, its_spacecraft] {
+        if !review(&d, scenario).can_launch {
+            continue;
+        }
+        let (wins, value) = flown(&d);
+        assert!(wins < good_wins && value < good_value, "{scenario}: {instrument} wins {wins} (known-good {good_wins}), {value:.0} Science Value ({good_value:.0}): {d:?}");
+    }
+}
+
+/// The radar is no shortcut where clouds are not the problem: Angola's Scenarios, Argentina's glaciers and India's
+/// cyclones.
+#[test]
+fn the_radar_is_not_the_answer_outside_brazil_and_japan() {
     for (scenario, good) in known_goods().into_iter().filter(|(s, _)| *s != AMAZON_WATCH && *s != JAPAN_DISASTER_RESPONSE) {
-        let best_other = good.instruments.iter().map(|i| catalog.instrument(i).unwrap().fit[scenario]).fold(0.0, f64::max);
-        assert!(radar.fit[scenario] < best_other / 2.0, "{scenario}: radar fit {}", radar.fit[scenario]);
+        assert_no_shortcut("sar-radar", amazon_watch_known_good(), scenario, &good);
     }
-    let mut d = amazon_watch_known_good();
-    for scenario in [CROP_WATCH, SPACE_WEATHER_SENTINEL] {
-        assert!(has_violation(&review(&d, scenario), FindingKind::OverBudget), "{scenario}");
-    }
-    d.orbit = Some("geo".into());
-    d.launch_vehicle = Some("geo-rideshare".into());
-    assert!(!review(&d, CONNECT_THE_VILLAGES).can_launch);
 }
 
 // ---------------------------------------------------------------- Cyclone Watch: only GEO watches a storm all day
@@ -331,11 +343,8 @@ fn cyclone_every_camera_from_geo_still_falls_short() {
 /// The imager is no shortcut elsewhere: in every other Scenario it is a poor Instrument.
 #[test]
 fn the_weather_imager_is_not_the_answer_outside_india() {
-    let catalog = load_catalog().unwrap();
-    let imager = catalog.instrument("weather-imager").unwrap();
     for (scenario, good) in known_goods().into_iter().filter(|(s, _)| *s != CYCLONE_WATCH) {
-        let best_other = good.instruments.iter().map(|i| catalog.instrument(i).unwrap().fit[scenario]).fold(0.0, f64::max);
-        assert!(imager.fit[scenario] < best_other / 2.0, "{scenario}: weather imager fit {}", imager.fit[scenario]);
+        assert_no_shortcut("weather-imager", cyclone_watch_known_good(), scenario, &good);
     }
 }
 

@@ -14,6 +14,14 @@ export function catalogScenarios() {
     }));
 }
 
+/** The Scenario cards in the order the spec asks for: the Angolan three first, then the rest by difficulty. */
+export const CARD_ORDER = [
+  'Crop Watch', 'Connect the Villages', 'Space Weather Sentinel', // Angola: Easy, Medium, Hard
+  'Glacier Watch', // Easy
+  'Amazon Watch', 'Cyclone Watch', // Medium
+  'Disaster Response', // Hard
+];
+
 /** Collects console errors and uncaught page errors; assert it is empty at the end of a test. */
 export function collectErrors(page) {
   const errors = [];

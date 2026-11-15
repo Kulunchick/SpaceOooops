@@ -176,11 +176,11 @@ fn a_real_event_needs_a_real_life_line_and_a_fantasy_event_has_none() {
 }
 
 #[test]
-fn every_scenario_sets_how_many_new_events_a_run_gets() {
-    let c = load_catalog().unwrap();
-    for s in &c.scenarios {
-        let t = &s.events;
-        assert!(t.new_events_min <= t.new_events_max, "{}", s.id);
-        assert!(t.new_events_max > 0, "{}: new events are on in the shipped game", s.id);
-    }
+fn a_scenario_asking_for_more_new_events_at_least_than_at_most_is_rejected() {
+    // The shipped counts (5 to 8 everywhere) are pinned in tests/events_balance.rs.
+    let mut c = load_catalog().unwrap();
+    let id = c.scenarios[2].id.clone();
+    c.scenarios[2].events.new_events_min = 9;
+    let msg = validate_catalog(&c).unwrap_err().to_string();
+    assert!(msg.contains(&id) && msg.contains("new_events_min"), "{msg}");
 }

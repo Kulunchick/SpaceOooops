@@ -121,6 +121,26 @@ test('speeding up the playback speeds up the spacecraft, and skipping leaves the
   expect(errors).toEqual([]);
 });
 
+test('with full motion, 4x plays a stretch without events about four times as fast as 1x', async ({ page }) => {
+  const errors = collectErrors(page);
+  // Crop Watch with k = 799 has no Random Event of any kind before day 72, so no day plays slower for an event
+  // while both speeds are measured (1x crosses about 12 days a second, 4x about 49).
+  await seedRuns(page, 799);
+  await launchCropWatch(page);
+  await page.waitForTimeout(200);
+  const slow = await sweep(page, 800);
+  await page.getByRole('button', { name: '4×' }).click();
+  await page.waitForTimeout(100);
+  const fast = await sweep(page, 400);
+  // The stretch measured was free of events: none has reached the log yet.
+  await expect(page.locator('.event-log')).toContainText('No Random Events yet.');
+  // Per second, about four times as fast (frame timing on a software renderer makes it rough).
+  const ratio = (fast / 400) / (slow / 800);
+  expect(ratio).toBeGreaterThan(2.5);
+  expect(ratio).toBeLessThan(6);
+  expect(errors).toEqual([]);
+});
+
 test('a new Random Event asks its question, and the event log shows the answer with its Unexplained mark', async ({ page }) => {
   const errors = collectErrors(page);
   await seedRuns(page, 19);

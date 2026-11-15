@@ -36,17 +36,11 @@ fn texts(e: &EventSpec) -> Vec<&str> {
     out
 }
 
+/// The loader already rejects real countries and agencies (see the next test); the joke needs its rival to be
+/// "a rival agency".
 #[test]
-fn no_event_text_names_a_real_country_or_agency_and_the_rival_is_a_rival_agency() {
+fn the_rival_is_a_rival_agency() {
     let c = load_catalog().unwrap();
-    let deny = ["NASA", "ESA", "Russia", "China", "America", "Japan", "India", "Brazil", "Angola", "Soviet"];
-    for e in &c.events {
-        for text in texts(e) {
-            for name in deny {
-                assert!(!text.contains(name), "{}: names {name}: {text}", e.id);
-            }
-        }
-    }
     let rival: Vec<&str> = c.events.iter().flat_map(texts).filter(|t| t.contains("rival")).collect();
     assert!(!rival.is_empty());
     assert!(rival.iter().any(|t| t.contains("rival agency")), "{rival:?}");
