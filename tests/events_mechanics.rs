@@ -301,3 +301,109 @@ fn no_new_mechanic_fails_a_component_or_ends_the_run() {
         }
     }
 }
+
+// ---- every shipped event changes the Run
+
+/// Every way a shipped event can play out, as a passive event of its own: its effects (or those of an option, or of
+/// a gamble's bad outcome), with an option's price as money spent. The mitigation is left out, so this is the event
+/// on a Design without the choice that softens it.
+fn outcomes(e: &EventSpec) -> Vec<(String, EventSpec)> {
+    let passive = |name: String, mut effects: Vec<EffectSpec>, cost: f64| {
+        if cost > 0.0 {
+            effects.push(EffectSpec {
+                mechanic: Mechanic::Budget,
+                strength: -cost,
+                days: None,
+                to_end: false,
+                delay: 0,
+                when: None,
+                label: None,
+            });
+        }
+        let spec = EventSpec { log: "x".to_string(), effects, question: None, mitigation: None, ..e.clone() };
+        (name, spec)
+    };
+    let mut out = Vec::new();
+    match &e.question {
+        None => out.push(passive(e.id.clone(), e.effects.clone(), 0.0)),
+        Some(q) => {
+            for o in &q.options {
+                out.push(passive(format!("{} / {}", e.id, o.id), o.effects.clone(), o.cost_usd));
+                if let Some(bad) = &o.bad {
+                    out.push(passive(format!("{} / {} (bad)", e.id, o.id), bad.effects.clone(), o.cost_usd));
+                }
+            }
+        }
+    }
+    out.retain(|(_, spec)| !spec.effects.is_empty());
+    out
+}
+
+fn crop_watch_with_basic_parts() -> Design {
+    let basic = |p: Option<Pick>| p.map(|p| Pick::new(&p.id, ReliabilityTier::Basic));
+    let d = crop_watch_known_good();
+    Design { solar: basic(d.solar.clone()), battery: basic(d.battery.clone()), attitude: basic(d.attitude.clone()), comms: basic(d.comms.clone()), ..d }
+}
+
+/// What a player can see of a Run, without the event log itself.
+fn seen(r: &RunResult) -> (Vec<DaySnapshot>, f64, f64, f64) {
+    let days = r.timeline.iter().map(|t| DaySnapshot { events: Vec::new(), ..t.clone() }).collect();
+    let s = &r.debrief.stats;
+    (days, s.science_value, s.total_cost_usd, r.debrief.score.total)
+}
+
+#[test]
+fn every_shipped_event_flown_alone_changes_the_run_on_a_design_it_can_meet() {
+    let shipped = load_catalog().unwrap();
+    let uhf = Design {
+        comms: Some(Pick::new("comms-uhf", ReliabilityTier::FlightProven)),
+        ..space_weather_sentinel_known_good()
+    };
+    let designs = [
+        (CROP_WATCH, crop_watch_known_good()),
+        (SPACE_WEATHER_SENTINEL, space_weather_sentinel_known_good()),
+        (CONNECT_THE_VILLAGES, connect_the_villages_known_good()),
+        (SPACE_WEATHER_SENTINEL, uhf),
+    ];
+    // Basic parts fail now and then, so a lower failure chance has failures to prevent.
+    let basic = [(CROP_WATCH, Design { computer_tier: ReliabilityTier::Basic, ..crop_watch_with_basic_parts() })];
+    let off = legacy_catalog();
+    let mut failures = Vec::new();
+    for e in &shipped.events {
+        let ways = outcomes(e);
+        assert!(!ways.is_empty(), "{}: no outcome does anything", e.id);
+        for (name, spec) in ways {
+            let mut c = with_new_events(load_catalog().unwrap(), 1, 1);
+            c.events = vec![spec.clone()];
+            // A lower failure chance changes a Run only when a failure was due: it must save some of 200 Runs.
+            // Any other outcome changes nearly every Run; one that falls on a day a flare or an outage already
+            // stopped the same thing may change nothing.
+            let failure_only = spec.effects.iter().all(|f| f.mechanic == Mechanic::FailureChance);
+            let (flown, seeds) = if failure_only { (&basic[..], 200) } else { (&designs[..], 20) };
+            let mut met = false;
+            for (scenario, design) in flown {
+                assert!(launch_review(&c, design, scenario).can_launch, "{scenario}");
+                let (mut fired, mut changed) = (0, 0);
+                for seed in 0..seeds {
+                    let with = run(&c, design, scenario, seed);
+                    if !with.timeline.iter().flat_map(|t| &t.events).any(|e| e.kind == EventKind::Catalog) {
+                        continue;
+                    }
+                    fired += 1;
+                    changed += usize::from(seen(&with) != seen(&run(&off, design, scenario, seed)));
+                }
+                if fired == 0 {
+                    continue;
+                }
+                met = true;
+                let enough = if failure_only { changed >= 1 } else { changed * 5 >= fired * 4 };
+                if !enough {
+                    failures.push(format!("{name} in {scenario}: changed {changed} of {fired} Runs"));
+                }
+                break;
+            }
+            assert!(met, "{name}: no test Design meets its condition");
+        }
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+}

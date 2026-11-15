@@ -462,8 +462,11 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
     let degraded = ctx.rules.degraded_output_fraction;
     let failed = s.failed;
     let output = |i: usize| if failed[i] { degraded } else { 1.0 };
-    let generation_w = ctx.generation_w * output(SOLAR) * m.power;
-    let power_ratio = if ctx.consumption_w > 0.0 { (generation_w / ctx.consumption_w).min(1.0) } else { 1.0 };
+    let generation_w = ctx.generation_w * output(SOLAR);
+    // An event's Power loss (`m.power` is never above 1) is a share of what the Design gets, applied after the
+    // margin: a Design with spare Power loses operating time too, not only one already short of it.
+    let power_ratio =
+        if ctx.consumption_w > 0.0 { (generation_w / ctx.consumption_w).min(1.0) } else { 1.0 } * m.power;
     // An event's lower capacity is for today only; it never wears the battery.
     let capacity_wh = s.battery_capacity_wh * output(BATTERY) * m.battery_capacity;
     // Share of each eclipse the battery carries; the Instruments are off for the rest of it.
@@ -509,8 +512,11 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
     s.stored_value += produced_value;
 
     let ground_up = (s.outage_days_left == 0 || s.station_bought) && !s.ended;
-    let downlink_mb = if ground_up { ctx.downlink_mb_per_day * output(COMMS) * m.downlink } else { 0.0 };
-    let sent = take(s, downlink_mb.min(s.stored_mb));
+    let downlink_mb = if ground_up { ctx.downlink_mb_per_day * output(COMMS) } else { 0.0 };
+    // An event's downlink loss is a share of the passes: that share of what would have come down today waits on
+    // board, whatever the link's margin. A gain is extra capacity, so it helps only Data already waiting.
+    let sendable = if m.downlink < 1.0 { downlink_mb.min(s.stored_mb) * m.downlink } else { (downlink_mb * m.downlink).min(s.stored_mb) };
+    let sent = take(s, sendable);
     s.delivered_mb += sent.0;
     s.science_value += sent.1;
 

@@ -103,6 +103,12 @@ fn a_share_stays_within_minus_one_and_one() {
 }
 
 #[test]
+fn a_power_effect_may_only_lower_the_power() {
+    let msg = error(&GOOD.replace("{ mechanic = \"instruments-off\", days = 2 }", "{ mechanic = \"power\", strength = 0.03, to_end = true }"));
+    assert!(msg.contains("test-event") && msg.contains("power"), "{msg}");
+}
+
+#[test]
 fn a_real_event_needs_a_real_life_line_and_a_fantasy_event_has_none() {
     let msg = error(&GOOD.replace("real_life = \"It happens.\"", ""));
     assert!(msg.contains("test-event") && msg.contains("real_life"), "{msg}");

@@ -21,7 +21,7 @@ fn event_toml(scene: &str, model: Option<&str>, id: &str) -> String {
     let model = model.map(|m| format!("model = \"{m}\"\n")).unwrap_or_default();
     format!(
         "[[events]]\nid = \"{id}\"\ngroup = \"lucky\"\ntitle = \"Test {id}\"\nlog = \"Something happened ({id}).\"\n\
-         scene = \"{scene}\"\n{model}effects = [{{ mechanic = \"power\", strength = 0.01, days = 3 }}]\n\n"
+         scene = \"{scene}\"\n{model}effects = [{{ mechanic = \"power\", strength = -0.01, days = 3 }}]\n\n"
     )
 }
 
@@ -215,7 +215,7 @@ fn a_skip_over_an_event_plays_no_cue_for_it() {
 fn model_entry(scene: &str, model: &str) -> String {
     format!(
         "[[events]]\nid = \"t-model\"\ngroup = \"lucky\"\ntitle = \"T\"\nlog = \"Something.\"\nscene = \"{scene}\"\n\
-         model = \"{model}\"\neffects = [{{ mechanic = \"power\", strength = 0.01, days = 3 }}]\n"
+         model = \"{model}\"\neffects = [{{ mechanic = \"power\", strength = -0.01, days = 3 }}]\n"
     )
 }
 

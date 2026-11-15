@@ -259,6 +259,7 @@ fn new_events_move_science_value_by_about_a_tenth_at_most_and_leave_success_to_t
     let on = load_catalog().unwrap();
     let off = legacy_catalog();
     const SEEDS: u64 = 200;
+    let mut over = Vec::new();
     for (scenario, design) in references(&on) {
         let (mut wins_on, mut wins_off, mut wins_against) = (0, 0, 0);
         let (mut sum, mut sum_against, mut worst) = (0.0, 0.0, 0.0f64);
@@ -271,7 +272,9 @@ fn new_events_move_science_value_by_about_a_tenth_at_most_and_leave_success_to_t
             sum += shift;
             sum_against += against.debrief.stats.science_value / base - 1.0;
             worst = if shift.abs() > worst.abs() { shift } else { worst };
-            assert!(shift.abs() <= 0.10, "{scenario} seed {seed}: new events moved Science Value by {:+.1}%", shift * 100.0);
+            if shift.abs() > 0.10 {
+                over.push(format!("{scenario} seed {seed}: new events moved Science Value by {:+.1}%", shift * 100.0));
+            }
             wins_off += usize::from(before.debrief.success);
             wins_on += usize::from(r.debrief.success);
             wins_against += usize::from(against.debrief.success);
@@ -290,4 +293,5 @@ fn new_events_move_science_value_by_about_a_tenth_at_most_and_leave_success_to_t
             assert!(wins.abs_diff(wins_off) * 20 <= SEEDS as usize, "{scenario}: success {wins} with new events, {wins_off} without");
         }
     }
+    assert!(over.is_empty(), "{}", over.join("\n"));
 }

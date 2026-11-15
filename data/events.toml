@@ -381,9 +381,9 @@ effects = [{ mechanic = "power", strength = -0.3, days = 3 }]
 id = "aliens-borrow-the-satellite"
 group = "fantasy"
 title = "Aliens borrow the satellite for experiments"
-log = "Aliens borrowed the satellite for experiments: Instruments off for 2 days. They returned it with washed panels: 2% more Power from then on."
+log = "Aliens borrowed the satellite for experiments: Instruments off for 2 days. They returned it with polished lenses and sensors: 2% more Data from then on."
 scene = "visitor"
-effects = [{ mechanic = "instruments-off", days = 2 }, { mechanic = "power", strength = 0.02, to_end = true, delay = 2 }]
+effects = [{ mechanic = "instruments-off", days = 2 }, { mechanic = "data", strength = 0.02, to_end = true, delay = 2 }]
 
 [[events]]
 id = "witch-on-a-broom"
@@ -414,19 +414,19 @@ effects = [{ mechanic = "budget", strength = 80000.0 }]
 id = "neighbouring-station-gives-away-passes"
 group = "lucky"
 title = "A neighbouring station gives away passes"
-log = "A neighbouring ground station had free time and gave away its passes: 50% more downlink for 5 days."
+log = "A neighbouring ground station had free time and gave away its passes. The operators used them to bring down old calibration Data: a bonus of 1% of the Science Value the Mission needs."
 scene = "link-interference"
 real_life = "Ground stations around the world share spare time, and a mission with an idle neighbour can borrow extra contact time."
-effects = [{ mechanic = "downlink", strength = 0.5, days = 5 }]
+effects = [{ mechanic = "science-bonus", strength = 0.01 }]
 
 [[events]]
 id = "programmers-compress-data-better"
 group = "lucky"
 title = "The programmers compress Data better"
-log = "The programmers found a better way to compress the Data: 5% more downlink from then on."
+log = "The programmers found a better way to compress the Data, so the Instruments can keep more of what they see: 5% more Data from then on."
 scene = "bonus-glow"
 real_life = "Flight software is often improved in orbit; a better compression routine sends more science through the same radio link."
-effects = [{ mechanic = "downlink", strength = 0.05, to_end = true }]
+effects = [{ mechanic = "data", strength = 0.05, to_end = true }]
 
 [[events]]
 id = "quiet-sun"
@@ -441,10 +441,10 @@ effects = [{ mechanic = "failure-chance", strength = -0.5, days = 30 }]
 id = "panels-beat-the-estimate"
 group = "lucky"
 title = "The panels beat the estimate"
-log = "The panels turned out to make 3% more Power than the datasheet promised, for the rest of the Mission."
+log = "The panels turned out to make more Power than the datasheet promised, so the Instruments can run a little longer each orbit: 3% more Data for the rest of the Mission."
 scene = "bonus-glow"
 real_life = "Datasheets are conservative; real solar cells often beat their rated output early in life."
-effects = [{ mechanic = "power", strength = 0.03, to_end = true }]
+effects = [{ mechanic = "data", strength = 0.03, to_end = true }]
 
 # ==== 06: the rescue bonus ====================================================
 # Helping costs planned science and pays its own Score line, never Science Value.
@@ -756,11 +756,11 @@ bad = { log = "The dragon was not impressed and scratched a panel. The spacecraf
 id = "micrometeoroid-through-a-panel"
 group = "real"
 title = "A micrometeoroid went through a panel"
-log = "A grain of space dust the size of a sand speck punched through a solar panel: 5% less Power for the rest of the Mission."
+log = "A grain of space dust the size of a sand speck punched through a solar panel: 3% less Power for the rest of the Mission."
 scene = "hit"
 real_life = "Space is full of tiny fast particles, and spacecraft panels collect small pits and holes from them over the years. Large wings catch more of them."
 more_likely = { fact = "deployable-panels", weight = 2 }
-effects = [{ mechanic = "power", strength = -0.05, to_end = true }]
+effects = [{ mechanic = "power", strength = -0.03, to_end = true }]
 
 [[events]]
 id = "bit-flipped-by-a-cosmic-ray"
@@ -847,20 +847,20 @@ bad = { log = "The shaking did not free the wing and the spacecraft wobbled: poi
 [[events.question.options]]
 id = "leave"
 label = "Leave it"
-consequence = "Free, but the panel gives 10% less Power for the rest of the Mission."
-log = "The wing was left half open: 10% less Power for the rest of the Mission."
+consequence = "Free, but the panel gives 5% less Power for the rest of the Mission."
+log = "The wing was left half open: 5% less Power for the rest of the Mission."
 note = "the wing stayed half open"
-effects = [{ mechanic = "power", strength = -0.1, to_end = true }]
+effects = [{ mechanic = "power", strength = -0.05, to_end = true }]
 
 [[events]]
 id = "storage-full-of-debug-logs"
 group = "real"
 title = "Storage full of debug logs"
-log = "The flight software wrote debug logs into the Data storage until it was half full: half the room for Data for 2 days."
+log = "The flight software wrote debug logs into the Data storage until only half of each day's Data had room: half the Data lost for 2 days."
 scene = "link-interference"
 real_life = "Debug logging left switched on has filled the storage of real spacecraft; a computer with more headroom would not notice."
 mitigation = { fact = "computer-flight-proven", scale = 0.0, log = "The flight software wrote debug logs into the Data storage. The Flight-proven computer cleaned them up on its own and nothing was lost." }
-effects = [{ mechanic = "storage", strength = -0.5, days = 2 }]
+effects = [{ mechanic = "data", strength = -0.5, days = 2 }]
 
 [[events]]
 id = "a-reaction-wheel-starts-to-vibrate"

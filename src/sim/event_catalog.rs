@@ -275,6 +275,11 @@ pub(crate) fn validate_effect(effect: &EffectSpec) -> Result<(), String> {
     if effect.mechanic.is_share() && !(-1.0..=1.0).contains(&effect.strength) {
         return Err(format!("'{name}' strength {} is a share and must lie in -1.0..=1.0", effect.strength));
     }
+    if effect.mechanic == Mechanic::Power && effect.strength > 0.0 {
+        return Err(format!(
+            "'{name}' may only lower the Power: a Design with spare Power could not use a gain (give more Data instead)"
+        ));
+    }
     if effect.mechanic == Mechanic::FailureChance && effect.strength > 0.0 {
         return Err(format!("'{name}' may only lower the failure chance, so no new event ends the Mission"));
     }
