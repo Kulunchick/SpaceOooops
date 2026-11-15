@@ -41,3 +41,23 @@ fn every_option_explains_itself() {
         .collect();
     assert!(whys.iter().all(|w| !w.trim().is_empty()));
 }
+
+#[test]
+fn a_missing_coverage_number_is_rejected_naming_the_scenario_and_the_orbit() {
+    let mut catalog = load_catalog().unwrap();
+    let scenario = catalog.scenarios[1].id.clone();
+    let orbit = catalog.orbits[0].id.clone();
+    catalog.orbits[0].coverage.remove(&scenario);
+    let message = spaceooops::sim::validate_catalog(&catalog).unwrap_err().to_string();
+    assert!(message.contains(&scenario) && message.contains(&orbit), "{message}");
+}
+
+#[test]
+fn a_missing_fit_number_is_rejected_naming_the_scenario_and_the_instrument() {
+    let mut catalog = load_catalog().unwrap();
+    let scenario = catalog.scenarios[2].id.clone();
+    let instrument = catalog.instruments[0].id.clone();
+    catalog.instruments[0].fit.remove(&scenario);
+    let message = spaceooops::sim::validate_catalog(&catalog).unwrap_err().to_string();
+    assert!(message.contains(&scenario) && message.contains(&instrument), "{message}");
+}

@@ -632,11 +632,12 @@ pub fn load_catalog() -> Result<Catalog, CatalogError> {
         objectives_preview_seed: objectives.preview_seed,
         events,
     };
-    validate(&catalog)?;
+    validate_catalog(&catalog)?;
     Ok(catalog)
 }
 
-fn validate(c: &Catalog) -> Result<(), CatalogError> {
+/// Checks the catalog is consistent: unique ids, no dangling references, no missing coverage or fit numbers.
+pub fn validate_catalog(c: &Catalog) -> Result<(), CatalogError> {
     let option_ids = c
         .structures.iter().map(|o| &o.id)
         .chain(c.solar_panels.iter().map(|o| &o.id))
@@ -663,6 +664,19 @@ fn validate(c: &Catalog) -> Result<(), CatalogError> {
     for orbit in &c.orbits {
         if let Some(key) = orbit.coverage.keys().find(|k| !scenario_ids.contains(k.as_str())) {
             return Err(CatalogError::Invalid(format!("orbit '{}' has coverage for unknown scenario '{key}'", orbit.id)));
+        }
+    }
+    // A missing number would silently count as zero, so every Scenario needs one for every Orbit and Instrument.
+    for s in &c.scenarios {
+        for orbit in &c.orbits {
+            if !orbit.coverage.contains_key(&s.id) {
+                return Err(CatalogError::Invalid(format!("orbit '{}' has no coverage for scenario '{}'", orbit.id, s.id)));
+            }
+        }
+        for instrument in &c.instruments {
+            if !instrument.fit.contains_key(&s.id) {
+                return Err(CatalogError::Invalid(format!("instrument '{}' has no fit for scenario '{}'", instrument.id, s.id)));
+            }
         }
     }
     for lv in &c.launch_vehicles {
