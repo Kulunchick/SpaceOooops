@@ -332,9 +332,19 @@ fn validate_design(_e: &EventSpec) -> Result<(), String> {
 }
 
 /// Ticket 09: the model is a known name, and only with a fly-by or a visitor.
-fn validate_model(_e: &EventSpec) -> Result<(), String> {
+fn validate_model(e: &EventSpec) -> Result<(), String> {
+    let Some(model) = &e.model else { return Ok(()) };
+    if !STAR_MODELS.contains(&model.as_str()) {
+        return Err(format!("unknown model '{model}' (known models: {})", STAR_MODELS.join(", ")));
+    }
+    if !matches!(e.scene, SceneEffect::FlyBy | SceneEffect::Visitor) {
+        return Err("a model goes only with a fly-by or a visitor scene".to_string());
+    }
     Ok(())
 }
+
+/// The star models `js/bridge/star_models.js` can draw.
+pub const STAR_MODELS: [&str; 4] = ["ufo", "whale", "dragon", "inspector"];
 
 /// Ticket 07: the pool's size and split, the number of questions, the deny-list of names.
 fn validate_pool(_events: &[EventSpec]) -> Result<(), String> {
