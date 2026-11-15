@@ -33,8 +33,11 @@ The day-by-day simulated flight of a Design from launch to end of Lifetime, driv
 _Avoid_: Playthrough, sim
 
 **Random Event**:
-An unplanned occurrence during a Run (solar flare, component failure, ground station outage).
+An unplanned occurrence during a Run (solar flare, component failure, ground station outage). Beyond the built-in ones the catalog has three groups: real (it really happens to missions, and the Debrief says how), fantasy (it cannot happen; the event log marks it Unexplained) and lucky (good news, shown apart from bad news). Some ask the player a question. A Score bonus from one is its own Score line and never changes Science Value.
 _Avoid_: Incident, hazard
+
+**Unexplained**:
+The mark the event log gives a fantasy Random Event, one that has no real-life explanation.
 
 **Debrief**:
 The post-Run report: whether the Mission succeeded, why, and its Score.

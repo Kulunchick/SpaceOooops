@@ -3,7 +3,7 @@
 //! An instant mechanic comes back from the day as numbers (`DayOutcome`) the `step` adds.
 use super::design_facts::Facts;
 use super::event_catalog::{EffectSpec, EventSpec, Mechanic};
-use super::score::ScoreLine;
+use super::score::{ScoreLine, ScoreLineKind};
 
 /// Everything the new Random Events keep over the Run.
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -142,7 +142,11 @@ pub(crate) fn start(effect: &EffectSpec, day: u32, st: &mut EventState, out: &mu
             st.timed(&EffectSpec { strength: 1.0, days: Some(1), to_end: false, ..effect.clone() }, day)
         }
         // ---- 06
-        Mechanic::ScoreBonus => {}
+        Mechanic::ScoreBonus => st.score_lines.push(ScoreLine {
+            kind: ScoreLineKind::EventBonus,
+            label: effect.label.clone().unwrap_or_default(),
+            points: effect.strength,
+        }),
     }
 }
 
