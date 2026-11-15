@@ -4,12 +4,12 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The Scene Spec lists an effect for each new event on its days, with a stable id, the right start and length, and nothing outside its days
-- [ ] An effect lasts as long as its event's mechanic, cut at the end of the Run, and a pause freezes it
-- [ ] Each of the six kinds is drawn in the low-poly style with generic geometry and reads at phone size
-- [ ] Each kind plays its Cue once when its effect starts
-- [ ] With reduced motion no effect animates and playback does not slow for it; without WebGL the Run plays with text only
-- [ ] Both Graphics settings (Low and High) draw the effects
-- [ ] Playwright: the effects specs cover at least one new effect kind in the WebGL project and its absence in the fallback project
+- [x] The Scene Spec lists an effect for each new event on its days, with a stable id, the right start and length, and nothing outside its days
+- [x] An effect lasts as long as its event's mechanic, cut at the end of the Run, and a pause freezes it
+- [x] Each of the six kinds is drawn in the low-poly style with generic geometry and reads at phone size
+- [x] Each kind plays its Cue once when its effect starts
+- [x] With reduced motion no effect animates and playback does not slow for it; without WebGL the Run plays with text only
+- [x] Both Graphics settings (Low and High) draw the effects
+- [x] Playwright: the effects specs cover at least one new effect kind in the WebGL project and its absence in the fallback project

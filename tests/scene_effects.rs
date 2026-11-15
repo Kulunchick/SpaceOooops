@@ -224,6 +224,7 @@ fn cue_for(kind: EventKind) -> Cue {
         EventKind::GroundStationOutage => Cue::Outage,
         EventKind::ComponentFailure => Cue::Failure,
         EventKind::BatteryShortfall => Cue::BatteryShortfall,
+        // New Random Events are off in these tests; their Cues are in tests/scene_events.rs.
         EventKind::Catalog => unreachable!("new Random Events are off in these tests"),
     }
 }
