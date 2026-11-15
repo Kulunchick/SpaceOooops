@@ -44,6 +44,22 @@ export async function pressLaunch(page) {
   }
 }
 
+/**
+ * Crop Watch with the seed of k = 19 (see run.webgl.spec.js): on day 6 a dragon takes the satellite for something
+ * shiny, a fantasy new Random Event with a question. Answers it and checks the event log tells the answer, marked
+ * Unexplained.
+ */
+export async function answerTheDragon(page) {
+  const prompt = page.locator('.decision-prompt');
+  await expect(prompt).toContainText('A dragon is circling the spacecraft, attracted by the shine. Dim the lights?', { timeout: 20_000 });
+  await expect(prompt).toContainText('A gamble: about 7 in 10 it goes well.');
+  await page.getByRole('button', { name: /Dim the lights/ }).click();
+  const entry = page.locator('.event-log li.event-fantasy').filter({ hasText: 'Day 6' });
+  await expect(entry).toContainText('The spacecraft dimmed its lights until the dragon lost interest. The Instruments were off for 2 days.');
+  await expect(entry.locator('.event-mark')).toHaveText('Unexplained');
+  await expect(prompt).toBeHidden();
+}
+
 /** Opens the share link, launches, skips through the Run (answering any decision) and opens the Debrief. */
 export async function flyCropWatch(page) {
   await page.goto(`./#share=${CROP_WATCH_SHARE}`);

@@ -161,6 +161,7 @@ pub(crate) fn causes(ctx: &DebriefContext) -> Vec<Cause> {
     problems.extend(poor_coverage(&f, rules));
     problems.extend(poor_fit(&f, rules));
     problems.extend(flares(&f));
+    problems.extend(new_events(&f));
     let floor = rules.min_impact_share * scenario.required_science_value;
     // A poor Orbit or Instrument fit that matters already explains a low best case; otherwise say how far even a
     // perfect Run of these Instruments falls short.
@@ -254,6 +255,9 @@ fn battery(f: &Facts) -> Option<Weighed> {
         (None, None) => format!("You already fly the biggest battery: {less_power}."),
     };
     let depth = need_wh / battery.capacity_wh;
+    // Deep or within the healthy depth as the player reads the two percentages: "drained 20% deep (a healthy
+    // battery stays under 20%)" would contradict itself.
+    let too_deep = pct(depth) != pct(healthy) && depth > healthy;
     let text = if need_wh > battery.capacity_wh {
         format!(
             "Your {} was too small: each orbit spends {minutes:.0} min in Earth's shadow, and getting through it takes \
@@ -262,7 +266,7 @@ fn battery(f: &Facts) -> Option<Weighed> {
             battery.name,
             pct(lost_share)
         )
-    } else if depth > healthy {
+    } else if too_deep {
         format!(
             "Your {} was drained {} deep in each of the {minutes:.0} min in Earth's shadow every orbit (a healthy \
              battery stays under {}), so it wore out fast. From day {first} it could no longer cover the eclipse, and \
@@ -614,6 +618,50 @@ fn flares(f: &Facts) -> Option<Weighed> {
         value(impact)
     );
     Some(weighed(CauseKind::RandomEvents, text, flare_days.first().copied(), impact))
+}
+
+/// The new Random Events (`data/events.toml`) that cost Science Value, named with their days. What one cost is
+/// estimated from the Run itself: how far the Science Value earned on its days (and two days after, when held-back
+/// Data comes down) fell below a typical day of this Run. Days in safe mode or short of battery are other causes'.
+fn new_events(f: &Facts) -> Option<Weighed> {
+    let timeline = f.ctx.timeline;
+    let gain = |i: usize| timeline[i].science_value - if i == 0 { 0.0 } else { timeline[i - 1].science_value };
+    let other_cause = |i: usize| f.safe_mode_days.contains(&timeline[i].day) || timeline[i].battery_state == GaugeState::Violated;
+    let mut typical: Vec<f64> = (0..timeline.len()).filter(|&i| !other_cause(i)).map(gain).collect();
+    typical.sort_by(f64::total_cmp);
+    let typical = *typical.get(typical.len() / 2)?;
+    let mut counted: BTreeSet<usize> = BTreeSet::new();
+    let mut named: Vec<(String, u32, f64)> = Vec::new();
+    for (i, day) in timeline.iter().enumerate() {
+        for e in day.events.iter().filter(|e| e.kind == EventKind::Catalog) {
+            let Some(event) = &e.catalog else { continue };
+            let window = (i..(i + event.scene_days as usize + 3).min(timeline.len())).filter(|&j| !other_cause(j));
+            let lost: f64 = window.filter(|&j| counted.insert(j)).map(|j| typical - gain(j)).sum();
+            if lost > 0.0 {
+                let title = f.catalog.events.iter().find(|s| s.id == event.id).map_or(event.id.clone(), |s| s.title.clone());
+                named.push((title, day.day, lost));
+            }
+        }
+    }
+    let impact: f64 = named.iter().map(|n| n.2).sum();
+    let first = named.first()?.1;
+    let names: Vec<String> = named.iter().map(|(title, day, _)| format!("{title} (day {day})")).collect();
+    let text = if named.len() == 1 {
+        format!(
+            "A Random Event cost about {} Science Value: {}. A margin above the required Science Value absorbs such \
+             surprises.",
+            value(impact),
+            names[0]
+        )
+    } else {
+        format!(
+            "Random Events cost about {} Science Value in all: {}. A margin above the required Science Value absorbs \
+             such surprises.",
+            value(impact),
+            list(&names)
+        )
+    };
+    Some(weighed(CauseKind::RandomEvents, text, Some(first), impact))
 }
 
 fn went_well(f: &Facts) -> Cause {

@@ -185,7 +185,7 @@ fn the_battery_cause_matches_the_discharge_and_suggests_a_bigger_battery() {
                 assert!(text.contains("Instruments"), "says what else to change: {text}");
             }
             if let Some(depth) = text.split("drained ").nth(1).and_then(|r| r.split('%').next()).and_then(|n| n.parse::<f64>().ok())
-                && depth < healthy {
+                && depth <= healthy {
                     assert!(!text.contains("wore out fast") && !text.contains("so it wore out"), "{text}");
                 }
         }

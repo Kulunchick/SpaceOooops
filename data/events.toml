@@ -455,6 +455,7 @@ id = "rescuers-ask-for-flood-images"
 group = "real"
 title = "Rescuers ask for flood images"
 scene = "bonus-glow"
+only = "camera"
 real_life = "After floods, rescue services ask satellite operators for fresh images, and operators often retask a spacecraft for a few days to help."
 
 [events.question]
@@ -836,7 +837,7 @@ default = "leave"
 [[events.question.options]]
 id = "shake"
 label = "Shake it with the reaction wheels"
-consequence = "Free. It probably opens, but if it does not, the spacecraft wobbles."
+consequence = "Free. If it opens, the panel gives full Power. If not, the spacecraft wobbles: pointing is 50% worse for 2 days."
 log = "The reaction wheels shook the wing and it clicked fully open."
 note = "the wing opened"
 effects = []

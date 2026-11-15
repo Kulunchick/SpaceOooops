@@ -389,9 +389,53 @@ fn validate_model(e: &EventSpec) -> Result<(), String> {
 /// The star models `js/bridge/star_models.js` can draw.
 pub const STAR_MODELS: [&str; 4] = ["ufo", "whale", "dragon", "inspector"];
 
-/// Ticket 07: the pool's size and split, the number of questions, the deny-list of names.
-fn validate_pool(_events: &[EventSpec]) -> Result<(), String> {
+/// Space agencies, matched as whole words.
+const DENIED_AGENCIES: [&str; 15] =
+    ["NASA", "ESA", "JAXA", "Roscosmos", "ISRO", "CNSA", "CNES", "DLR", "INPE", "CONAE", "KARI", "CSA", "UKSA", "SpaceX", "USSR"];
+/// Countries and their adjectives, matched as the start of a word ("Russia" also catches "Russian").
+const DENIED_COUNTRIES: [&str; 20] = [
+    "Russia", "Soviet", "China", "Chinese", "America", "USA", "Japan", "India", "Brazil", "Angola", "Argentin",
+    "France", "French", "German", "Israel", "Iran", "Korea", "Britain", "British", "Ukrain",
+];
+
+/// Ticket 07: no event text names a real country or agency (the game jokes about "a rival agency" only). The
+/// pool's size and split are pinned by the catalog tests, as a test catalog may hold a single event.
+fn validate_pool(events: &[EventSpec]) -> Result<(), String> {
+    for e in events {
+        for text in texts(e) {
+            for word in text.split(|c: char| !c.is_alphanumeric()).filter(|w| !w.is_empty()) {
+                let denied = DENIED_AGENCIES.contains(&word) || DENIED_COUNTRIES.iter().any(|c| word.starts_with(c));
+                if denied {
+                    return Err(format!(
+                        "event '{}' names '{word}': event texts name no real country or agency (say \"a rival agency\")",
+                        e.id
+                    ));
+                }
+            }
+        }
+    }
     Ok(())
+}
+
+/// Every player-facing text of an event.
+fn texts(e: &EventSpec) -> Vec<&str> {
+    let mut out = vec![e.title.as_str(), e.log.as_str()];
+    out.extend(e.real_life.as_deref());
+    out.extend(e.mitigation.as_ref().map(|m| m.log.as_str()));
+    let mut effects: Vec<&EffectSpec> = e.effects.iter().collect();
+    if let Some(q) = &e.question {
+        out.push(q.text.as_str());
+        for o in &q.options {
+            out.extend([o.label.as_str(), o.consequence.as_str(), o.log.as_str(), o.note.as_str()]);
+            effects.extend(&o.effects);
+            if let Some(b) = &o.bad {
+                out.extend([b.log.as_str(), b.note.as_str()]);
+                effects.extend(&b.effects);
+            }
+        }
+    }
+    out.extend(effects.into_iter().filter_map(|f| f.label.as_deref()));
+    out
 }
 
 fn is_kebab_case(id: &str) -> bool {

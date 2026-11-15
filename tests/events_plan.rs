@@ -56,7 +56,7 @@ fn with_new_events_off_a_run_is_as_before_them() {
 #[test]
 fn flares_outages_and_failures_fall_on_the_same_days_with_new_events_on() {
     let off = legacy_catalog();
-    let on = with_new_events(load_catalog().unwrap(), 3, 3);
+    let on = load_catalog().unwrap();
     let (mut failures, mut with_new) = (0, 0);
     for seed in 0..120 {
         let d = basic_design();
@@ -66,7 +66,7 @@ fn flares_outages_and_failures_fall_on_the_same_days_with_new_events_on() {
         with_new += usize::from(!new_events(&after).is_empty());
     }
     assert!(failures > 0, "the sweep sees Component failures");
-    assert!(with_new > 80, "only {with_new} of 120 Runs had new events");
+    assert!(with_new > 100, "only {with_new} of 120 Runs had new events");
 }
 
 #[test]
@@ -86,7 +86,7 @@ fn the_same_seed_gives_the_same_new_events_and_other_seeds_give_others() {
 
 #[test]
 fn a_run_gets_its_count_of_new_events_each_once_on_distinct_days_and_none_ends_the_mission() {
-    let on = with_new_events(load_catalog().unwrap(), 6, 8); // the shipped 2 to 3 are all questions (03), so passive events would not show
+    let on = load_catalog().unwrap();
     let off = legacy_catalog();
     let tuning = &on.scenario(CROP_WATCH).unwrap().events;
     let (min, max) = (tuning.new_events_min as usize, tuning.new_events_max as usize);
@@ -109,9 +109,10 @@ fn a_run_gets_its_count_of_new_events_each_once_on_distinct_days_and_none_ends_t
         assert!(r.timeline.len() >= before.timeline.len(), "seed {seed}");
         seen.extend(ids.into_iter().map(str::to_string));
     }
-    // Questions fill a Run first (up to 3 or 4), so while the Scenarios give 2 to 3 events and the pool has
-    // three or more questions, only those show up; ticket 07 raises the count and checks the whole pool.
-    assert!(seen.len() >= 3, "a sweep shows several different events: {seen:?}");
+    // This Design has every Design fact but a UHF radio, so only the UHF radio's events never show up.
+    let eligible: BTreeSet<String> =
+        on.events.iter().filter(|e| e.only != Some(DesignFact::UhfRadio)).map(|e| e.id.clone()).collect();
+    assert_eq!(seen, eligible, "every event this Design can meet shows up in a sweep");
 }
 
 #[test]

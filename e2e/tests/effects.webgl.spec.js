@@ -81,7 +81,7 @@ test('a solar flare sends a wave from the Sun to the spacecraft, and safe mode f
 
 test('a ground station outage turns the main beacon dark until contact returns', async ({ page }) => {
   const errors = collectErrors(page);
-  // Crop Watch, k = 10: the ground station goes offline on day 8.
+  // Crop Watch, k = 10: the ground station goes offline on day 8 (a passive new event on day 4 comes before it).
   await seedRuns(page, 10);
   await launch(page);
   await expect(page.locator('.decision-prompt')).toBeVisible({ timeout: 20_000 });
@@ -89,8 +89,7 @@ test('a ground station outage turns the main beacon dark until contact returns',
   await page.getByRole('button', { name: /Wait it out/ }).click();
   await expect(canvas(page)).toHaveAttribute('data-stations', 'primary:dark backup:on');
   await hold(page, true);
-  // A new Random Event can start on the same day (k = 10: link interference on day 8), and its Cue comes second.
-  await expect(page.locator('html')).toHaveAttribute('data-audio-last-cue', /^(outage|interference)$/);
+  await expect(page.locator('html')).toHaveAttribute('data-audio-last-cue', 'outage');
   // No Data comes down while waiting, so no beam.
   expect(await attr(page, 'data-contact')).toBe('');
   await shot(page, 'outage');
@@ -101,7 +100,8 @@ test('a ground station outage turns the main beacon dark until contact returns',
 
 test('ground contact passes show as a beam between the spacecraft and the station', async ({ page }) => {
   const errors = collectErrors(page);
-  await seedRuns(page, 34);
+  // Crop Watch, k = 3052: no question before day 203.
+  await seedRuns(page, 3052);
   await launch(page);
   await expect(canvas(page)).toHaveAttribute('data-contact', 'primary', { timeout: 60_000 });
   await hold(page, true);
@@ -113,7 +113,8 @@ test('ground contact passes show as a beam between the spacecraft and the statio
 
 test('a failed Component sparks and goes dark on the model, and a skip leaves no effect behind', async ({ page }) => {
   const errors = collectErrors(page);
-  // All-Basic Crop Watch, k = 10: an outage on day 8, then the deployable panels fail on day 39 and end the Mission.
+  // All-Basic Crop Watch, k = 10: an outage on day 8, then the deployable panels fail on day 39 and end the Mission
+  // (no new event asks a question before then).
   await seedRuns(page, 10);
   await launch(page, BASIC_SHARE);
   await expect(page.locator('.decision-prompt')).toBeVisible({ timeout: 20_000 });
@@ -139,10 +140,10 @@ test('a failed Component sparks and goes dark on the model, and a skip leaves no
 
 test('a new Random Event shows as a link-interference effect with its Cue, and is gone after its day', async ({ page }) => {
   const errors = collectErrors(page);
-  // Crop Watch, k = 50: link-interference events on days 113, 217 and 355, no question to wait for.
-  await seedRuns(page, 50);
+  // Crop Watch, k = 42: the first new event is a link interference on day 45 (the control-room key went on
+  // holiday), with no question before it.
+  await seedRuns(page, 42);
   await launch(page);
-  await page.getByRole('button', { name: '4×' }).click();
   await expect(canvas(page)).toHaveAttribute('data-effects', /linkInterference/, { timeout: 40_000 });
   await hold(page, true);
   await page.waitForTimeout(200);
@@ -156,21 +157,31 @@ test('a new Random Event shows as a link-interference effect with its Cue, and i
   await hold(page, false);
   await expect(canvas(page)).not.toHaveAttribute('data-effects', /linkInterference/, { timeout: 10_000 });
   expect(await attr(page, 'data-event-fx')).toBe('');
+  await expect(page.locator('.event-log')).toContainText('The only key to the control room went on holiday');
   expect(errors).toEqual([]);
 });
 
-test('a fly-by is drawn beside the spacecraft and plays its Cue', async ({ page }) => {
-  const errors = collectErrors(page);
-  // Crop Watch, k = 11: a fly-by on day 192 (two days long).
-  await seedRuns(page, 11);
-  await launch(page);
-  await page.getByRole('button', { name: '4×' }).click();
-  await expect(canvas(page)).toHaveAttribute('data-effects', /flyBy/, { timeout: 40_000 });
-  await hold(page, true);
-  await page.waitForTimeout(200);
-  expect(await attr(page, 'data-event-fx')).toMatch(/flyBy:/);
-  await shot(page, 'fly-by');
-  await expect(page.locator('html')).toHaveAttribute('data-audio-last-cue', 'fly-by');
-  await hold(page, false);
-  expect(errors).toEqual([]);
-});
+// Each new scene effect kind on a seed whose Run reaches it before any question (Crop Watch's known-good Design).
+const KINDS = [
+  { kind: 'flyBy', cue: 'fly-by', k: 42, what: 'the debris of an anti-satellite test flies by on day 89' },
+  { kind: 'panelShading', cue: 'shading', k: 6, what: 'the spacecraft is scared of its own shadow on day 34' },
+  { kind: 'bonusGlow', cue: 'bonus', k: 48, what: 'a rare sight lands in frame on day 22' },
+  { kind: 'visitor', cue: 'visitor', k: 133, what: 'aliens borrow the satellite on day 38' },
+  { kind: 'hit', cue: 'hit', k: 14, what: 'a static discharge hits the hull on day 8' },
+];
+
+for (const { kind, cue, k, what } of KINDS) {
+  test(`a ${kind} effect is drawn at the spacecraft and plays its Cue (${what})`, async ({ page }) => {
+    const errors = collectErrors(page);
+    await seedRuns(page, k);
+    await launch(page);
+    await expect(canvas(page)).toHaveAttribute('data-effects', new RegExp(kind), { timeout: 40_000 });
+    await hold(page, true);
+    await page.waitForTimeout(200);
+    expect(await attr(page, 'data-event-fx')).toMatch(new RegExp(`(^| )${kind}:`));
+    await shot(page, kind);
+    await expect(page.locator('html')).toHaveAttribute('data-audio-last-cue', cue);
+    await hold(page, false);
+    expect(errors).toEqual([]);
+  });
+}
