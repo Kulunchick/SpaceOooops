@@ -125,8 +125,7 @@ fn outcome(o: &OptionSpec, roll: f64) -> (String, Vec<EffectSpec>, bool) {
     (o.log.clone(), o.effects.clone(), true)
 }
 
-/// Ticket 05: the event's mitigation when its Design fact holds.
-#[allow(unused_variables)]
+/// The event's mitigation when its Design fact holds.
 fn mitigated<'a>(spec: &'a EventSpec, facts: &Facts) -> Option<&'a Mitigation> {
-    None
+    spec.mitigation.as_ref().filter(|m| facts.contains(&m.fact))
 }

@@ -109,7 +109,9 @@ fn a_run_gets_its_count_of_new_events_each_once_on_distinct_days_and_none_ends_t
         assert!(r.timeline.len() >= before.timeline.len(), "seed {seed}");
         seen.extend(ids.into_iter().map(str::to_string));
     }
-    assert_eq!(seen.len(), on.events.len(), "every event shows up in a sweep");
+    // Questions fill a Run first (up to 3 or 4), so while the Scenarios give 2 to 3 events and the pool has
+    // three or more questions, only those show up; ticket 07 raises the count and checks the whole pool.
+    assert!(seen.len() >= 3, "a sweep shows several different events: {seen:?}");
 }
 
 #[test]
@@ -123,9 +125,16 @@ fn a_new_event_carries_its_catalog_id_group_and_scene_and_logs_its_text() {
         let spec = c.events.iter().find(|s| s.id == catalog.id).expect("a catalog id");
         assert_eq!(catalog.group, spec.group);
         assert_eq!(catalog.scene, spec.scene);
-        assert_eq!(e.text, spec.log);
+        match (&spec.question, &spec.mitigation) {
+            (Some(_), _) => {}
+            (None, Some(m)) if catalog.softened => assert_eq!(e.text, m.log),
+            _ => assert_eq!(e.text, spec.log),
+        }
         assert!((1..=5).contains(&catalog.scene_days));
-        assert!(e.prompt.is_none() && e.choice.is_none() && e.component.is_none());
+        assert!(e.component.is_none());
+        if spec.question.is_none() {
+            assert!(e.prompt.is_none() && e.choice.is_none());
+        }
     }
 }
 

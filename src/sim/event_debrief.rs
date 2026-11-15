@@ -15,9 +15,23 @@ pub(crate) fn real_life_lines(pool: &EventState) -> Vec<String> {
     Vec::new()
 }
 
-/// Ticket 05: one line per fired event with an `only` condition, a `more_likely` whose fact held, or a
-/// mitigation: which choice caused or softened it (`DesignFact::phrase`).
-#[allow(unused_variables)]
+/// One line per fired event with an `only` condition, a `more_likely` whose fact held, or a mitigation that
+/// applied: which Design choice caused or softened it.
 pub(crate) fn design_notes(pool: &EventState) -> Vec<String> {
-    Vec::new()
+    pool.fired
+        .iter()
+        .filter_map(|f| {
+            let mut parts = Vec::new();
+            if let Some(fact) = f.spec.only {
+                parts.push(format!("it could only happen with {}", fact.phrase()));
+            }
+            if let Some(m) = f.spec.more_likely.as_ref().filter(|m| pool.facts.contains(&m.fact)) {
+                parts.push(format!("it was more likely with {}", m.fact.phrase()));
+            }
+            if let Some(m) = f.spec.mitigation.as_ref().filter(|_| f.softened) {
+                parts.push(format!("it was softened by {}", m.fact.phrase()));
+            }
+            (!parts.is_empty()).then(|| format!("Day {}, {}: {}.", f.day, f.spec.title, parts.join(", and ")))
+        })
+        .collect()
 }

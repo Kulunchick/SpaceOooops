@@ -4,11 +4,11 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Conditions and mitigations are data in the catalog file, from a closed set of Design facts; catalog tests reject an unknown fact
-- [ ] Across a sweep of seeds an event never appears in a Run whose Design does not meet its condition
-- [ ] A "more likely" condition raises how often the event is planned, shown over a sweep of seeds
-- [ ] A mitigated event still appears in the log, with text saying the choice softened it, and its effect is reduced or zero
-- [ ] The Debrief names the Design choice behind each conditioned or mitigated event that happened
-- [ ] A Run still gets its planned number of events when conditions shrink the eligible pool, or as many as are eligible
+- [x] Conditions and mitigations are data in the catalog file, from a closed set of Design facts; catalog tests reject an unknown fact
+- [x] Across a sweep of seeds an event never appears in a Run whose Design does not meet its condition
+- [x] A "more likely" condition raises how often the event is planned, shown over a sweep of seeds
+- [x] A mitigated event still appears in the log, with text saying the choice softened it, and its effect is reduced or zero
+- [x] The Debrief names the Design choice behind each conditioned or mitigated event that happened
+- [x] A Run still gets its planned number of events when conditions shrink the eligible pool, or as many as are eligible

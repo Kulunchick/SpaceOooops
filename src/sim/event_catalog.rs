@@ -291,8 +291,28 @@ fn validate_gamble(_e: &EventSpec) -> Result<(), String> {
     Ok(())
 }
 
-/// Ticket 05: weight 2..=4, scale in 0..1, scale 0 when the event has `instruments-off`.
-fn validate_design(_e: &EventSpec) -> Result<(), String> {
+/// Weight 2..=4, scale in 0..1, scale 0 when the event has `instruments-off` (it cannot be scaled).
+fn validate_design(e: &EventSpec) -> Result<(), String> {
+    if let Some(m) = &e.more_likely
+        && !(2..=4).contains(&m.weight)
+    {
+        return Err(format!("more_likely weight {} must be 2 to 4", m.weight));
+    }
+    if let Some(m) = &e.mitigation {
+        if !(0.0..1.0).contains(&m.scale) {
+            return Err(format!("mitigation scale {} must lie in 0 up to (not including) 1", m.scale));
+        }
+        if m.log.trim().is_empty() {
+            return Err("a mitigation needs log text".to_string());
+        }
+        let options = e.question.iter().flat_map(|q| &q.options);
+        let all = e.effects.iter().chain(options.clone().flat_map(|o| &o.effects)).chain(
+            options.filter_map(|o| o.bad.as_ref()).flat_map(|b| &b.effects),
+        );
+        if m.scale != 0.0 && all.into_iter().any(|f| f.mechanic == Mechanic::InstrumentsOff) {
+            return Err("a mitigation of an event with instruments-off must have scale = 0.0, as Instruments off cannot be scaled".to_string());
+        }
+    }
     Ok(())
 }
 
