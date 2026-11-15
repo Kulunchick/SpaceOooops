@@ -45,7 +45,7 @@ Review fixes (branch `review-fixes`): every event must change the Run (story 17)
   waits on board whatever the link's margin; a downlink gain is extra capacity and helps only Data already waiting.
 - **G5, The panels beat the estimate**: +3% Power to the end became 3% more Data to the end (the spare Power lets the
   Instruments run longer).
-- **F4, Aliens borrow the satellite**: +2% Power from day 3 became 2% more Data from day 3 (polished lenses and sensors).
+- **F4, Aliens borrow the satellite**: +2% Power from day 3 became 2% more Data from day 3 (polished sensors).
 - **G2, A neighbouring station gives away passes**: +50% downlink for 5 days did nothing for a Design whose link
   already carries all its Data; it is now a Science Value bonus of 1% (old calibration Data brought down).
 - **G3, The programmers compress Data better**: +5% downlink to the end became 5% more Data to the end.

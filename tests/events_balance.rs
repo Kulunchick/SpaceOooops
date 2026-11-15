@@ -68,6 +68,20 @@ fn an_event_naming_a_real_agency_or_country_fails_to_load() {
 }
 
 #[test]
+fn an_event_that_can_happen_without_a_camera_does_not_talk_about_one() {
+    let c = load_catalog().unwrap();
+    for e in c.events.iter().filter(|e| e.only != Some(DesignFact::Camera)) {
+        // The real-life line is about spacecraft in general, not this one.
+        let real_life = e.real_life.as_deref();
+        for text in texts(e).into_iter().filter(|t| Some(*t) != real_life) {
+            let lower = text.to_lowercase();
+            let camera = ["camera", "lens", "photo shoot", "shooting"].iter().any(|w| lower.contains(w));
+            assert!(!camera || lower.contains("with a camera aboard"), "{}: {text}", e.id);
+        }
+    }
+}
+
+#[test]
 fn the_bonus_glow_is_the_lucky_events_own_scene_effect() {
     let c = load_catalog().unwrap();
     for e in &c.events {

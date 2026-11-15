@@ -208,20 +208,20 @@ effects = [{ mechanic = "data", strength = -0.5, days = 2 }]
 [[events]]
 id = "journalists-want-a-picture"
 group = "real"
-title = "Journalists want a pretty picture"
+title = "Journalists want a pretty picture of the spacecraft"
 scene = "panel-shading"
-real_life = "Missions rely on public attention, and operators do sometimes retask a spacecraft for a press-friendly picture, at the price of a day of planned science."
+real_life = "Missions rely on public attention, and operators do sometimes retask a spacecraft for a press-friendly moment, such as a pass timed for a telescope photo, at the price of a day of planned science."
 
 [events.question]
-text = "Journalists want a pretty picture from the spacecraft for tomorrow's paper. Spend a day on it?"
+text = "Journalists want a pretty picture of the spacecraft for tomorrow's paper, taken by a telescope on the ground as it turns to catch the Sun. Spend a day posing?"
 default = "decline"
 
 [[events.question.options]]
 id = "shoot"
-label = "A day of shooting"
-consequence = "The Instruments are off for 1 day for the photo shoot, but the sponsors add US$10k to the Budget."
+label = "A day of posing"
+consequence = "The Instruments are off for 1 day while the spacecraft poses, but the sponsors add US$10k to the Budget."
 log = "The spacecraft spent a day posing. The Instruments were off, and the sponsors sent US$10k."
-note = "a day of science was spent on the photo shoot, and the sponsors added US$10k to the Budget"
+note = "a day of science was spent posing for the photo, and the sponsors added US$10k to the Budget"
 effects = [{ mechanic = "instruments-off", days = 1 }, { mechanic = "budget", strength = 10000.0 }]
 
 [[events.question.options]]
@@ -381,7 +381,7 @@ effects = [{ mechanic = "power", strength = -0.3, days = 3 }]
 id = "aliens-borrow-the-satellite"
 group = "fantasy"
 title = "Aliens borrow the satellite for experiments"
-log = "Aliens borrowed the satellite for experiments: Instruments off for 2 days. They returned it with polished lenses and sensors: 2% more Data from then on."
+log = "Aliens borrowed the satellite for experiments: Instruments off for 2 days. They returned it with polished sensors: 2% more Data from then on."
 scene = "visitor"
 effects = [{ mechanic = "instruments-off", days = 2 }, { mechanic = "data", strength = 0.02, to_end = true, delay = 2 }]
 
@@ -611,26 +611,26 @@ model = "inspector"
 real_life = "Some satellites exist to inspect other satellites from close range, and nobody can be sure what they are looking at."
 
 [events.question]
-text = "A rival agency's inspector satellite has come right up close. Close the lens covers?"
+text = "A rival agency's inspector satellite has come right up close. Switch the Instruments off and wait until it leaves?"
 default = "close"
 
 [[events.question.options]]
 id = "close"
-label = "Close the lens covers and wait"
+label = "Switch off and wait"
 consequence = "Safe, but the Instruments are off for 2 days."
-log = "The spacecraft closed its lens covers until the inspector left. The Instruments were off for 2 days."
-note = "the lens covers were closed and the Instruments were off for 2 days"
+log = "The spacecraft switched its Instruments off until the inspector left. The Instruments were off for 2 days."
+note = "the Instruments were switched off for 2 days"
 effects = [{ mechanic = "instruments-off", days = 2 }]
 
 [[events.question.options]]
 id = "ignore"
 label = "Ignore it"
-consequence = "No downtime, but the inspector might accidentally dazzle the camera with a laser (Instruments off for 3 days)."
+consequence = "No downtime, but the inspector might accidentally dazzle the Instruments with its laser (Instruments off for 3 days)."
 log = "The inspector looked around and left without a word."
 note = "the inspector left without doing anything"
 effects = []
 chance = 0.7
-bad = { log = "The inspector's laser accidentally dazzled the camera. The Instruments were off for 3 days.", note = "the inspector accidentally dazzled the camera and the Instruments were off for 3 days", effects = [{ mechanic = "instruments-off", days = 3 }] }
+bad = { log = "The inspector's laser accidentally dazzled the Instruments. The Instruments were off for 3 days.", note = "the inspector accidentally dazzled the Instruments and the Instruments were off for 3 days", effects = [{ mechanic = "instruments-off", days = 3 }] }
 
 [[events]]
 id = "schoolchildren-hack-the-link"
@@ -866,7 +866,7 @@ effects = [{ mechanic = "data", strength = -0.5, days = 2 }]
 id = "a-reaction-wheel-starts-to-vibrate"
 group = "real"
 title = "A reaction wheel started to vibrate"
-log = "A reaction wheel began to vibrate and blurred the pictures: 30% less Data for 3 days."
+log = "A reaction wheel began to vibrate and shook the Instruments, spoiling their measurements: 30% less Data for 3 days."
 scene = "hit"
 real_life = "A worn wheel bearing makes a spacecraft jitter, which blurs images; simple attitude control with little margin suffers more."
 more_likely = { fact = "attitude-basic", weight = 3 }
