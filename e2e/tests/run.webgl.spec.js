@@ -3,13 +3,14 @@
 // The canvas exposes data-shot, data-orbit (Orbit id), data-orbit-angle (the angle drawn this frame),
 // data-orbit-target (the latest Scene Spec's angle) and data-in-shadow.
 import { test, expect } from '@playwright/test';
-import { collectErrors, pressLaunch, CROP_WATCH_SHARE } from './helpers.js';
+import { answerTheDragon, chooseReducedMotion, collectErrors, pressLaunch, CROP_WATCH_SHARE } from './helpers.js';
 
 const TAU = Math.PI * 2;
 
 /**
  * Makes the Run's seed deterministic: the UI builds it from two Math.random() halves, so a constant k / 2^32
- * gives seed (k << 32) | k. Crop Watch with k = 28 asks its first question on day 3; with k = 34 it asks none.
+ * gives seed (k << 32) | k. Crop Watch with k = 28 asks its first question on day 3 (a solar flare); with k = 3052
+ * the first question waits until day 203; with k = 19 the first is a new Random Event on day 6 (a dragon).
  */
 async function seedRuns(page, k) {
   await page.addInitScript((value) => {
@@ -53,7 +54,7 @@ function overlaps(a, b) {
 
 test('the Run shows the Design orbiting the 3D Earth instead of the SVG, with the panels at the edges', async ({ page }) => {
   const errors = collectErrors(page);
-  await seedRuns(page, 34);
+  await seedRuns(page, 3052);
   await launchCropWatch(page);
   const canvas = page.locator('canvas.scene-canvas');
   await expect(canvas).toHaveAttribute('data-orbit', 'sso-600');
@@ -100,7 +101,10 @@ test('paused playback holds the spacecraft exactly where the playback is', async
 
 test('speeding up the playback speeds up the spacecraft, and skipping leaves the orbit for the Debrief', async ({ page }) => {
   const errors = collectErrors(page);
-  await seedRuns(page, 34);
+  // Every Run has new Random Events, and a day with one plays slower; with reduced motion every day plays at the
+  // same pace, so the two sweeps compare the speeds alone.
+  await chooseReducedMotion(page);
+  await seedRuns(page, 3052);
   await launchCropWatch(page);
   await page.waitForTimeout(800);
   const slow = await sweep(page, 1500);
@@ -114,5 +118,13 @@ test('speeding up the playback speeds up the spacecraft, and skipping leaves the
   await expect(page.locator('.verdict-title')).toBeVisible();
   // The Debrief has no orbit view: nothing keeps flying behind it.
   await expect(page.locator('canvas.scene-canvas')).toHaveAttribute('data-orbit', '');
+  expect(errors).toEqual([]);
+});
+
+test('a new Random Event asks its question, and the event log shows the answer with its Unexplained mark', async ({ page }) => {
+  const errors = collectErrors(page);
+  await seedRuns(page, 19);
+  await launchCropWatch(page);
+  await answerTheDragon(page);
   expect(errors).toEqual([]);
 });
