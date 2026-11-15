@@ -106,6 +106,47 @@ fn scenario_select_frames_the_globe_over_angola() {
     }
 }
 
+fn select_spec(catalog: &Catalog, previewed: Option<&str>) -> scene::SceneSpec {
+    scene::build(&SceneInputs {
+        scenarios: &catalog.scenarios,
+        chosen: Some("crop-watch"),
+        previewed,
+        ..SceneInputs::on(Screen::ScenarioSelect)
+    })
+}
+
+/// All Scenarios are in Angola today, so move one pin and its Target Country to prove the follow.
+fn catalog_with_space_weather_in(country: &str, lat: f64, lon: f64) -> Catalog {
+    let mut catalog = load_catalog().unwrap();
+    let s = catalog.scenarios.iter_mut().find(|s| s.id == "space-weather-sentinel").unwrap();
+    s.marker_lat = lat;
+    s.marker_lon = lon;
+    s.target_country.id = country.to_string();
+    catalog
+}
+
+#[test]
+fn select_shot_frames_the_previewed_scenarios_pin() {
+    let catalog = catalog_with_space_weather_in("brazil", -10.0, -55.0);
+    let spec = select_spec(&catalog, Some("space-weather-sentinel"));
+    assert_eq!(spec.shot, Shot::Globe { lat: -10.0, lon: -55.0 });
+}
+
+#[test]
+fn select_shot_rests_on_angola_with_nothing_previewed_or_an_unknown_id() {
+    let catalog = catalog_with_space_weather_in("brazil", -10.0, -55.0);
+    let home = Shot::Globe { lat: -12.5, lon: 17.5 };
+    assert_eq!(select_spec(&catalog, None).shot, home);
+    assert_eq!(select_spec(&catalog, Some("nope")).shot, home);
+}
+
+#[test]
+fn select_highlight_follows_the_previewed_scenario_and_rests_on_angola() {
+    let catalog = catalog_with_space_weather_in("brazil", -10.0, -55.0);
+    assert_eq!(select_spec(&catalog, Some("space-weather-sentinel")).highlighted_country, "brazil");
+    assert_eq!(select_spec(&catalog, None).highlighted_country, "angola");
+}
+
 #[test]
 fn the_brief_holds_on_the_chosen_scenarios_marker() {
     let catalog = load_catalog().unwrap();
