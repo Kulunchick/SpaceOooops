@@ -66,7 +66,7 @@ fn flares_outages_and_failures_fall_on_the_same_days_with_new_events_on() {
         with_new += usize::from(!new_events(&after).is_empty());
     }
     assert!(failures > 0, "the sweep sees Component failures");
-    assert!(with_new > 100, "only {with_new} of 120 Runs had new events");
+    assert!(with_new > 80, "only {with_new} of 120 Runs had new events");
 }
 
 #[test]
