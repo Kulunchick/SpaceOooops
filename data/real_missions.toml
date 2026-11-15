@@ -10,12 +10,14 @@ crop-watch = ["agriculture", "earth-observation"]
 connect-the-villages = ["remote-connectivity", "communications"]
 space-weather-sentinel = ["space-weather", "ionosphere", "radiation"]
 amazon-watch = ["deforestation", "earth-observation"]
+glacier-watch = ["glaciers", "earth-observation"]
 
 # Plain words for each purpose tag, used in the "why this match" line.
 [purpose_words]
 agriculture = "farm monitoring"
 earth-observation = "imaging the ground"
 deforestation = "watching forests for clearing"
+glaciers = "watching glaciers and ice"
 remote-connectivity = "connecting remote places"
 communications = "communications"
 store-and-forward = "store-and-forward messaging"
@@ -86,6 +88,24 @@ url = "https://www.eoportal.org/satellite-missions/amazonia-1"
 # Imager camera, "the prime objective is to monitor deforestation". The USGS station page
 # https://landsat.usgs.gov/CUB confirms INPE's Cuiabá station tracks it (AMZ1). Amazonia-1 carries a camera, not
 # a radar: it matches by objective and Orbit.
+verified = "secondary"
+
+[[real_missions]]
+name = "SAOCOM"
+operator = "CONAE (Argentina's National Space Activities Commission)"
+year = 2018
+orbit_class = "sso"
+spacecraft_class = "large"
+mass_kg = 1600.0
+size_note = "radar Earth-observation satellite, about 1,600 kg"
+purposes = ["glaciers", "earth-observation"]
+blurb = "SAOCOM-1A, Argentina's L-band radar satellite, was launched on a Falcon 9 in October 2018 into a 620 km sun-synchronous orbit. Its survey of Antarctica studies how the continent's glaciers change, and its radar images the ground day and night through cloud."
+url = "https://www.eoportal.org/satellite-missions/saocom"
+# secondary (eoPortal, ESA-run catalogue): SAOCOM-1A launched 7/8 October 2018 on a Falcon 9 from Vandenberg;
+# "altitude = 619.6 km" sun-synchronous; payload an L-band polarimetric SAR; objectives include "monitoring
+# surveys of Antarctica (study of continental glacier evolution, global change indicators, etc.)". The page gives
+# both ~1600 kg (wet mass of each spacecraft) and 3050 kg for SAOCOM-1B; the lower figure is used. SAOCOM carries
+# a radar, not a camera: it matches by objective and Orbit.
 verified = "secondary"
 
 # ---------------------------------------------------------------- communications for remote places

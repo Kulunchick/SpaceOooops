@@ -41,6 +41,28 @@ export const BRAZIL = [
   [-60.7, 5.2], [-59.9, 4.5], [-59.8, 2.5], [-58.8, 1.2], [-56.5, 1.9], [-54.6, 2.3],
 ];
 
+// Argentina: the Atlantic coast follows SOUTH_AMERICA's points; the Argentine half of Tierra del Fuego is part of
+// the same polygon (joined across the Strait of Magellan) because CONAE's backup station stands there; the
+// inland borders are coarse, traced by eye from the Andes ridge, the Bermejo and Pilcomayo, Paraguay, Paraná and
+// Uruguay rivers.
+export const ARGENTINA = [
+  // Brazil border, Iguazú to the Uruguay river, and down it to the Río de la Plata
+  [-54.6, -25.6], [-53.8, -27.1], [-55.7, -28.2], [-57.6, -30.2], [-58.2, -32.2], [-58.4, -33.8],
+  // Atlantic coast, south to Cabo Vírgenes
+  [-57.5, -35], [-56.7, -36.5], [-58, -38.5], [-62.3, -38.8], [-65, -42], [-67.5, -46], [-65.8, -47.8],
+  [-69, -50.5], [-68.4, -52.4],
+  // Tierra del Fuego (the eastern half of the island) and back across the Strait
+  [-68.4, -53.3], [-67.7, -53.85], [-66.7, -54], [-65.5, -54.7], [-66.5, -55], [-68.6, -54.95], [-68.6, -52.65],
+  // Chile: the Andes, south to north
+  [-70, -52.3], [-72.3, -51.2], [-73.2, -50.6], [-73.4, -50], [-73.3, -49.2], [-72.8, -48.2], [-72.3, -47.2],
+  [-71.7, -46.2], [-71.6, -45], [-71.7, -43.7], [-71.9, -42.2], [-71.7, -41], [-71.3, -39.8], [-70.8, -38.5],
+  [-70.8, -37], [-70.4, -35.8], [-70, -34], [-70.2, -32.5], [-69.8, -30.8], [-69, -29], [-68.4, -27.2],
+  [-68.6, -25.5], [-68.2, -24], [-67.2, -22.8],
+  // Bolivia, then Paraguay along the Pilcomayo, Paraguay and Paraná rivers
+  [-66.2, -22.1], [-64.6, -22.2], [-62.65, -22.25], [-60.5, -23.9], [-57.7, -25.3], [-58.6, -27.3], [-57, -27.4],
+  [-55.9, -27.4],
+];
+
 const MADAGASCAR = [[49.3, -12], [50.4, -15.5], [47.4, -25], [45, -25.5], [43.6, -23], [44.4, -16.2], [47, -14.5]];
 
 const EURASIA = [
@@ -119,7 +141,7 @@ function inside(polygon, lon, lat) {
 
 // One outline per Target Country, keyed by the country id in data/scenarios.toml. Add a country here to make it
 // highlightable; a Scenario whose country has no outline here simply highlights nothing.
-export const COUNTRIES = { angola: ANGOLA, brazil: BRAZIL };
+export const COUNTRIES = { angola: ANGOLA, brazil: BRAZIL, argentina: ARGENTINA };
 
 /** The id of the Target Country whose outline holds the point, or null. */
 export function countryAt(lon, lat) {

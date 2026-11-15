@@ -375,9 +375,19 @@ fn validate_design(e: &EventSpec) -> Result<(), String> {
 }
 
 /// Ticket 09: the model is a known name, and only with a fly-by or a visitor.
-fn validate_model(_e: &EventSpec) -> Result<(), String> {
+fn validate_model(e: &EventSpec) -> Result<(), String> {
+    let Some(model) = &e.model else { return Ok(()) };
+    if !STAR_MODELS.contains(&model.as_str()) {
+        return Err(format!("unknown model '{model}' (known models: {})", STAR_MODELS.join(", ")));
+    }
+    if !matches!(e.scene, SceneEffect::FlyBy | SceneEffect::Visitor) {
+        return Err("a model goes only with a fly-by or a visitor scene".to_string());
+    }
     Ok(())
 }
+
+/// The star models `js/bridge/star_models.js` can draw.
+pub const STAR_MODELS: [&str; 4] = ["ufo", "whale", "dragon", "inspector"];
 
 /// Space agencies, matched as whole words.
 const DENIED_AGENCIES: [&str; 15] =
