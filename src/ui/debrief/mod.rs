@@ -5,6 +5,7 @@ mod actions;
 mod causes;
 mod compare;
 mod decisions;
+mod events;
 mod real_mission;
 mod objectives;
 mod score;
@@ -33,6 +34,7 @@ pub fn DebriefScreen() -> impl IntoView {
                 <ScoreSection />
                 <StatsSection />
                 <decisions::DecisionsSection />
+                <events::EventsSection />
                 <objectives::ObjectivesSection />
                 <real_mission::RealMissionSection />
                 <ComparisonSection />

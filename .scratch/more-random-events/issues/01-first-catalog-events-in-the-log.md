@@ -4,15 +4,15 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] A new catalog data file holds the events (id, group, title, log text, mechanic, strength, length, scene effect type) and loads into the Catalog; a malformed entry fails catalog tests with a clear message
-- [ ] Each Scenario has a minimum and maximum number of new events per Run; zero switches them off
-- [ ] With new events off, a Run is identical to today's for the same Design, Scenario and seed
-- [ ] With new events on, solar flares, outages and failure rolls still fall on the same days as before for the same seed (the existing random stream is untouched)
-- [ ] Same Design, Scenario and seed give the same new events on the same days; different seeds give different sets
-- [ ] No new event appears twice in a Run, and none ends the Mission, across a sweep of seeds
-- [ ] Each of the three mechanics is covered through the Run interface with a one-event test catalog: the day snapshots move as the event states and return to normal when it ends
-- [ ] The Random Event carries the catalog event id, its group and its scene effect type; the event log shows its text on its day
-- [ ] Playback slows on a day with a new event, as it does for existing events
-- [ ] Existing tests pass (run against new events off, or re-pinned once)
+- [x] A new catalog data file holds the events (id, group, title, log text, mechanic, strength, length, scene effect type) and loads into the Catalog; a malformed entry fails catalog tests with a clear message
+- [x] Each Scenario has a minimum and maximum number of new events per Run; zero switches them off
+- [x] With new events off, a Run is identical to today's for the same Design, Scenario and seed
+- [x] With new events on, solar flares, outages and failure rolls still fall on the same days as before for the same seed (the existing random stream is untouched)
+- [x] Same Design, Scenario and seed give the same new events on the same days; different seeds give different sets
+- [x] No new event appears twice in a Run, and none ends the Mission, across a sweep of seeds
+- [x] Each of the three mechanics is covered through the Run interface with a one-event test catalog: the day snapshots move as the event states and return to normal when it ends
+- [x] The Random Event carries the catalog event id, its group and its scene effect type; the event log shows its text on its day
+- [x] Playback slows on a day with a new event, as it does for existing events
+- [x] Existing tests pass (run against new events off, or re-pinned once)
