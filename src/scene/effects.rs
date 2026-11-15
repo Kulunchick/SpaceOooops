@@ -9,7 +9,7 @@
 //! starting on day `k` has `start = k - 1` and is active for `start < playback <= start + days`.
 use serde::Serialize;
 
-use crate::sim::{EventKind, EventTuning, RunResult};
+use crate::sim::{EventKind, EventTuning, RunResult, SceneEffect};
 
 use super::{SceneInputs, Screen};
 
@@ -43,6 +43,27 @@ pub enum EffectKind {
     Failure { component: String },
     /// The battery stopped covering the eclipse: its part flashes a warning on the day it starts.
     BatteryShortfall { component: String },
+    /// A new Random Event: something passes the spacecraft (a star model by name, or generic geometry).
+    FlyBy {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        model: Option<String>,
+    },
+    /// A new Random Event: a strike on a Model part (the Design's solar panel part; none = the bus).
+    Hit {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        component: Option<String>,
+    },
+    /// A new Random Event: the contact beam breaks up.
+    LinkInterference,
+    /// A new Random Event: the solar panels go dark.
+    PanelShading,
+    /// A new (lucky) Random Event: a glow round the spacecraft.
+    BonusGlow,
+    /// A new Random Event: something holds beside the spacecraft (a star model by name, or generic geometry).
+    Visitor {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        model: Option<String>,
+    },
 }
 
 /// The sim's option ids for the flare and outage answers that change what the scene shows.
@@ -124,8 +145,19 @@ pub fn all(run: &RunResult, tuning: Option<&EventTuning>) -> Vec<Effect> {
                     };
                     push(id, kind, start, days);
                 }
-                // New Random Events: their six effect kinds arrive with More Random Events ticket 08.
-                EventKind::Catalog => {}
+                EventKind::Catalog => {
+                    let Some(c) = &e.catalog else { continue };
+                    let kind = match c.scene {
+                        SceneEffect::FlyBy => EffectKind::FlyBy { model: c.model.clone() },
+                        // The part is filled in from the Design (`for_inputs`); the timeline does not know it.
+                        SceneEffect::Hit => EffectKind::Hit { component: None },
+                        SceneEffect::LinkInterference => EffectKind::LinkInterference,
+                        SceneEffect::PanelShading => EffectKind::PanelShading,
+                        SceneEffect::BonusGlow => EffectKind::BonusGlow,
+                        SceneEffect::Visitor => EffectKind::Visitor { model: c.model.clone() },
+                    };
+                    push(format!("day-{}-event-{}", t.day, c.id), kind, start, f64::from(c.scene_days.max(1)));
+                }
             }
         }
         // Ground contact: a beam on every day Data came down, to whichever station carried it.
@@ -199,7 +231,16 @@ pub(super) fn stations_for(inputs: &SceneInputs) -> Vec<Station> {
 
 pub(super) fn for_inputs(inputs: &SceneInputs) -> Vec<Effect> {
     match (inputs.screen, inputs.run) {
-        (Screen::Run, Some(run)) => at(run, tuning(inputs), inputs.playback),
+        (Screen::Run, Some(run)) => {
+            let panel = inputs.design.and_then(|d| d.solar.as_ref()).map(|p| p.id.clone());
+            let mut effects = at(run, tuning(inputs), inputs.playback);
+            for e in &mut effects {
+                if let EffectKind::Hit { component } = &mut e.kind {
+                    component.clone_from(&panel);
+                }
+            }
+            effects
+        }
         _ => Vec::new(),
     }
 }

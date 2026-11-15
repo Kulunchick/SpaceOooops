@@ -58,6 +58,18 @@ pub enum Cue {
     Failure,
     /// Run: the battery stops covering the eclipse.
     BatteryShortfall,
+    /// Run: something passes the spacecraft (a new Random Event).
+    FlyBy,
+    /// Run: a strike on the spacecraft.
+    Hit,
+    /// Run: the contact beam breaks up.
+    LinkInterference,
+    /// Run: the solar panels go dark.
+    PanelShading,
+    /// Run: a lucky event.
+    BonusGlow,
+    /// Run: something holds beside the spacecraft.
+    Visitor,
     /// The Debrief opens on a Success: a jingle.
     Success,
     /// The Debrief opens on a failed Mission: a falling tone.
@@ -76,6 +88,12 @@ impl Cue {
             Cue::Outage => "outage",
             Cue::Failure => "failure",
             Cue::BatteryShortfall => "battery",
+            Cue::FlyBy => "fly-by",
+            Cue::Hit => "hit",
+            Cue::LinkInterference => "interference",
+            Cue::PanelShading => "shading",
+            Cue::BonusGlow => "bonus",
+            Cue::Visitor => "visitor",
             Cue::Success => "success",
             Cue::MissionFailed => "mission-failed",
         }
@@ -130,6 +148,12 @@ fn event_cues(previous: &SceneSpec, current: &SceneSpec) -> Vec<Cue> {
             EffectKind::StationDark { .. } => Cue::Outage,
             EffectKind::Failure { .. } => Cue::Failure,
             EffectKind::BatteryShortfall { .. } => Cue::BatteryShortfall,
+            EffectKind::FlyBy { .. } => Cue::FlyBy,
+            EffectKind::Hit { .. } => Cue::Hit,
+            EffectKind::LinkInterference => Cue::LinkInterference,
+            EffectKind::PanelShading => Cue::PanelShading,
+            EffectKind::BonusGlow => Cue::BonusGlow,
+            EffectKind::Visitor { .. } => Cue::Visitor,
             EffectKind::SafeMode | EffectKind::Contact { .. } => continue,
         };
         if !cues.contains(&cue) {

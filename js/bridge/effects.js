@@ -10,6 +10,7 @@
 //   contact           a beam between the spacecraft and the station, drawn while the station is in view
 //   failure           the part sparks from HIT of the failure day, then stays dark to the end of the Run
 //   batteryShortfall  the battery blinks amber for the day
+//   flyBy, hit, linkInterference, panelShading, bonusGlow, visitor: the new Random Events, see event_effects.js
 //
 // The spacecraft's part of it goes through `craft.setCondition(...)` (spacecraft.js), which any craft has, so the
 // Debrief's failure shots can put a craft into the same states without this module.
@@ -20,6 +21,7 @@
 // `data-contact` (the station a beam is drawn to, empty when none).
 import * as THREE from '../../vendor/three/three.module.js';
 import { latLonToVector } from './earth.js';
+import { createEventEffects } from './event_effects.js';
 
 /** Share of the flare day at which the wave reaches the spacecraft (failures on that day spark from here too). */
 const HIT = 0.6;
@@ -104,6 +106,8 @@ export function createEffects({ scene, run, canvas, camera = null }) {
   const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 1, 6, 1, true), additive(BEAM, 0.6));
   beam.visible = false;
   root.add(beam);
+  // The new Random Events (six kinds, drawn by event_effects.js); it hands back what the spacecraft itself shows.
+  const eventFx = createEventEffects({ scene, run, canvas, camera });
 
   const stations = new Map(); // id -> group
   let spec = null;
@@ -145,6 +149,8 @@ export function createEffects({ scene, run, canvas, camera = null }) {
     syncStations(active ? next.stations : []);
     canvas.dataset.effects = active ? (next.effects ?? []).map((e) => e.kind).join(' ') : '';
     if (!active) {
+      eventFx.frame([], 0);
+      canvas.dataset.eventFx = '';
       flare.visible = false;
       beam.visible = false;
       canvas.dataset.flare = '';
@@ -161,6 +167,7 @@ export function createEffects({ scene, run, canvas, camera = null }) {
     const playback = spec.orbit.playback;
     const effects = spec.effects ?? [];
     const into = (e) => playback - e.start; // days into the effect
+    const events = eventFx.frame(effects, playback);
 
     // ---- the spacecraft's condition
     let feather = 0;
@@ -183,7 +190,8 @@ export function createEffects({ scene, run, canvas, camera = null }) {
         flash = Math.max(flash, Math.max(0, 1 - Math.abs(t - HIT) / 0.12));
       }
     }
-    run.craft.setCondition({ feather, dim: feather, dark, warnParts, warn, spark, flash });
+    spark ??= events.spark;
+    run.craft.setCondition({ feather, dim: Math.max(feather, events.dim), dark, warnParts, warn, spark, flash });
     canvas.dataset.feather = feather.toFixed(2);
     canvas.dataset.darkParts = dark.join(' ');
     // The ring round the spacecraft carries the news at a distance: amber in safe mode or on a battery warning,
@@ -259,7 +267,7 @@ export function createEffects({ scene, run, canvas, camera = null }) {
         beam.position.copy(stationPos).addScaledVector(dir, 0.5);
         beam.quaternion.setFromUnitVectors(Y, dir.normalize());
         beam.scale.set(1, length, 1);
-        beam.material.opacity = 0.35 + 0.3 * (0.5 + 0.5 * Math.sin(playback * Math.PI * 2 * 6));
+        beam.material.opacity = (0.35 + 0.3 * (0.5 + 0.5 * Math.sin(playback * Math.PI * 2 * 6))) * (events.linkBreak ? 0.2 : 1);
         linked = contact.station;
       }
     }
@@ -271,6 +279,7 @@ export function createEffects({ scene, run, canvas, camera = null }) {
     apply,
     frame,
     dispose() {
+      eventFx.dispose();
       for (const g of stations.values()) {
         g.parent?.remove(g);
         g.traverse((o) => {
