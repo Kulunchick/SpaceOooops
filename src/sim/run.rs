@@ -216,6 +216,8 @@ pub(crate) struct RunContext<'a> {
     pub(crate) event_specs: &'a [EventSpec],
     pub(crate) facts: Facts,
     pub(crate) required_science_value: f64,
+    /// The Scenario's main ground station, named when it goes offline.
+    main_station: String,
 }
 
 const NO_EVENTS: EventTuning = EventTuning {
@@ -294,6 +296,7 @@ impl<'a> RunContext<'a> {
             event_specs: &catalog.events,
             facts,
             required_science_value: r.scenario.map_or(0.0, |s| s.required_science_value),
+            main_station: r.scenario.map_or(String::new(), |s| s.main_station().to_string()),
         }
     }
 }
@@ -401,7 +404,7 @@ fn step(ctx: &RunContext, s: &mut RunState) -> DaySnapshot {
         let buy = choice == decisions::BUY_STATION_TIME;
         let cost_usd = if buy { choices.outage_station_time_cost_usd } else { 0.0 };
         let mut event =
-            if buy { events::ground_station_outage_covered(tuning) } else { events::ground_station_outage(tuning) };
+            if buy { events::ground_station_outage_covered(tuning, &ctx.main_station) } else { events::ground_station_outage(tuning, &ctx.main_station) };
         s.taken.push(Taken {
             day: s.day,
             choice: choice.to_string(),

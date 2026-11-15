@@ -32,6 +32,8 @@
 .brief-fact, .brief-facts > div { background: rgba(255, 255, 255, 0.05); padding: 0.5rem 0.7rem; }
 .brief-facts dt { color: var(--lp-text-muted); }
 .brief-facts dd { color: var(--lp-accent); font-family: var(--lp-font-display); font-size: 1.1rem; }
+.brief-facts > .brief-stations { grid-column: 1 / -1; }
+.brief-facts .brief-stations dd { font-size: 0.95rem; }
 .brief ul { margin: 0.2rem 0; padding-left: 1.1rem; }
 .brief .actions { margin: 1rem 0 0; }
 

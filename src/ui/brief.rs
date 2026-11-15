@@ -38,6 +38,7 @@ pub fn BriefScreen() -> impl IntoView {
                     <dd>{format!("{} days (about {:.0} months)", s.min_lifetime_days, f64::from(s.min_lifetime_days) / 30.4)}</dd>
                 </div>
                 <div class="brief-block"><dt>"Budget"</dt><dd>{money(s.budget_usd)}</dd></div>
+                <div class="brief-block brief-stations"><dt>"Ground stations"</dt><dd>{s.ground_stations_line()}</dd></div>
             </dl>
             <div class="brief-block">
                 <h3>"Key constraints"</h3>

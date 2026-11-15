@@ -52,6 +52,25 @@ pub struct TargetCountry {
     pub name: String,
 }
 
+impl Scenario {
+    /// The Mission's ground stations by name, for the Brief: "Tsukuba (main) and Okinawa (backup)".
+    pub fn ground_stations_line(&self) -> String {
+        match self.ground_stations.as_slice() {
+            [] => String::new(),
+            [only] => only.name.clone(),
+            [main, rest @ ..] => {
+                let backups: Vec<&str> = rest.iter().map(|s| s.name.as_str()).collect();
+                format!("{} (main) and {} (backup)", main.name, backups.join(" and "))
+            }
+        }
+    }
+
+    /// The main ground station's name ("" if the Scenario has none).
+    pub fn main_station(&self) -> &str {
+        self.ground_stations.first().map_or("", |s| s.name.as_str())
+    }
+}
+
 /// The Target Country highlighted where no Scenario is in play (title, Sources, Scenario select).
 pub const HOME_COUNTRY: &str = "angola";
 

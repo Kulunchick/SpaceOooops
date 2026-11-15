@@ -128,11 +128,17 @@ pub(crate) fn solar_flare_ridden_out() -> RandomEvent {
     }
 }
 
-pub(crate) fn ground_station_outage_covered(tuning: &EventTuning) -> RandomEvent {
+/// "The ground station" or "The Tsukuba ground station".
+fn station_name(station: &str) -> String {
+    if station.is_empty() { "The ground station".to_string() } else { format!("The {station} ground station") }
+}
+
+pub(crate) fn ground_station_outage_covered(tuning: &EventTuning, station: &str) -> RandomEvent {
     RandomEvent {
         kind: EventKind::GroundStationOutage,
         text: format!(
-            "The ground station went offline for {}. Time bought on another station kept the Data coming down.",
+            "{} went offline for {}. Time bought on another station kept the Data coming down.",
+            station_name(station),
             days(tuning.outage_days)
         ),
         component: None,
@@ -142,11 +148,12 @@ pub(crate) fn ground_station_outage_covered(tuning: &EventTuning) -> RandomEvent
     }
 }
 
-pub(crate) fn ground_station_outage(tuning: &EventTuning) -> RandomEvent {
+pub(crate) fn ground_station_outage(tuning: &EventTuning, station: &str) -> RandomEvent {
     RandomEvent {
         kind: EventKind::GroundStationOutage,
         text: format!(
-            "The ground station went offline for {}. Data piles up on board until contact returns.",
+            "{} went offline for {}. Data piles up on board until contact returns.",
+            station_name(station),
             days(tuning.outage_days)
         ),
         component: None,

@@ -89,6 +89,37 @@ fn the_full_catalog_is_bundled() {
     }
 }
 
+// ---------------------------------------------------------------- ground stations by name
+
+#[test]
+fn the_brief_names_the_scenarios_ground_stations_main_first() {
+    let c = load_catalog().unwrap();
+    let line = |id: &str| c.scenario(id).unwrap().ground_stations_line();
+    assert_eq!(line(JAPAN_DISASTER_RESPONSE), "Tsukuba (main) and Okinawa (backup)");
+    assert_eq!(line(CROP_WATCH), "Luanda (main) and Johannesburg (backup)");
+    for s in &c.scenarios {
+        for station in &s.ground_stations {
+            assert!(s.ground_stations_line().contains(&station.name), "{}", s.id);
+        }
+    }
+}
+
+#[test]
+fn a_ground_station_outage_names_the_main_station() {
+    let c = load_catalog().unwrap();
+    for (scenario, design, station) in [
+        (JAPAN_DISASTER_RESPONSE, japan_disaster_response_known_good(), "Tsukuba"),
+        (CROP_WATCH, crop_watch_known_good(), "Luanda"),
+    ] {
+        let outage = (0..100)
+            .flat_map(|seed| run(&c, &design, scenario, seed).timeline)
+            .flat_map(|t| t.events)
+            .find(|e| e.kind == EventKind::GroundStationOutage)
+            .expect("an outage in 100 Runs");
+        assert!(outage.text.contains(station), "{scenario}: {}", outage.text);
+    }
+}
+
 // ---------------------------------------------------------------- every Scenario is winnable
 
 /// Cleanly: no violation and no warning. Disaster Response is the one exception, by design: its Budget is too tight

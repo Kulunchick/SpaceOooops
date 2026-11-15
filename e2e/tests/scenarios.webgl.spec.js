@@ -100,6 +100,8 @@ test('hovering the Japan card turns the globe to its pin and highlights Japan on
   await page.screenshot({ path: 'test-results/scenario-select-japan.png' });
   await page.locator('.scenario-card', { hasText: 'Disaster Response' }).getByRole('button', { name: 'Select' }).click();
   await expect(page.getByRole('heading', { name: 'Disaster Response' })).toBeVisible();
+  await expect(page.locator('.brief-stations')).toContainText('Ground stations');
+  await expect(page.locator('.brief-stations')).toContainText('Tsukuba (main) and Okinawa (backup)');
   await expect(canvas).toHaveAttribute('data-highlight', 'japan');
   await expect(canvas).toHaveAttribute('data-flying', 'false', { timeout: 15000 });
   await page.waitForTimeout(500);
