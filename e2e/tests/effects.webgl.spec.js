@@ -176,7 +176,8 @@ for (const { kind, cue, k, what } of KINDS) {
     const errors = collectErrors(page);
     await seedRuns(page, k);
     await launch(page);
-    await expect(canvas(page)).toHaveAttribute('data-effects', new RegExp(kind), { timeout: 40_000 });
+    // A one-day effect lasts about 1.5 s at 1x: poll often, or a slow frame lets it pass between two looks.
+    await expect.poll(() => attr(page, 'data-effects'), { intervals: [50], timeout: 40_000 }).toMatch(new RegExp(kind));
     await hold(page, true);
     await page.waitForTimeout(200);
     expect(await attr(page, 'data-event-fx')).toMatch(new RegExp(`(^| )${kind}:`));
