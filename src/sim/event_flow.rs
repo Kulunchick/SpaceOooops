@@ -32,8 +32,18 @@ pub(crate) fn on_day(
     for planned in ctx.plan.events.iter().filter(|p| p.day == day) {
         let Some(spec) = ctx.event_specs.get(planned.event) else { continue };
         let mut out = DayOutcome::default();
-        let event = fire(spec, planned, budget_left_usd - firing.cost_usd, pool, decisions, &mut out);
-        firing.cost_usd += out.cost_usd.min((budget_left_usd - firing.cost_usd).max(0.0));
+        let mut event = fire(spec, planned, budget_left_usd - firing.cost_usd, pool, decisions, &mut out);
+        let left = (budget_left_usd - firing.cost_usd).max(0.0);
+        // A spend is capped at the Budget left, so the log must not claim more than was taken.
+        if out.cost_usd > left + 0.5 {
+            let took = if left < 0.5 {
+                "The Budget was already spent, so it took nothing.".to_string()
+            } else {
+                format!("Only {} of the Budget was left, so that is all it took.", money(left))
+            };
+            event.text = format!("{} {took}", event.text.trim_end());
+        }
+        firing.cost_usd += out.cost_usd.min(left);
         firing.science_bonus += out.science_bonus_share * ctx.required_science_value;
         firing.events.push(event);
     }

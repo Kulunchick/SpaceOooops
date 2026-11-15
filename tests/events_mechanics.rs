@@ -245,6 +245,20 @@ fn money_spent_goes_through_the_extra_cost_path() {
 }
 
 #[test]
+fn money_spent_beyond_the_budget_left_takes_only_what_is_left_and_the_log_says_so() {
+    let (with, without, day) = flown(&one_event(r#"{ mechanic = "budget", strength = -100000000.0 }"#), 1);
+    let spent = with.debrief.stats.total_cost_usd - without.debrief.stats.total_cost_usd;
+    assert!(spent > 0.0 && spent < 100_000_000.0, "{spent}");
+    let e = with.timeline[day as usize - 1].events.iter().find(|e| e.kind == EventKind::Catalog).unwrap();
+    let left = if spent >= 1_000_000.0 { format!("${:.2}M", spent / 1e6) } else { format!("${:.0}k", spent / 1e3) };
+    assert!(e.text.starts_with("Something happened.") && e.text.contains(&left), "{} / {left}", e.text);
+    // Within the Budget the text is the event's own.
+    let (with, _, day) = flown(&one_event(r#"{ mechanic = "budget", strength = -20000.0 }"#), 1);
+    let e = with.timeline[day as usize - 1].events.iter().find(|e| e.kind == EventKind::Catalog).unwrap();
+    assert_eq!(e.text, "Something happened.");
+}
+
+#[test]
 fn money_gained_raises_the_budget_left_and_shows_in_the_score() {
     let (with, without, _) = flown(&one_event(r#"{ mechanic = "budget", strength = 20000.0 }"#), 1);
     assert_eq!(with.debrief.stats.total_cost_usd, without.debrief.stats.total_cost_usd, "gained money is not a cost");
