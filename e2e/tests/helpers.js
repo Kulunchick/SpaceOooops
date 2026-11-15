@@ -1,5 +1,18 @@
 // Shared helpers for the smoke tests.
+import { readFileSync } from 'node:fs';
 import { expect } from '@playwright/test';
+
+/** The Scenarios in data/scenarios.toml (name and Target Country name), so checks follow the catalog. */
+export function catalogScenarios() {
+  const text = readFileSync(new URL('../../data/scenarios.toml', import.meta.url), 'utf8');
+  return text
+    .split(/^\[\[scenarios\]\]/m)
+    .slice(1)
+    .map((block) => ({
+      name: block.match(/^name = "(.*)"/m)[1],
+      country: block.match(/^target_country = \{[^}]*name = "([^"]*)"/m)[1],
+    }));
+}
 
 /** Collects console errors and uncaught page errors; assert it is empty at the end of a test. */
 export function collectErrors(page) {

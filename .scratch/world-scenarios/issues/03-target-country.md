@@ -13,13 +13,13 @@ Angola are generalised.
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] A Scenario without a Target Country fails catalog loading
-- [ ] Each card shows its Target Country; Angolan Scenarios come first, then by difficulty
-- [ ] The Scene Spec names the highlighted Target Country per screen as above
-- [ ] The globe highlights only the named country; with Angola named it looks as today
-- [ ] The listed general texts no longer say "Angola"; Scenario briefs, hints and constraints still do
-- [ ] Marker tests check "markers apart and near their Target Country" instead of "inside Angola"
-- [ ] End-to-end Scenario select checks compare the card count with the catalog instead of expecting exactly three, and check the country label, in WebGL and fallback projects
-- [ ] The glossary entry for Target Country matches what was built
+- [x] A Scenario without a Target Country fails catalog loading
+- [x] Each card shows its Target Country; Angolan Scenarios come first, then by difficulty
+- [x] The Scene Spec names the highlighted Target Country per screen as above
+- [x] The globe highlights only the named country; with Angola named it looks as today
+- [x] The listed general texts no longer say "Angola"; Scenario briefs, hints and constraints still do
+- [x] Marker tests check "markers apart and near their Target Country" instead of "inside Angola"
+- [x] End-to-end Scenario select checks compare the card count with the catalog instead of expecting exactly three, and check the country label, in WebGL and fallback projects
+- [x] The glossary entry for Target Country matches what was built

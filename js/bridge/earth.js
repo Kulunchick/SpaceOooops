@@ -2,7 +2,7 @@
 // a sparse cloud shell, and a star field. Flat shading, palette colours only, no textures.
 import * as THREE from '../../vendor/three/three.module.js';
 import { palette } from './palette.js';
-import { surfaceAt } from './land.js';
+import { countryAt, surfaceAt } from './land.js';
 
 export const EARTH_RADIUS = 1;
 const DEG = Math.PI / 180;
@@ -40,27 +40,48 @@ function faceColour(centroid) {
   const { lat, lon } = vectorToLatLon(centroid);
   const jitter = hash3(centroid.x, centroid.y, centroid.z);
   switch (surfaceAt(lon, lat)) {
-    case 'angola': return palette.angola;
     case 'ice': return palette.ice;
     case 'land': return landColour(lat, lon, jitter);
     default: return jitter > 0.7 ? palette.oceanDeep : palette.ocean;
   }
 }
 
-/** Colours every triangle of a non-indexed geometry with `colourOf(centroid)`. */
+/**
+ * Colours every triangle of a non-indexed geometry with `colourOf(centroid)`. Returns `highlight(countryId)`, which
+ * paints only the facets inside that Target Country's outline in the highlight colour; every other facet keeps its
+ * own colour. Passing an unknown id or null clears the highlight.
+ */
 function colourFaces(geometry, colourOf) {
   const pos = geometry.getAttribute('position');
   const colours = new Float32Array(pos.count * 3);
+  const countries = [];
   const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
   const colour = new THREE.Color();
   for (let i = 0; i < pos.count; i += 3) {
     a.fromBufferAttribute(pos, i);
     b.fromBufferAttribute(pos, i + 1);
     c.fromBufferAttribute(pos, i + 2);
-    colour.setHex(colourOf(a.add(b).add(c).divideScalar(3)));
+    const centroid = a.add(b).add(c).divideScalar(3);
+    const at = vectorToLatLon(centroid);
+    countries.push(countryAt(at.lon, at.lat));
+    colour.setHex(colourOf(centroid));
     for (let k = 0; k < 3; k++) colour.toArray(colours, (i + k) * 3);
   }
-  geometry.setAttribute('color', new THREE.BufferAttribute(colours, 3));
+  const base = colours.slice();
+  const attribute = new THREE.BufferAttribute(colours, 3);
+  geometry.setAttribute('color', attribute);
+  const lit = new THREE.Color(palette.angola);
+  let current;
+  return (countryId) => {
+    if (countryId === current) return;
+    current = countryId;
+    colours.set(base);
+    countries.forEach((id, face) => {
+      if (id === null || id !== countryId) return;
+      for (let k = 0; k < 3; k++) lit.toArray(colours, (face * 3 + k) * 3);
+    });
+    attribute.needsUpdate = true;
+  };
 }
 
 function cloudShell(detail) {
@@ -106,7 +127,7 @@ function starField(count) {
 export function createEarth(quality) {
   const detail = quality === 'low' ? 14 : 20;
   const globeGeometry = new THREE.IcosahedronGeometry(EARTH_RADIUS, detail);
-  colourFaces(globeGeometry, faceColour);
+  const highlight = colourFaces(globeGeometry, faceColour);
   const globe = new THREE.Mesh(
     globeGeometry,
     new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.95, metalness: 0 }),
@@ -114,5 +135,5 @@ export function createEarth(quality) {
   const clouds = cloudShell(quality === 'low' ? 6 : 9);
   const earth = new THREE.Group();
   earth.add(globe, clouds);
-  return { earth, clouds, stars: starField(quality === 'low' ? 400 : 900) };
+  return { earth, clouds, highlight, stars: starField(quality === 'low' ? 400 : 900) };
 }

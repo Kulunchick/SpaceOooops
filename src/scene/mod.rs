@@ -112,6 +112,8 @@ pub struct SceneSpec {
     /// Scenario pins on the globe; empty except on Scenario select and Brief.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub markers: Vec<Marker>,
+    /// Id of the one Target Country the globe colours (Angola unless a Scenario is in play).
+    pub highlighted_country: String,
     /// The Run's orbit view: the Orbit, the spacecraft's place on it and Earth's shadow (Run screen only).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub orbit: Option<OrbitView>,
@@ -142,6 +144,7 @@ pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
         hangar: hangar::for_inputs(inputs),
         pad: pad::for_inputs(inputs),
         markers: markers::markers(inputs.screen, inputs.scenarios, inputs.chosen),
+        highlighted_country: markers::highlighted_country(inputs.screen, inputs.scenarios, inputs.chosen),
         orbit,
         effects: effects::for_inputs(inputs),
         stations: effects::stations_for(inputs),

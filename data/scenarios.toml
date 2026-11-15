@@ -32,6 +32,8 @@ tutorial_hints = [
 # Science Value earned per GB of Data delivered by an Instrument with fit 1.0 over an Orbit with coverage 1.0.
 # Game-tuned: a single well-suited imager sending ~300 MB a day for a year earns about 1.5x the requirement.
 science_value_per_gb = 1.4
+# The country the Scenario serves (id keys the globe outline).
+target_country = { id = "angola", name = "Angola" }
 
 # Random Event tuning for this Scenario (chances are per day).
 [scenarios.events]
@@ -72,6 +74,8 @@ key_constraints = [
 ]
 # Science Value here is service delivered: a relay carrying ~2 GB a day for a year earns about 1.4x the requirement.
 science_value_per_gb = 0.2
+# The country the Scenario serves (id keys the globe outline).
+target_country = { id = "angola", name = "Angola" }
 
 [scenarios.events]
 # source: NOAA SWPC - strong (X-class) flares a few times a year near solar maximum.
@@ -110,6 +114,8 @@ key_constraints = [
 # Game-tuned: a particle detector and an ionosphere probe delivering all their Data for six months earn about
 # 1.2x the requirement; losing a quarter of the Data falls short.
 science_value_per_gb = 1.0
+# The country the Scenario serves (id keys the globe outline).
+target_country = { id = "angola", name = "Angola" }
 
 [scenarios.events]
 # The mission flies near solar maximum, when flares are most frequent (NOAA SWPC); ~3 per year here.

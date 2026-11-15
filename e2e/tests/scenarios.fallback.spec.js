@@ -1,13 +1,17 @@
 // Scenario select and Brief without WebGL: the same information over the static background.
 import { test, expect } from '@playwright/test';
-import { collectErrors } from './helpers.js';
+import { collectErrors, catalogScenarios } from './helpers.js';
 
 test('Scenario select and Brief work over the static background', async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto('./');
   await page.getByRole('button', { name: 'Start' }).click();
   await page.getByRole('button', { name: 'Choose a Scenario' }).click();
-  await expect(page.locator('.scenario-card')).toHaveCount(3);
+  const catalog = catalogScenarios();
+  await expect(page.locator('.scenario-card')).toHaveCount(catalog.length);
+  for (const { name, country } of catalog) {
+    await expect(page.locator('.scenario-card', { hasText: name }).locator('.scenario-country')).toContainText(country);
+  }
   await expect(page.locator('.scene-layer')).toHaveAttribute('data-scene', 'fallback');
   await expect(page.locator('.scene-fallback')).toBeVisible();
   for (const img of await page.locator('.scenario-card img').all()) {

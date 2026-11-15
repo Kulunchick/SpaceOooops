@@ -9,7 +9,7 @@ A predefined mission brief: the objective to achieve, the Science Value required
 _Avoid_: Level, quest
 
 **Target Country**:
-The country a Scenario serves: it holds the Scenario's pin and ground stations, and is outlined and highlighted on the globe while that Scenario is hovered or selected. Angola for the original three Scenarios.
+The country a Scenario serves: it holds the Scenario's pin and ground stations, and is outlined and highlighted on the globe (only that one country) once that Scenario is chosen; Angola is highlighted on the title and Scenario select screens. The Scenario card shows it, and Angolan Scenarios are listed first. Angola for the original three Scenarios.
 _Avoid_: Region, area, target (alone)
 
 **Mission**:

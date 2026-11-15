@@ -29,8 +29,29 @@ pub struct Scenario {
     pub tutorial_hints: Vec<String>,
     /// Science Value per GB delivered by an Instrument with fit 1.0 over an Orbit with coverage 1.0.
     pub science_value_per_gb: f64,
+    /// The country this Scenario serves: card label and the globe's highlight. Required.
+    pub target_country: TargetCountry,
     /// Random Event chances and severity in this Scenario.
     pub events: EventTuning,
+}
+
+/// A Scenario's Target Country: `id` keys the outline in the JS land mask, `name` is shown to the player.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TargetCountry {
+    pub id: String,
+    pub name: String,
+}
+
+/// The Target Country highlighted where no Scenario is in play (title, Sources, Scenario select).
+pub const HOME_COUNTRY: &str = "angola";
+
+/// Scenarios in the order the cards list them: Angolan ones first, then by difficulty (Easy, Medium, Hard);
+/// ties keep catalog order.
+pub fn scenarios_in_card_order(scenarios: &[Scenario]) -> Vec<&Scenario> {
+    let rank = |d: &str| ["Easy", "Medium", "Hard"].iter().position(|x| *x == d).unwrap_or(usize::MAX);
+    let mut ordered: Vec<&Scenario> = scenarios.iter().collect();
+    ordered.sort_by_key(|s| (s.target_country.id != HOME_COUNTRY, rank(&s.difficulty)));
+    ordered
 }
 
 /// Per-Scenario Random Event chances (per day) and severity.
