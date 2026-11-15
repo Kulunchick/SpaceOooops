@@ -254,6 +254,9 @@ fn battery(f: &Facts) -> Option<Weighed> {
         (None, None) => format!("You already fly the biggest battery: {less_power}."),
     };
     let depth = need_wh / battery.capacity_wh;
+    // Deep or within the healthy depth as the player reads the two percentages: "drained 20% deep (a healthy
+    // battery stays under 20%)" would contradict itself.
+    let too_deep = pct(depth) != pct(healthy) && depth > healthy;
     let text = if need_wh > battery.capacity_wh {
         format!(
             "Your {} was too small: each orbit spends {minutes:.0} min in Earth's shadow, and getting through it takes \
@@ -262,7 +265,7 @@ fn battery(f: &Facts) -> Option<Weighed> {
             battery.name,
             pct(lost_share)
         )
-    } else if depth > healthy {
+    } else if too_deep {
         format!(
             "Your {} was drained {} deep in each of the {minutes:.0} min in Earth's shadow every orbit (a healthy \
              battery stays under {}), so it wore out fast. From day {first} it could no longer cover the eclipse, and \

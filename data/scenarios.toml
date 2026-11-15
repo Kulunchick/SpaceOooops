@@ -47,8 +47,8 @@ flare_failure_multiplier = 20.0
 outage_daily_chance = 0.006
 outage_days = 3
 # New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
-new_events_min = 2
-new_events_max = 3
+new_events_min = 5
+new_events_max = 8
 
 # Ground stations, main first: near Luanda, and a commercial site near Johannesburg (outage backup).
 [[scenarios.ground_stations]]
@@ -97,8 +97,8 @@ flare_failure_multiplier = 30.0
 outage_daily_chance = 0.006
 outage_days = 3
 # New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
-new_events_min = 2
-new_events_max = 3
+new_events_min = 5
+new_events_max = 8
 
 # Ground stations, main first: near Luanda, and a commercial site near Johannesburg (outage backup).
 [[scenarios.ground_stations]]
@@ -148,8 +148,8 @@ flare_failure_multiplier = 20.0
 outage_daily_chance = 0.01
 outage_days = 3
 # New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
-new_events_min = 2
-new_events_max = 3
+new_events_min = 5
+new_events_max = 8
 
 # Ground stations, main first: near Luanda, and a commercial site near Johannesburg (outage backup).
 [[scenarios.ground_stations]]
@@ -207,8 +207,8 @@ flare_failure_multiplier = 20.0
 outage_daily_chance = 0.006
 outage_days = 3
 # New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
-new_events_min = 2
-new_events_max = 3
+new_events_min = 5
+new_events_max = 8
 
 # Ground stations, main first: INPE's tracking and control stations at Cuiabá and Alcântara (backup).
 # source: USGS Landsat ground station list, station CUB (INPE, Cuiabá): -15.5528, -56.0733; it lists
