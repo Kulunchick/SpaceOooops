@@ -16,9 +16,7 @@
 // `frame(effects, playback)` returns what the spacecraft itself must show, for effects.js to merge into its
 // condition: `{ dim, spark, linkBreak }`. The canvas carries `data-event-fx`, `kind:progress` pairs.
 import * as THREE from '../../vendor/three/three.module.js';
-
-/** Star models by name (ticket 09 fills this from star_models.js). */
-const MODELS = {};
+import { MODELS } from './star_models.js';
 
 const smooth = (x) => {
   const t = Math.min(1, Math.max(0, x));
@@ -129,11 +127,13 @@ const BUILDERS = {
 };
 
 /** A named star model, when ticket 09 has one; otherwise the generic shape. */
-function modelFor(effect, generic) {
+function modelFor(effect, generic, low) {
   const make = effect.model ? MODELS[effect.model] : null;
   if (!make) return generic;
-  const model = make();
-  model.userData = { ...generic.userData, body: model, rock: model };
+  const model = make(low);
+  disposeGroup(generic);
+  // A star model keeps its own pose (no tumbling, no spinning); `tick` moves its wings, tail and lights.
+  model.userData = { ...model.userData, star: true, beam: { material: { opacity: 0 } } };
   return model;
 }
 
@@ -188,7 +188,7 @@ export function createEventEffects({ scene, run, canvas = null, camera = null })
       seen.add(e.id);
       let g = live.get(e.id);
       if (!g) {
-        g = modelFor(e, builder());
+        g = modelFor(e, builder(), canvas?.dataset.quality === 'low');
         live.set(e.id, g);
         root.add(g);
       }
@@ -199,12 +199,14 @@ export function createEventEffects({ scene, run, canvas = null, camera = null })
       const parts = g.userData;
       g.scale.setScalar(U);
       status.push(`${e.kind}:${p.toFixed(2)}`);
+      parts.tick?.(t);
 
       if (e.kind === 'flyBy') {
         // Crosses from one side to the other, above the craft, tumbling.
         const x = -5 + 10 * p;
         g.position.copy(craftPos).addScaledVector(right, x * U).addScaledVector(up, 1.6 * U);
-        parts.rock?.rotation.set(t * 5, t * 7, 0);
+        if (parts.star) g.rotation.set(0, 0, still ? 0 : Math.sin(t * 3) * 0.1); // nose along the way it travels
+        else parts.rock?.rotation.set(t * 5, t * 7, 0);
         g.scale.setScalar(U * (0.4 + 0.6 * fade));
       } else if (e.kind === 'hit') {
         // The streak comes in over the first 40%, then the burst and the sparks.
@@ -263,9 +265,12 @@ export function createEventEffects({ scene, run, canvas = null, camera = null })
         // Arrives, holds beside the craft (bobbing a little), and leaves.
         const arrive = smooth(into / 0.4) * smooth((e.days - into) / 0.4);
         const bob = still ? 0 : Math.sin(t * 6) * 0.12;
-        g.position.copy(craftPos).addScaledVector(right, 2.2 * U).addScaledVector(up, (1.1 + bob) * U);
+        // A star model is bigger than the generic saucer, so it holds closer, to stay on a phone-width screen.
+        const beside = parts.star ? 1.5 : 2.2;
+        g.position.copy(craftPos).addScaledVector(right, beside * U).addScaledVector(up, (parts.star ? 0.9 : 1.1 + bob) * U);
         g.scale.setScalar(U * (still ? 1 : arrive));
-        if (!still) g.rotation.y = t * 1.2;
+        if (parts.star) g.rotation.set(0.25, -0.5, 0); // a three-quarter view from the camera
+        else if (!still) g.rotation.y = t * 1.2;
         parts.beam.material.opacity = 0.18 * (still ? 1 : arrive);
       }
     }

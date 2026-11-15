@@ -227,6 +227,66 @@ lat = -2.34
 lon = -44.42
 
 [[scenarios]]
+id = "glacier-watch"
+name = "Glacier Watch"
+difficulty = "Easy"
+objective = "Photograph the Patagonian ice fields from a sun-synchronous Orbit for two years, to measure how fast the glaciers are retreating."
+why_it_matters = "Patagonia holds the largest ice fields outside Antarctica and Greenland, and most of its glaciers are shrinking. Their meltwater feeds rivers and lakes and adds to sea level. One year of pictures cannot tell a bad summer from a lasting change: a trend appears only when the same ice is seen again and again over years. Argentina's space agency, CONAE, watches its glaciers from space for that reason."
+required_science_value = 100.0
+# Two full years: two summers and two winters, enough to tell a trend from one warm season.
+min_lifetime_days = 730
+# source: game estimate. The same small camera satellite as Crop Watch, but with two years of operations to pay for.
+budget_usd = 2_500_000.0
+# Globe marker: the Southern Patagonian Ice Field above Lago Argentino, Santa Cruz (Perito Moreno glacier area).
+marker_lat = -50.5
+marker_lon = -73.0
+# Placeholder art (own work); swap the file or this path when the team supplies images.
+illustration = "assets/images/scenarios/glacier-watch.svg"
+key_constraints = [
+    "A glacier trend needs years of pictures: the spacecraft must last two years.",
+    "A 400 km Orbit sinks into the air within a year (300 days here); a sun-synchronous Orbit lasts years.",
+    "A sharp camera needs reaction wheels to point at the ground.",
+]
+tutorial_hints = [
+    "Start on the Science tab: one plain camera is enough here. Compare how well each Instrument suits ice.",
+    "Check the Lifetime on the Launch & Orbit tab: the Mission needs two years, and only some Orbits last that long.",
+    "On the Spacecraft tab, imagers and reaction wheels need deployable solar panels: watch the Power gauge.",
+    "On the Budget & Comms tab, two years of operations cost money: check the Budget gauge and the Data gauge.",
+]
+# Game-tuned: a well-suited imager sending ~300 MB a day for two years earns about 1.5x the requirement.
+science_value_per_gb = 0.7
+# The country the Scenario serves (id keys the globe outline).
+target_country = { id = "argentina", name = "Argentina" }
+
+[scenarios.events]
+# source: NOAA SWPC - strong (X-class) flares a few times a year near solar maximum; ~1.5 per year here.
+solar_flare_daily_chance = 0.004
+flare_safe_mode_days = 2
+flare_failure_multiplier = 20.0
+# Two stations that back each other up: outages about twice a year.
+outage_daily_chance = 0.006
+outage_days = 3
+# New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
+new_events_min = 2
+new_events_max = 3
+
+# Ground stations, main first: CONAE's Córdoba ground station at the Teófilo Tabanera Space Center, and its
+# Tierra del Fuego station at Tolhuin (backup).
+# source: Teófilo Tabanera Space Center, Falda del Cañete, Córdoba: 31 31' 29" S, 64 28' 02" W (Wikidata and
+# Wikimedia Commons; CONAE's own page gives the address, Ruta C45 km 8, but no numbers).
+[[scenarios.ground_stations]]
+name = "Córdoba"
+lat = -31.52
+lon = -64.47
+
+# source: CONAE Tierra del Fuego Ground Station, Tolhuin: 54 30' 37" S, 67 06' 54" W (Wikidata and Wikimedia Commons).
+# CONAE has only planned a station in Ushuaia itself, so the real station is used.
+[[scenarios.ground_stations]]
+name = "Tierra del Fuego"
+lat = -54.51
+lon = -67.12
+
+[[scenarios]]
 id = "cyclone-watch"
 name = "Cyclone Watch"
 difficulty = "Medium"

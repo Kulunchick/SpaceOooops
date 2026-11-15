@@ -133,6 +133,20 @@ pub fn SourcesScreen(on_back: impl Fn() + 'static) -> impl IntoView {
                     <Ext href="https://www.eoportal.org/satellite-missions/insat-3dr" label="INSAT-3DR, eoPortal" />
                     " (secondary source)."
                 </li>
+                <li>
+                    "Argentina (Glacier Watch), National Space Activities Commission (CONAE). C\u{f3}rdoba station, at the Te\u{f3}filo Tabanera Space Center: "
+                    <Ext href="https://www.wikidata.org/wiki/Q5693426" label="Te\u{f3}filo Tabanera Space Center, Wikidata" />
+                    " (position, secondary source; CONAE's "
+                    <Ext
+                        href="https://www.argentina.gob.ar/ciencia/conae/centros-y-estaciones/estacion-terrena-cordoba/ubicacion"
+                        label="C\u{f3}rdoba ground station page"
+                    />
+                    " gives the address only). Backup station, Tierra del Fuego Ground Station at Tolhuin (CONAE has only planned one in Ushuaia): "
+                    <Ext href="https://www.wikidata.org/wiki/Q42373251" label="Tierra del Fuego Ground Station, Wikidata" />
+                    " (secondary source). SAOCOM: "
+                    <Ext href="https://www.eoportal.org/satellite-missions/saocom" label="SAOCOM, eoPortal" />
+                    " (secondary source; the page gives two masses and the lower one is used)."
+                </li>
             </ul>
 
             <h3>"Assets and licences"</h3>
