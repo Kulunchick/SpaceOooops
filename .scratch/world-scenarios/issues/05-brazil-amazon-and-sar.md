@@ -12,13 +12,13 @@ against public sources first.
 
 **Blocked by:** 01, 02, 03, 04
 
-**Status:** ready-for-agent
+Status: resolved
 
-- [ ] A known-good radar Design on SSO passes Launch Review cleanly and reaches Success on a fixed seed and on the large majority of seeds
-- [ ] An optical Design on SSO launches but falls short of the required Science Value
-- [ ] The radar appears on the Design screen with a plain-words explanation of what it does and what it costs
-- [ ] The radar does not become the best answer in the Angolan Scenarios
-- [ ] Brazil is outlined, highlighted when its card is hovered or selected, and holds the pin and stations
-- [ ] The Debrief can show Amazonia-1 for a matching Design
-- [ ] The card has an illustration in the fallback project; end-to-end checks pass with the new card count
-- [ ] The sweep passes with the new Scenario and Instrument
+- [x] A known-good radar Design on SSO passes Launch Review cleanly and reaches Success on a fixed seed and on the large majority of seeds
+- [x] An optical Design on SSO launches but falls short of the required Science Value
+- [x] The radar appears on the Design screen with a plain-words explanation of what it does and what it costs
+- [x] The radar does not become the best answer in the Angolan Scenarios
+- [x] Brazil is outlined, highlighted when its card is hovered or selected, and holds the pin and stations
+- [x] The Debrief can show Amazonia-1 for a matching Design
+- [x] The card has an illustration in the fallback project; end-to-end checks pass with the new card count
+- [x] The sweep passes with the new Scenario and Instrument

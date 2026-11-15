@@ -334,6 +334,20 @@ function buildInstrument({ size, shape }) {
       g.add(arm);
       break;
     }
+    case 'radar-panel': {
+      // A low electronics box with a long, flat antenna panel unfolded across it, tiled with radiating patches.
+      g.add(box(w * 0.7, h * 0.3, d * 0.7, dark, 0, h * 0.15, 0));
+      const span = Math.max(w, d) * 2.6;
+      const depth = Math.min(w, d) * 0.9;
+      const panel = mat(palette.instrumentWhite, { metal: 0.2, rough: 0.5 });
+      g.add(box(span, h * 0.08, depth, panel, 0, h * 0.34, 0));
+      const tile = mat(palette.alu, { metal: 0.7, rough: 0.35 });
+      const n = 6;
+      for (let i = 0; i < n; i++) {
+        g.add(box(span / n * 0.8, h * 0.02, depth * 0.8, tile, -span / 2 + (span * (i + 0.5)) / n, h * 0.39, 0));
+      }
+      break;
+    }
     default:
       g.add(box(w, h, d, dark, 0, h / 2, 0));
   }

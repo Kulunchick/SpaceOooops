@@ -203,6 +203,7 @@ fn every_known_good_design_is_matched_to_a_sensible_real_mission() {
         (CROP_WATCH, crop_watch_known_good(), "Planet Dove"),
         (CONNECT_THE_VILLAGES, connect_the_villages_known_good(), "Arcturus"),
         (SPACE_WEATHER_SENTINEL, space_weather_sentinel_known_good(), "Dellingr"),
+        (AMAZON_WATCH, amazon_watch_known_good(), "Amazonia-1"),
     ];
     for (scenario, design, name) in expected {
         let m = fly(&design, scenario, 1).real_mission_match.expect("a match");
@@ -261,10 +262,11 @@ fn every_design_parameter_gauge_and_component_category_has_a_why_it_matters_text
 }
 
 #[test]
-fn only_crop_watch_carries_first_time_hints() {
+fn crop_watch_and_every_scenario_outside_angola_carry_first_time_hints() {
     let catalog = legacy_catalog();
     for s in &catalog.scenarios {
-        assert_eq!(!s.tutorial_hints.is_empty(), s.id == CROP_WATCH, "{}", s.id);
+        let expected = s.id == CROP_WATCH || s.target_country.id != "angola";
+        assert_eq!(!s.tutorial_hints.is_empty(), expected, "{}", s.id);
     }
 }
 

@@ -26,6 +26,7 @@ fn each_scenarios_marker_position_comes_from_its_data() {
 fn country_centre(id: &str) -> ((f64, f64), f64) {
     match id {
         "angola" => ((-12.5, 17.5), 9.0),
+        "brazil" => ((-10.0, -53.0), 20.0),
         other => panic!("no known centre for Target Country '{other}'"),
     }
 }
@@ -76,6 +77,10 @@ fn markers_sit_near_their_target_country_and_stay_apart() {
         let (centre, radius) = country_centre(&s.target_country.id);
         let away = angle_between(centre, (s.marker_lat, s.marker_lon));
         assert!(away <= radius, "{} marker is {away:.1} degrees from {}", s.id, s.target_country.name);
+        // The main station is in the Target Country (Angola's backup is in South Africa, so only the main one).
+        let main = &s.ground_stations[0];
+        let away = angle_between(centre, (main.lat, main.lon));
+        assert!(away <= radius, "{} station {} is {away:.1} degrees from {}", s.id, main.name, s.target_country.name);
     }
     for (i, a) in catalog.scenarios.iter().enumerate() {
         for b in &catalog.scenarios[i + 1..] {
@@ -130,6 +135,15 @@ fn select_shot_frames_the_previewed_scenarios_pin() {
     let catalog = catalog_with_space_weather_in("brazil", -10.0, -55.0);
     let spec = select_spec(&catalog, Some("space-weather-sentinel"));
     assert_eq!(spec.shot, Shot::Globe { lat: -10.0, lon: -55.0 });
+}
+
+#[test]
+fn hovering_the_brazil_card_turns_the_globe_to_its_pin_and_outlines_brazil() {
+    let catalog = load_catalog().unwrap();
+    let amazon = catalog.scenario("amazon-watch").expect("the Brazil Scenario is bundled");
+    let spec = select_spec(&catalog, Some("amazon-watch"));
+    assert_eq!(spec.shot, Shot::Globe { lat: amazon.marker_lat, lon: amazon.marker_lon });
+    assert_eq!(spec.highlighted_country, "brazil");
 }
 
 #[test]

@@ -22,6 +22,25 @@ export const ANGOLA = [
   [24, -13], [22, -13], [22, -16.2], [23.4, -17.6], [20.9, -18], [18.5, -17.4], [13.9, -17.4],
 ];
 
+// Brazil: the Atlantic coast follows SOUTH_AMERICA's points (with Alcântara's bay a little further out, so the
+// station stands on land); the inland borders are coarse, traced by eye from the rivers and ranges they follow.
+export const BRAZIL = [
+  // Atlantic coast, from the Oiapoque river (French Guiana border) south to Chuí (Uruguay border)
+  [-51.6, 4.3], [-50, 1.8], [-48, -1], [-44.4, -1.9], [-44, -2.5], [-39, -3.7], [-35.2, -5.5], [-35, -9],
+  [-38.5, -13], [-39, -17.8], [-41, -22], [-44.7, -23.3], [-48.5, -26.5], [-48.6, -28.5], [-51, -31],
+  [-53.4, -33.7],
+  // Uruguay, Argentina and Paraguay
+  [-53.2, -32.4], [-55.6, -30.9], [-57.6, -30.2], [-55.7, -28.2], [-53.8, -27.1], [-54.6, -25.6], [-54.3, -24],
+  [-55.6, -22.6], [-57.9, -22.1], [-58.1, -19.8],
+  // Bolivia and Peru
+  [-57.5, -18.2], [-58.4, -16.3], [-60.2, -16.2], [-60.5, -13.8], [-62.5, -13], [-64.4, -12.5], [-65.3, -11.8],
+  [-65.4, -10.8], [-66.6, -9.9], [-68.6, -11.1], [-69.6, -11], [-72.4, -10], [-73, -9.4], [-74, -7.5],
+  [-72.9, -5.1], [-70, -4.2],
+  // Colombia, Venezuela, Guyana and Suriname
+  [-69.6, -1], [-69.9, 0.6], [-69.4, 1.1], [-66.85, 1.2], [-65.5, 0.8], [-64, 2], [-64.6, 4.1], [-62.9, 3.6],
+  [-60.7, 5.2], [-59.9, 4.5], [-59.8, 2.5], [-58.8, 1.2], [-56.5, 1.9], [-54.6, 2.3],
+];
+
 const MADAGASCAR = [[49.3, -12], [50.4, -15.5], [47.4, -25], [45, -25.5], [43.6, -23], [44.4, -16.2], [47, -14.5]];
 
 const EURASIA = [
@@ -100,7 +119,7 @@ function inside(polygon, lon, lat) {
 
 // One outline per Target Country, keyed by the country id in data/scenarios.toml. Add a country here to make it
 // highlightable; a Scenario whose country has no outline here simply highlights nothing.
-export const COUNTRIES = { angola: ANGOLA };
+export const COUNTRIES = { angola: ANGOLA, brazil: BRAZIL };
 
 /** The id of the Target Country whose outline holds the point, or null. */
 export function countryAt(lon, lat) {

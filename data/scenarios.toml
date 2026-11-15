@@ -161,3 +161,67 @@ lon = 13.18
 name = "Johannesburg"
 lat = -25.89
 lon = 27.69
+
+# ---------------------------------------------------------------- World Scenarios
+
+[[scenarios]]
+id = "amazon-watch"
+name = "Amazon Watch"
+difficulty = "Medium"
+objective = "Watch the Brazilian Amazon from a sun-synchronous Orbit for a year and spot new forest clearing quickly, through the clouds that cover the forest most days."
+why_it_matters = "The Amazon rainforest breathes out huge amounts of water vapour, so thick clouds hang over it for much of the year, worst in the rainy season. An ordinary camera sees only the tops of the clouds. Clearing goes on under them, and an alert that comes weeks late arrives after the trees are gone. Brazil watches its forest from space so that inspectors can be sent while the clearing can still be stopped."
+required_science_value = 100.0
+# One full year: a rainy season and a dry season.
+min_lifetime_days = 365
+# source: game estimate. A radar costs more than a camera and the heavier spacecraft needs a SmallSat rideshare
+# slot; still far below a real ~600 kg national Earth-observation satellite.
+budget_usd = 4_000_000.0
+# Globe marker: the deforestation frontier in southern Pará, near Novo Progresso, where clearing meets the forest.
+marker_lat = -7.0
+marker_lon = -55.4
+# Placeholder art (own work); swap the file or this path when the team supplies images.
+illustration = "assets/images/scenarios/amazon-watch.svg"
+key_constraints = [
+    "Clouds cover the Amazon most days: a camera sees little of the forest.",
+    "A radar sees through cloud and at night, but it is heavy, power-hungry and expensive.",
+    "The radar's Data is heavy: the comms link must send it down every day.",
+]
+tutorial_hints = [
+    "Start on the Science tab: compare how well each Instrument suits this Scenario. Clouds blind the cameras here.",
+    "The radar is big and heavy: on the Spacecraft tab pick a Structure with room for it, and deployable solar panels for its Power.",
+    "On the Launch & Orbit tab, check that the Launch Vehicle can carry your Mass to the sun-synchronous Orbit.",
+    "On the Budget & Comms tab, make sure the radio can send the radar's Data down: watch the Data gauge.",
+]
+# Game-tuned: the radar sending ~1.5 GB a day for a year earns about 1.5x the requirement; a camera whose
+# pictures are mostly cloud earns a small fraction of it.
+science_value_per_gb = 0.27
+# The country the Scenario serves (id keys the globe outline).
+target_country = { id = "brazil", name = "Brazil" }
+
+[scenarios.events]
+# source: NOAA SWPC - strong (X-class) flares a few times a year near solar maximum; ~1.5 per year here.
+solar_flare_daily_chance = 0.004
+flare_safe_mode_days = 2
+flare_failure_multiplier = 20.0
+# Two national stations that back each other up: outages about twice a year.
+outage_daily_chance = 0.006
+outage_days = 3
+# New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
+new_events_min = 2
+new_events_max = 3
+
+# Ground stations, main first: INPE's tracking and control stations at Cuiabá and Alcântara (backup).
+# source: USGS Landsat ground station list, station CUB (INPE, Cuiabá): -15.5528, -56.0733; it lists
+# Amazonia-1 among the satellites the station tracks and controls (https://landsat.usgs.gov/CUB).
+[[scenarios.ground_stations]]
+name = "Cuiabá"
+lat = -15.55
+lon = -56.07
+
+# source: INPE's Alcântara tracking and control station (ETA) is in Alcântara, Maranhão (gov.br service page
+# for INPE's tracking and control); position of the Alcântara launch centre beside it, 2.34 S 44.42 W
+# (Wikipedia, Alcântara Space Center; secondary).
+[[scenarios.ground_stations]]
+name = "Alcântara"
+lat = -2.34
+lon = -44.42

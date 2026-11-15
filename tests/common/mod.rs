@@ -64,6 +64,24 @@ pub fn connect_the_villages_known_good() -> Design {
     }
 }
 
+pub const AMAZON_WATCH: &str = "amazon-watch";
+
+/// A 12U CubeSat with the radar on reaction wheels, deployable panels, an 80 Wh battery and an X-band radio for
+/// the radar's heavy Data, in SSO on a SmallSat rideshare (too heavy for a 6U slot). Passes cleanly in Brazil.
+pub fn amazon_watch_known_good() -> Design {
+    Design {
+        instruments: vec!["sar-radar".to_string()],
+        structure: Some("cubesat-12u".to_string()),
+        solar: Some(Pick::new("solar-deployable", FlightProven)),
+        battery: Some(Pick::new("battery-l", FlightProven)),
+        attitude: Some(Pick::new("reaction-wheels", FlightProven)),
+        comms: Some(Pick::new("comms-x-band", FlightProven)),
+        computer_tier: FlightProven,
+        orbit: Some("sso-600".to_string()),
+        launch_vehicle: Some("smallsat-rideshare".to_string()),
+    }
+}
+
 /// A 6U CubeSat with a particle detector and an ionosphere probe in LEO 400 km, deployed from the space
 /// station, sending its heavy Data down over an X-band radio. Passes cleanly.
 pub fn space_weather_sentinel_known_good() -> Design {

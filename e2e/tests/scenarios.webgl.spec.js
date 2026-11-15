@@ -9,7 +9,7 @@ async function openScenarioSelect(page) {
   await expect(page.getByRole('heading', { name: 'Choose a Scenario' })).toBeVisible();
 }
 
-test('Scenario select shows three cards with illustrations over the clear scene', async ({ page }) => {
+test('Scenario select shows every card with its illustration over the clear scene', async ({ page }) => {
   const errors = collectErrors(page);
   await openScenarioSelect(page);
   const catalog = catalogScenarios();
@@ -46,6 +46,26 @@ test('hovering or focusing a card turns the globe without errors', async ({ page
   await cards.first().getByRole('button', { name: 'Select' }).focus();
   await page.waitForTimeout(150);
   await expect(page.locator('.scene-layer')).toHaveAttribute('data-scene', 'live');
+  expect(errors).toEqual([]);
+});
+
+test('hovering the Brazil card turns the globe to its pin and highlights Brazil only', async ({ page }) => {
+  const errors = collectErrors(page);
+  await openScenarioSelect(page);
+  const canvas = page.locator('canvas.scene-canvas');
+  await expect(canvas).toHaveAttribute('data-highlight', 'angola');
+  await page.locator('.scenario-card', { hasText: 'Amazon Watch' }).hover();
+  await expect(canvas).toHaveAttribute('data-highlight', 'brazil');
+  await expect(canvas).toHaveAttribute('data-shot-at', '-7,-55.4');
+  await expect(canvas).toHaveAttribute('data-flying', 'false', { timeout: 15000 });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: 'test-results/scenario-select-brazil.png' });
+  await page.locator('.scenario-card', { hasText: 'Amazon Watch' }).getByRole('button', { name: 'Select' }).click();
+  await expect(page.getByRole('heading', { name: 'Amazon Watch' })).toBeVisible();
+  await expect(canvas).toHaveAttribute('data-highlight', 'brazil');
+  await expect(canvas).toHaveAttribute('data-flying', 'false', { timeout: 15000 });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: 'test-results/brief-brazil.png' });
   expect(errors).toEqual([]);
 });
 
