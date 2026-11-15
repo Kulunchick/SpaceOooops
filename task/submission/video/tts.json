@@ -1,0 +1,11 @@
+{
+ "text": "We are team Space Oops. Students rarely get to fly a whole space mission, so we built one. Space Oops: design it, launch it, find out why it failed. Every choice is a trade-off: a better instrument costs mass, power and money. Pass the launch review, survive solar flares. Fail, learn, fly again, solo or as a crew of four. Then read a debrief grounded in NASA mission design guides.",
+ "model_id": "eleven_v4",
+ "voice_settings": {
+  "stability": 0.65,
+  "similarity_boost": 0.8,
+  "style": 0.35,
+  "use_speaker_boost": true,
+  "speed": 1.0
+ }
+}

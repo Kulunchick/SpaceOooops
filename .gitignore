@@ -12,3 +12,9 @@ graphify-out/*
 /e2e/node_modules/
 /e2e/test-results/
 /e2e/playwright-report/
+
+# Secrets
+.env
+task/resources/graphify-out/*
+!task/resources/graphify-out/GRAPH_REPORT.md
+!task/resources/graphify-out/graph.json
