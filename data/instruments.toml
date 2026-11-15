@@ -53,7 +53,7 @@ fit = { crop-watch = 0.3, connect-the-villages = 0.0, space-weather-sentinel = 0
 id = "village-relay"
 shape = "folded-dish"
 name = "Ka-band village relay"
-why = "A radio relay with a small folding dish aimed at Angola. Village terminals with small dishes talk to it, and it passes their phone and internet traffic to a gateway station over the spacecraft's comms band. A village is only served while the satellite is in view, so it needs an Orbit that stays over Angola."
+why = "A radio relay with a small folding dish aimed at the target region. Village terminals with small dishes talk to it, and it passes their phone and internet traffic to a gateway station over the spacecraft's comms band. A village is only served while the satellite is in view, so it needs an Orbit that stays over the target region."
 # source: game estimate from CubeSat Ka-band communication payload demonstrations: a few kg, ~4U with the
 # folded antenna, 5-10 W while transmitting.
 mass_kg = 4.0

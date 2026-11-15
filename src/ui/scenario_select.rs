@@ -1,7 +1,7 @@
 //! Scenario select: every Scenario in the catalog with difficulty, objective and key constraints, as cards beside
 //! the globe. Each card has an illustration slot (placeholder art from the Scenario data, easy to swap).
 use leptos::prelude::*;
-use spaceooops::sim::Design;
+use spaceooops::sim::{scenarios_in_card_order, Design};
 
 use super::format::money;
 use super::state::{AppState, Screen};
@@ -9,11 +9,11 @@ use super::state::{AppState, Screen};
 #[component]
 pub fn ScenarioSelectScreen() -> impl IntoView {
     let state = expect_context::<AppState>();
-    let scenarios = state.catalog.with_value(|c| c.scenarios.clone());
+    let scenarios = state.catalog.with_value(|c| scenarios_in_card_order(&c.scenarios).into_iter().cloned().collect::<Vec<_>>());
     view! {
         <section class="screen scenario-screen">
             <h2 class="lp-display scenario-title">"Choose a Scenario"</h2>
-            <p class="scenario-hint">"Each pin on the globe is one Scenario, somewhere in Angola."</p>
+            <p class="scenario-hint">"Each pin on the globe is one Scenario, somewhere around the world."</p>
             <div class="scenario-list">
                 {scenarios
                     .into_iter()
@@ -31,6 +31,7 @@ pub fn ScenarioSelectScreen() -> impl IntoView {
                                             {s.difficulty.clone()}
                                         </span>
                                     </header>
+                                    <p class="scenario-country">"Target Country: " {s.target_country.name.clone()}</p>
                                     <p>{s.objective.clone()}</p>
                                     <p class="muted">"Budget: " {money(s.budget_usd)}</p>
                                     <ul class="constraints">

@@ -1,6 +1,6 @@
 // Scenario select and Brief over the 3D scene: markers, fly-to, skipping the flight, reduced motion.
 import { test, expect } from '@playwright/test';
-import { collectErrors, chooseReducedMotion } from './helpers.js';
+import { collectErrors, chooseReducedMotion, catalogScenarios } from './helpers.js';
 
 async function openScenarioSelect(page) {
   await page.goto('./');
@@ -12,8 +12,12 @@ async function openScenarioSelect(page) {
 test('Scenario select shows three cards with illustrations over the clear scene', async ({ page }) => {
   const errors = collectErrors(page);
   await openScenarioSelect(page);
-  await expect(page.locator('.scenario-card')).toHaveCount(3);
-  await expect(page.locator('.scenario-card .illustration-slot img')).toHaveCount(3);
+  const catalog = catalogScenarios();
+  await expect(page.locator('.scenario-card')).toHaveCount(catalog.length);
+  await expect(page.locator('.scenario-card .illustration-slot img')).toHaveCount(catalog.length);
+  for (const { name, country } of catalog) {
+    await expect(page.locator('.scenario-card', { hasText: name }).locator('.scenario-country')).toContainText(country);
+  }
   for (const img of await page.locator('.scenario-card img').all()) {
     await expect.poll(() => img.evaluate((i) => i.complete && i.naturalWidth > 0)).toBe(true);
   }

@@ -44,7 +44,8 @@ export function hasWebGL() {
 }
 
 function buildWorld() {
-  const { earth, clouds, stars } = createEarth(quality);
+  const { earth, clouds, stars, highlight } = createEarth(quality);
+  highlight(spec?.highlightedCountry ?? 'angola');
   const craft = createTitleCraft();
   craft.scale.setScalar(1.6);
   const orbit = new THREE.Group();
@@ -63,7 +64,7 @@ function buildWorld() {
   if (spec) pad.apply(spec, reducedMotion);
   const debrief = createDebrief({ scene, camera, earth, sunLight, canvas: canvasEl });
   if (spec) debrief.apply(spec, reducedMotion);
-  return { earth, clouds, stars, craft, orbit, hangar, run, effects, pad, debrief };
+  return { earth, clouds, highlight, stars, craft, orbit, hangar, run, effects, pad, debrief };
 }
 
 function disposeWorld() {
@@ -174,6 +175,7 @@ export async function init(canvas, initialQuality = 'high') {
 export function apply(sceneSpec) {
   spec = sceneSpec;
   if (rig) rig.setShot(sceneSpec.shot);
+  world?.highlight(sceneSpec.highlightedCountry ?? 'angola');
   world?.hangar.apply(sceneSpec, reducedMotion);
   world?.run.apply(sceneSpec, reducedMotion);
   world?.effects.apply(sceneSpec);
