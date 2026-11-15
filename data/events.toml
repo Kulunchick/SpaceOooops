@@ -88,3 +88,137 @@ log = "The only key to the control room went on holiday with the engineer who ha
 scene = "link-interference"
 real_life = "Small missions often run on a handful of people, and a missed pass because nobody could reach the console is a classic of university ground stations."
 effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]
+
+# ==== 02: remaining mechanics, passive events ================================
+# Data, storage, pointing, battery capacity, failure chance, Budget, Science Value bonus, extra day of Data.
+# ============================================================================
+
+[[events]]
+id = "thermostat-lost-its-mind"
+group = "real"
+title = "The thermostat lost its mind"
+log = "A faulty thermostat let the battery get cold. A cold battery holds less charge: 30% less capacity for 3 days."
+scene = "panel-shading"
+real_life = "Batteries lose capacity in the cold, so spacecraft carry heaters on thermostats; when one sticks, the battery cools and the mission has less energy for eclipses."
+effects = [{ mechanic = "battery-capacity", strength = -0.3, days = 3 }]
+
+[[events]]
+id = "antenna-snagged-while-unfolding"
+group = "real"
+title = "The antenna snagged while unfolding"
+log = "The antenna caught on a bit of blanket while unfolding and only half opened: half the downlink for 2 days."
+scene = "link-interference"
+real_life = "Deployable antennas and booms have snagged on thermal blankets and tape on real spacecraft, leaving them partly open."
+effects = [{ mechanic = "downlink", strength = -0.5, days = 2 }]
+
+[[events]]
+id = "operator-fell-asleep-on-night-shift"
+group = "real"
+title = "The operator fell asleep on the night shift"
+log = "The night-shift operator dozed off through the pass. The Data waited on board for the next one: no downlink for 1 day."
+scene = "link-interference"
+real_life = "Tired operators are a known risk in control rooms, which is why real missions automate routine passes and rotate shifts."
+effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]
+
+[[events]]
+id = "budget-cut-for-a-fountain"
+group = "real"
+title = "Budget cut"
+log = "The ministry needed a new fountain for its lobby and took $60,000 from the Mission's Budget."
+scene = "bonus-glow"
+real_life = "Space budgets are set by governments every year, and a mission can lose money to unrelated priorities even after it has launched."
+effects = [{ mechanic = "budget", strength = -60000.0 }]
+
+[[events]]
+id = "console-update-mid-pass"
+group = "real"
+title = "System update on the console mid-pass"
+log = "The ground console began installing updates in the middle of the pass (\"do not turn off your computer\"): no downlink for 1 day."
+scene = "link-interference"
+real_life = "Operating-system updates on ground computers have interrupted real satellite passes; control rooms now freeze updates during contacts."
+effects = [{ mechanic = "downlink", strength = -1.0, days = 1 }]
+
+[[events]]
+id = "russells-teapot-knocks"
+group = "fantasy"
+title = "Russell's teapot knocks on the hull"
+log = "Something small and china-shaped knocked on the hull and the pointing wobbled: pointing was 50% worse for 1 day."
+scene = "visitor"
+effects = [{ mechanic = "pointing", strength = -0.5, days = 1 }]
+
+[[events]]
+id = "gremlins-chew-the-wiring"
+group = "fantasy"
+title = "Gremlins chew the wiring"
+log = "Gremlins chewed on the wiring and cut the Power by 30% for 3 days, then got bored and left."
+scene = "panel-shading"
+effects = [{ mechanic = "power", strength = -0.3, days = 3 }]
+
+[[events]]
+id = "aliens-borrow-the-satellite"
+group = "fantasy"
+title = "Aliens borrow the satellite for experiments"
+log = "Aliens borrowed the satellite for experiments: Instruments off for 2 days. They returned it with washed panels: 2% more Power from then on."
+scene = "visitor"
+effects = [{ mechanic = "instruments-off", days = 2 }, { mechanic = "power", strength = 0.02, to_end = true, delay = 2 }]
+
+[[events]]
+id = "witch-on-a-broom"
+group = "fantasy"
+title = "A witch on a broom crosses the orbit"
+log = "A witch on a broom crossed the orbit. The spacecraft dodged: Instruments off for 1 day."
+scene = "fly-by"
+effects = [{ mechanic = "instruments-off", days = 1 }]
+
+[[events]]
+id = "time-loop"
+group = "fantasy"
+title = "Time loop"
+log = "The satellite lived one day twice. Nobody can explain it, but there is an extra day of Data."
+scene = "bonus-glow"
+effects = [{ mechanic = "extra-data-day" }]
+
+[[events]]
+id = "a-sponsor-chips-in"
+group = "lucky"
+title = "A sponsor chips in"
+log = "A company liked the Mission and chipped in $80,000 for its logo on the website."
+scene = "bonus-glow"
+real_life = "Small missions often raise money from sponsors, in exchange for a name on the spacecraft or the website."
+effects = [{ mechanic = "budget", strength = 80000.0 }]
+
+[[events]]
+id = "neighbouring-station-gives-away-passes"
+group = "lucky"
+title = "A neighbouring station gives away passes"
+log = "A neighbouring ground station had free time and gave away its passes: 50% more downlink for 5 days."
+scene = "link-interference"
+real_life = "Ground stations around the world share spare time, and a mission with an idle neighbour can borrow extra contact time."
+effects = [{ mechanic = "downlink", strength = 0.5, days = 5 }]
+
+[[events]]
+id = "programmers-compress-data-better"
+group = "lucky"
+title = "The programmers compress Data better"
+log = "The programmers found a better way to compress the Data: 5% more downlink from then on."
+scene = "bonus-glow"
+real_life = "Flight software is often improved in orbit; a better compression routine sends more science through the same radio link."
+effects = [{ mechanic = "downlink", strength = 0.05, to_end = true }]
+
+[[events]]
+id = "quiet-sun"
+group = "lucky"
+title = "Quiet Sun"
+log = "The Sun was calm for a month, and the Components were less likely to fail: half the usual failure chance for 30 days."
+scene = "bonus-glow"
+real_life = "Solar activity follows an 11-year cycle, and quiet stretches mean less radiation damage to electronics."
+effects = [{ mechanic = "failure-chance", strength = -0.5, days = 30 }]
+
+[[events]]
+id = "panels-beat-the-estimate"
+group = "lucky"
+title = "The panels beat the estimate"
+log = "The panels turned out to make 3% more Power than the datasheet promised, for the rest of the Mission."
+scene = "bonus-glow"
+real_life = "Datasheets are conservative; real solar cells often beat their rated output early in life."
+effects = [{ mechanic = "power", strength = 0.03, to_end = true }]

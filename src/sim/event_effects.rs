@@ -117,7 +117,6 @@ impl EventState {
 }
 
 /// Starts one effect of an event that fired on `day`. One arm per mechanic; a later ticket fills its own arm.
-#[allow(unused_variables)] // `out` is for the instant mechanics (ticket 02)
 pub(crate) fn start(effect: &EffectSpec, day: u32, st: &mut EventState, out: &mut DayOutcome) {
     match effect.mechanic {
         // ---- 01
@@ -125,15 +124,23 @@ pub(crate) fn start(effect: &EffectSpec, day: u32, st: &mut EventState, out: &mu
         Mechanic::InstrumentsOff => st.timed(effect, day),
         Mechanic::Downlink => st.timed(effect, day),
         // ---- 02, timed
-        Mechanic::Data => {}
-        Mechanic::Storage => {}
-        Mechanic::Pointing => {}
-        Mechanic::BatteryCapacity => {}
-        Mechanic::FailureChance => {}
+        Mechanic::Data => st.timed(effect, day),
+        Mechanic::Storage => st.timed(effect, day),
+        Mechanic::Pointing => st.timed(effect, day),
+        Mechanic::BatteryCapacity => st.timed(effect, day),
+        Mechanic::FailureChance => st.timed(effect, day),
         // ---- 02, instant
-        Mechanic::Budget => {}
-        Mechanic::ScienceBonus => {}
-        Mechanic::ExtraDataDay => {}
+        Mechanic::Budget => {
+            if effect.strength >= 0.0 {
+                st.budget_gained_usd += effect.strength;
+            } else {
+                out.cost_usd -= effect.strength;
+            }
+        }
+        Mechanic::ScienceBonus => out.science_bonus_share += effect.strength,
+        Mechanic::ExtraDataDay => {
+            st.timed(&EffectSpec { strength: 1.0, days: Some(1), to_end: false, ..effect.clone() }, day)
+        }
         // ---- 06
         Mechanic::ScoreBonus => {}
     }
