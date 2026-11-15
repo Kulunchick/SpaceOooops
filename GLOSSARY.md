@@ -9,7 +9,7 @@ A predefined mission brief: the objective to achieve, the Science Value required
 _Avoid_: Level, quest
 
 **Target Country**:
-The country a Scenario serves: it holds the Scenario's pin and ground stations, and is outlined and highlighted on the globe (only that one country) once that Scenario is chosen; Angola is highlighted on the title and Scenario select screens. The Scenario card shows it, and Angolan Scenarios are listed first. Angola for the original three Scenarios.
+The country a Scenario serves: it holds the Scenario's pin and ground stations, and is outlined and highlighted on the globe (only one country at a time) while its Scenario card is hovered or focused on Scenario select and on every screen once the Scenario is chosen; Angola is highlighted on the title screen, and on Scenario select while no card is hovered. The Scenario card shows it, and Angolan Scenarios are listed first. Angola for the original three Scenarios.
 _Avoid_: Region, area, target (alone)
 
 **Mission**:
@@ -38,6 +38,15 @@ _Avoid_: Incident, hazard
 
 **Unexplained**:
 The mark the event log gives a fantasy Random Event, one that has no real-life explanation.
+_Avoid_: Fantasy, fake (in player-facing text)
+
+**Lucky**:
+The mark the event log gives a lucky Random Event (good news: Budget, Data or Science Value gained), shown apart from bad news.
+_Avoid_: Bonus event, good event
+
+**Gamble**:
+An option of a Random Event's question that has two outcomes and a stated chance ("about 7 in 10 it goes well"); the roll is fixed when the Run is planned, before the player answers. The Debrief says whether the gamble paid off or failed.
+_Avoid_: Risk option, coin flip
 
 **Debrief**:
 The post-Run report: whether the Mission succeeded, why, and its Score.

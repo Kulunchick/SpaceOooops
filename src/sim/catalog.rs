@@ -71,7 +71,8 @@ impl Scenario {
     }
 }
 
-/// The Target Country highlighted where no Scenario is in play (title, Sources, Scenario select).
+/// The Target Country highlighted where no Scenario is in play (title, Sources, and Scenario select while no card is
+/// hovered).
 pub const HOME_COUNTRY: &str = "angola";
 
 /// Scenarios in the order the cards list them: Angolan ones first, then by difficulty (Easy, Medium, Hard);
