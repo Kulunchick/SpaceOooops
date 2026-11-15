@@ -22,15 +22,59 @@ fn each_scenarios_marker_position_comes_from_its_data() {
     }
 }
 
-/// Rough centre of each Target Country (degrees) and the radius within which its Scenarios' markers must sit.
-fn country_centre(id: &str) -> ((f64, f64), f64) {
-    match id {
-        "angola" => ((-12.5, 17.5), 9.0),
-        "brazil" => ((-10.0, -53.0), 20.0),
-        "india" => ((22.0, 79.0), 15.0),
-        "japan" => ((36.0, 138.0), 10.0),
-        "argentina" => ((-38.0, -65.0), 20.0),
-        other => panic!("no known centre for Target Country '{other}'"),
+/// The Target Country outlines the globe draws, read from `js/bridge/land.js` (as other tests read data files):
+/// country id -> its polygons of [lon, lat] points.
+fn outlines() -> std::collections::BTreeMap<String, Vec<Vec<(f64, f64)>>> {
+    let js = include_str!("../js/bridge/land.js");
+    let line = js.lines().find(|l| l.starts_with("export const COUNTRIES = {")).expect("COUNTRIES in land.js");
+    let body = line.split('{').nth(1).unwrap().split('}').next().unwrap();
+    let mut out = std::collections::BTreeMap::new();
+    for entry in body.split(',').map(str::trim).filter(|e| !e.is_empty()) {
+        let (id, constant) = entry.split_once(':').unwrap();
+        let start = js.find(&format!("export const {} = [", constant.trim())).expect("the outline constant");
+        let text = &js[start..];
+        let text = &text[text.find('[').unwrap()..text.find("\n];").unwrap() + 2];
+        // JS to JSON: drop comments and trailing commas.
+        let mut json: String = text.lines().map(|l| l.split("//").next().unwrap()).collect::<Vec<_>>().join("\n");
+        while let Some(i) = json.find(",\n]").or_else(|| json.find(", ]")).or_else(|| json.find(",]")) {
+            json.remove(i);
+        }
+        let json = json.replace(",\n  ]", "\n  ]");
+        let v: serde_json::Value = serde_json::from_str(&json).unwrap_or_else(|e| panic!("{id}: {e}\n{json}"));
+        let pair = |p: &serde_json::Value| (p[0].as_f64().unwrap(), p[1].as_f64().unwrap());
+        let parts: Vec<Vec<(f64, f64)>> = if v[0][0].is_array() {
+            v.as_array().unwrap().iter().map(|part| part.as_array().unwrap().iter().map(pair).collect()).collect()
+        } else {
+            vec![v.as_array().unwrap().iter().map(pair).collect()]
+        };
+        out.insert(id.trim().to_string(), parts);
+    }
+    out
+}
+
+/// Whether (lat, lon) is inside one of the polygons (even-odd rule, as land.js does).
+fn inside(parts: &[Vec<(f64, f64)>], lat: f64, lon: f64) -> bool {
+    parts.iter().any(|poly| {
+        let mut hit = false;
+        let mut j = poly.len() - 1;
+        for i in 0..poly.len() {
+            let ((xi, yi), (xj, yj)) = (poly[i], poly[j]);
+            if (yi > lat) != (yj > lat) && lon < (xj - xi) * (lat - yi) / (yj - yi) + xi {
+                hit = !hit;
+            }
+            j = i;
+        }
+        hit
+    })
+}
+
+#[test]
+fn every_target_country_and_the_home_country_have_an_outline_on_the_globe() {
+    let catalog = load_catalog().unwrap();
+    let outlines = outlines();
+    assert!(outlines.contains_key(spaceooops::sim::HOME_COUNTRY));
+    for s in &catalog.scenarios {
+        assert!(outlines.contains_key(&s.target_country.id), "{}: no outline for '{}' in land.js", s.id, s.target_country.id);
     }
 }
 
@@ -74,16 +118,20 @@ fn the_highlighted_country_follows_the_screen() {
 }
 
 #[test]
-fn markers_sit_near_their_target_country_and_stay_apart() {
+fn markers_and_stations_sit_inside_their_target_country_and_markers_stay_apart() {
     let catalog = load_catalog().unwrap();
+    let outlines = outlines();
     for s in &catalog.scenarios {
-        let (centre, radius) = country_centre(&s.target_country.id);
-        let away = angle_between(centre, (s.marker_lat, s.marker_lon));
-        assert!(away <= radius, "{} marker is {away:.1} degrees from {}", s.id, s.target_country.name);
-        // The main station is in the Target Country (Angola's backup is in South Africa, so only the main one).
-        let main = &s.ground_stations[0];
-        let away = angle_between(centre, (main.lat, main.lon));
-        assert!(away <= radius, "{} station {} is {away:.1} degrees from {}", s.id, main.name, s.target_country.name);
+        let outline = &outlines[&s.target_country.id];
+        assert!(inside(outline, s.marker_lat, s.marker_lon), "{} marker is outside {}", s.id, s.target_country.name);
+        for g in &s.ground_stations {
+            // The one station abroad: the Angolan Scenarios' backup in South Africa.
+            if s.target_country.id == "angola" && g.name == "Johannesburg" {
+                assert!(!inside(outline, g.lat, g.lon));
+                continue;
+            }
+            assert!(inside(outline, g.lat, g.lon), "{} station {} is outside {}", s.id, g.name, s.target_country.name);
+        }
     }
     for (i, a) in catalog.scenarios.iter().enumerate() {
         for b in &catalog.scenarios[i + 1..] {
@@ -123,7 +171,7 @@ fn select_spec(catalog: &Catalog, previewed: Option<&str>) -> scene::SceneSpec {
     })
 }
 
-/// All Scenarios are in Angola today, so move one pin and its Target Country to prove the follow.
+/// Moves an Angolan Scenario's pin and Target Country elsewhere, so a follow cannot pass by resting on Angola.
 fn catalog_with_space_weather_in(country: &str, lat: f64, lon: f64) -> Catalog {
     let mut catalog = load_catalog().unwrap();
     let s = catalog.scenarios.iter_mut().find(|s| s.id == "space-weather-sentinel").unwrap();
@@ -156,6 +204,27 @@ fn hovering_the_india_card_turns_the_globe_to_its_pin_and_outlines_india() {
     let spec = select_spec(&catalog, Some("cyclone-watch"));
     assert_eq!(spec.shot, Shot::Globe { lat: cyclone.marker_lat, lon: cyclone.marker_lon });
     assert_eq!(spec.highlighted_country, "india");
+}
+
+/// The globe's highlight must show the facets under the country's pins and ground stations, so the Scene Spec
+/// names them: every pin and station of every Scenario in the highlighted country.
+#[test]
+fn the_highlight_names_the_pins_and_stations_it_must_show() {
+    let catalog = load_catalog().unwrap();
+    let points = |spec: &scene::SceneSpec| spec.highlight_points.iter().map(|p| (p.lat, p.lon)).collect::<Vec<_>>();
+    let japan = points(&select_spec(&catalog, Some("japan-disaster-response")));
+    for p in [(38.3, 140.7), (36.07, 140.13), (26.5, 127.9)] {
+        assert!(japan.contains(&p), "{p:?} in {japan:?}");
+    }
+    assert_eq!(japan.len(), 3);
+    let home = points(&select_spec(&catalog, None));
+    for s in catalog.scenarios.iter().filter(|s| s.target_country.id == "angola") {
+        assert!(home.contains(&(s.marker_lat, s.marker_lon)), "{}", s.id);
+        assert!(home.contains(&(s.ground_stations[0].lat, s.ground_stations[0].lon)), "{}", s.id);
+    }
+    let json = scene::to_json(&select_spec(&catalog, Some("japan-disaster-response")));
+    let v: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(v["highlightPoints"][0]["lat"], 38.3);
 }
 
 #[test]

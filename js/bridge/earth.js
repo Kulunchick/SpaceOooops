@@ -2,7 +2,7 @@
 // a sparse cloud shell, and a star field. Flat shading, palette colours only, no textures.
 import * as THREE from '../../vendor/three/three.module.js';
 import { palette } from './palette.js';
-import { countryAt, surfaceAt } from './land.js';
+import { countryAt, countryParts, inCountry, mainlandAt, surfaceAt } from './land.js';
 
 export const EARTH_RADIUS = 1;
 const DEG = Math.PI / 180;
@@ -46,40 +46,97 @@ function faceColour(centroid) {
   }
 }
 
+// Points along a country's coasts and borders, about half a degree apart, to find the facets an outline crosses.
+function outlineSamples(parts) {
+  const points = [];
+  for (const part of parts) {
+    part.forEach(([lon0, lat0], i) => {
+      const [lon1, lat1] = part[(i + 1) % part.length];
+      const steps = Math.max(1, Math.ceil(Math.hypot(lon1 - lon0, lat1 - lat0) / 0.5));
+      for (let s = 0; s < steps; s++) {
+        const t = s / steps;
+        points.push(latLonToVector(lat0 + (lat1 - lat0) * t, lon0 + (lon1 - lon0) * t));
+      }
+    });
+  }
+  return points;
+}
+
+// Whether the unit vector `p` lies inside the spherical triangle a, b, c (seen from Earth's centre).
+const edge = new THREE.Vector3();
+function inTriangle(p, a, b, c) {
+  const side = (u, v) => Math.sign(edge.crossVectors(u, v).dot(p));
+  const s = side(a, b);
+  return s === side(b, c) && s === side(c, a);
+}
+
 /**
- * Colours every triangle of a non-indexed geometry with `colourOf(centroid)`. Returns `highlight(countryId)`, which
- * paints only the facets inside that Target Country's outline in the highlight colour; every other facet keeps its
- * own colour. Passing an unknown id or null clears the highlight.
+ * The facets that show a Target Country: every facet whose centre is inside its outline, and also every facet off
+ * the mainland (sea or island) that the outline touches: a corner inside it, or a stretch of its coast running
+ * through it. The second rule lets a narrow country of islands (Japan) read as a country and keeps the facets under
+ * its pin and stations; facets on another country's mainland are never taken, so no highlight bleeds into a neighbour.
+ */
+function countryFaces(id, faces, points) {
+  const samples = outlineSamples(countryParts(id));
+  const out = new Set();
+  // The facet under each of the country's pins and stations (only those inside its outline: Angola's backup station
+  // is in South Africa), even where the coarse globe puts the facet's centre over the border.
+  for (const { lat, lon } of points) {
+    if (!inCountry(id, lon, lat)) continue;
+    const p = latLonToVector(lat, lon);
+    const face = faces.findIndex((f) => f.corners[0].dot(p) > 0.9 && inTriangle(p, ...f.corners));
+    if (face >= 0) out.add(face);
+  }
+  faces.forEach((f, index) => {
+    if (f.country === id) {
+      out.add(index);
+      return;
+    }
+    if (f.country !== null || f.mainland) return;
+    // Facets far from every sample cannot touch the outline (a facet is a few degrees across).
+    if (!samples.some((p) => p.distanceToSquared(f.centroid) < 0.012)) return;
+    const touches = f.corners.some((v) => {
+      const at = vectorToLatLon(v);
+      return inCountry(id, at.lon, at.lat);
+    }) || samples.some((p) => p.dot(f.centroid) > 0.9 && inTriangle(p, ...f.corners));
+    if (touches) out.add(index);
+  });
+  return out;
+}
+
+/**
+ * Colours every triangle of a non-indexed geometry with `colourOf(centroid)`. Returns `highlight(countryId, points)`,
+ * which paints only the facets that show that Target Country (see `countryFaces`; `points` are its pins and stations,
+ * [{ lat, lon }]) in the highlight colour; every other facet keeps its own colour. An unknown id or null clears it.
  */
 function colourFaces(geometry, colourOf) {
   const pos = geometry.getAttribute('position');
   const colours = new Float32Array(pos.count * 3);
-  const countries = [];
-  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  const faces = [];
   const colour = new THREE.Color();
   for (let i = 0; i < pos.count; i += 3) {
-    a.fromBufferAttribute(pos, i);
-    b.fromBufferAttribute(pos, i + 1);
-    c.fromBufferAttribute(pos, i + 2);
-    const centroid = a.add(b).add(c).divideScalar(3);
+    const corners = [0, 1, 2].map((k) => new THREE.Vector3().fromBufferAttribute(pos, i + k).normalize());
+    const centroid = corners[0].clone().add(corners[1]).add(corners[2]).divideScalar(3);
     const at = vectorToLatLon(centroid);
-    countries.push(countryAt(at.lon, at.lat));
+    faces.push({ corners, centroid: centroid.clone().normalize(), country: countryAt(at.lon, at.lat), mainland: mainlandAt(at.lon, at.lat) });
     colour.setHex(colourOf(centroid));
     for (let k = 0; k < 3; k++) colour.toArray(colours, (i + k) * 3);
   }
   const base = colours.slice();
   const attribute = new THREE.BufferAttribute(colours, 3);
   geometry.setAttribute('color', attribute);
-  const lit = new THREE.Color(palette.angola);
+  const lit = new THREE.Color(palette.highlight);
+  const shown = new Map();
   let current;
-  return (countryId) => {
-    if (countryId === current) return;
-    current = countryId;
+  return (countryId, points = []) => {
+    const key = `${countryId}|${points.map((p) => `${p.lat},${p.lon}`).join(';')}`;
+    if (key === current) return;
+    current = key;
     colours.set(base);
-    countries.forEach((id, face) => {
-      if (id === null || id !== countryId) return;
+    if (countryId && !shown.has(key)) shown.set(key, countryFaces(countryId, faces, points));
+    for (const face of shown.get(key) ?? []) {
       for (let k = 0; k < 3; k++) lit.toArray(colours, (face * 3 + k) * 3);
-    });
+    }
     attribute.needsUpdate = true;
   };
 }

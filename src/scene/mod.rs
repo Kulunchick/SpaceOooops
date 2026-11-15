@@ -23,7 +23,7 @@ pub use cues::{one_shots, Cue, Track};
 pub use debrief::{fate_for_cause, DebriefScene, Fate, ComponentClass};
 pub use effects::{Effect, EffectKind, Station};
 pub use hangar::{HangarPreview, OrbitPreview, LaunchVehiclePreview};
-pub use markers::Marker;
+pub use markers::{LatLon, Marker};
 pub use orbit::OrbitView;
 pub use pad::{PadScene, PadVote};
 pub use shot::Shot;
@@ -117,6 +117,9 @@ pub struct SceneSpec {
     pub markers: Vec<Marker>,
     /// Id of the one Target Country the globe colours (Angola unless a Scenario is in play).
     pub highlighted_country: String,
+    /// Pins and ground stations of the highlighted country, whose facets the highlight must show.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub highlight_points: Vec<LatLon>,
     /// The Run's orbit view: the Orbit, the spacecraft's place on it and Earth's shadow (Run screen only).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub orbit: Option<OrbitView>,
@@ -137,6 +140,7 @@ pub struct SceneSpec {
 pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
     let orbit = orbit::for_inputs(inputs);
     let debrief = debrief::for_inputs(inputs);
+    let highlighted_country = markers::highlighted_country(inputs.screen, inputs.scenarios, inputs.chosen, inputs.previewed);
     SceneSpec {
         shot: markers::shot(inputs.screen, inputs.scenarios, inputs.chosen, inputs.previewed)
             .or_else(|| debrief.as_ref().map(shot::for_debrief))
@@ -147,7 +151,8 @@ pub fn build(inputs: &SceneInputs<'_>) -> SceneSpec {
         hangar: hangar::for_inputs(inputs),
         pad: pad::for_inputs(inputs),
         markers: markers::markers(inputs.screen, inputs.scenarios, inputs.chosen),
-        highlighted_country: markers::highlighted_country(inputs.screen, inputs.scenarios, inputs.chosen, inputs.previewed),
+        highlight_points: markers::highlight_points(inputs.scenarios, &highlighted_country),
+        highlighted_country,
         orbit,
         effects: effects::for_inputs(inputs),
         stations: effects::stations_for(inputs),

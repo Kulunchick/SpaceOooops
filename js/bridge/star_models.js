@@ -1,4 +1,4 @@
-// Star models for the Random Events that have their own look (More Random Events ticket 09): the UFO, the space
+// Star models for the Random Events that have their own look: the UFO, the space
 // whale, the dragon and the rival agency's inspector satellite. Original low-poly geometry in the game's palette;
 // no flag, emblem or lettering of any real agency or country.
 //
@@ -109,20 +109,20 @@ function dragon(low) {
     const horn = mesh(new THREE.ConeGeometry(0.06, 0.32, 3), flat(palette.desert), -0.08, 0.3, s * 0.14);
     horn.rotation.z = 0.5;
     head.add(horn);
-    head.add(mesh(new THREE.OctahedronGeometry(0.05, 0), glow(palette.angola), 0.16, 0.1, s * 0.15));
+    head.add(mesh(new THREE.OctahedronGeometry(0.05, 0), glow(palette.highlight), 0.16, 0.1, s * 0.15));
   }
   g.add(head);
   const wings = [];
   for (const s of [-1, 1]) {
     const pivot = new THREE.Group();
     pivot.position.set(0.1, 0.25, s * 0.2);
-    const wing = flatShape([[0, 0], [-0.1, 0.62], [-0.35, 0.4], [-0.5, 0.58], [-0.7, 0.0]], twoSided(palette.angola, { roughness: 0.9 }));
+    const wing = flatShape([[0, 0], [-0.1, 0.62], [-0.35, 0.4], [-0.5, 0.58], [-0.7, 0.0]], twoSided(palette.highlight, { roughness: 0.9 }));
     wing.rotation.x = s > 0 ? -Math.PI / 2 + 0.45 : Math.PI / 2 - 0.45; // fanned out sideways, tilted up
     pivot.add(wing);
     g.add(pivot);
     wings.push([pivot, s]);
   }
-  const spike = mesh(new THREE.ConeGeometry(0.1, 0.34, 4), flat(palette.angola), -links * (low ? 0.36 : 0.28) + 0.1, 0, 0);
+  const spike = mesh(new THREE.ConeGeometry(0.1, 0.34, 4), flat(palette.highlight), -links * (low ? 0.36 : 0.28) + 0.1, 0, 0);
   spike.rotation.z = Math.PI / 2;
   g.add(spike);
   g.position.x = 0.5;

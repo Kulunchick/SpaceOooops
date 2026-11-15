@@ -9,7 +9,8 @@ export const palette = {
   desert: 0xd9b26f,
   ice: 0xeaf3f8,
   cloud: 0xffffff,
-  angola: 0xff6b3d,
+  // The highlighted Target Country on the globe (and the warm accent some star models share).
+  highlight: 0xff6b3d,
   sun: 0xfff1d0,
   craftBody: 0xd8dde6,
   craftGold: 0xe0b440,

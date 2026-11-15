@@ -31,6 +31,8 @@ let sunLight = null;
 let skyLight = null;
 // A quality change that arrived while the launch sequence was playing waits for its end (rebuilding the world would restart it).
 let pendingQuality = null;
+// The Target Country highlighted when the Scene Spec names none (as `HOME_COUNTRY` in src/sim/catalog.rs).
+const HOME_COUNTRY = 'angola';
 const LAUNCH_PHASES = ['countdown', 'ignition', 'liftoff', 'ascent'];
 
 /** Whether this browser can create a WebGL context at all. */
@@ -59,7 +61,7 @@ function buildWorld() {
   // The Run and Debrief scenes keep the Sun's position at creation to restore it later: give them the resting one.
   sunLight.position.copy(SUN_HOME);
   const { earth, clouds, stars, highlight } = createEarth(quality);
-  highlight(spec?.highlightedCountry ?? 'angola');
+  highlight(spec?.highlightedCountry ?? HOME_COUNTRY, spec?.highlightPoints ?? []);
   const craft = createTitleCraft();
   craft.scale.setScalar(1.6);
   const orbit = new THREE.Group();
@@ -193,10 +195,10 @@ export function apply(sceneSpec) {
   const follows = ['globe', 'region'].includes(sceneSpec.shot?.kind);
   if (sunFollows && !follows && sunLight) sunLight.position.copy(SUN_HOME);
   sunFollows = follows;
-  world?.highlight(sceneSpec.highlightedCountry ?? 'angola');
+  world?.highlight(sceneSpec.highlightedCountry ?? HOME_COUNTRY, sceneSpec.highlightPoints ?? []);
   // For browser tests: the highlighted Target Country and where the Shot looks.
   if (canvasEl) {
-    canvasEl.dataset.highlight = sceneSpec.highlightedCountry ?? 'angola';
+    canvasEl.dataset.highlight = sceneSpec.highlightedCountry ?? HOME_COUNTRY;
     canvasEl.dataset.shotAt = sceneSpec.shot?.lat == null ? '' : `${sceneSpec.shot.lat},${sceneSpec.shot.lon}`;
   }
   world?.hangar.apply(sceneSpec, reducedMotion);

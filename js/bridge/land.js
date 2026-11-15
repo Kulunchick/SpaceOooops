@@ -9,15 +9,16 @@ const AFRICA = [
   [42, -1], [40.2, -3], [39.3, -6.8], [40.5, -10.5], [40.6, -15], [37, -17.8], [35.4, -21.5], [35.5, -24],
   [32.8, -25.9], [32.4, -28.6], [30.8, -30.5], [27.9, -33], [25.6, -34], [22, -34.2], [20, -34.8],
   [18.4, -34.2], [18.2, -32], [17.1, -29], [15.2, -27], [14.5, -22.8], [13.4, -20.5], [11.75, -17.25],
-  [12.15, -15.2], [13.4, -12.6], [13.2, -8.8], [12.3, -6.1], [12.2, -5], [11.8, -4.4], [9.3, -1],
+  [12.15, -15.2], [13.4, -12.6], [13.05, -8.8], [12.3, -6.1], [12.2, -5], [11.8, -4.4], [9.3, -1],
   [9.5, 1], [9.7, 3.9], [8.5, 4.5], [6, 4.3], [3.4, 6.4], [1.2, 6.1], [-2, 4.8], [-4, 5.2], [-7.5, 4.4],
   [-11, 6.8], [-13.2, 8.5], [-15.5, 11.5], [-17.1, 14.7], [-16.5, 19.4], [-17, 21], [-14.8, 26],
   [-13.1, 27.7], [-9.8, 29.9], [-9.2, 32.5], [-6.8, 34],
 ];
 
-// Mainland Angola (the Cabinda exclave is too small to show at this resolution).
+// Mainland Angola (the Cabinda exclave is too small to show at this resolution). The coast at Luanda sits a
+// little out to sea so the station stands on land.
 export const ANGOLA = [
-  [11.75, -17.25], [12.15, -15.2], [13.4, -12.6], [13.2, -8.8], [12.3, -6.1], [13, -5.9], [16.3, -5.9],
+  [11.75, -17.25], [12.15, -15.2], [13.4, -12.6], [13.05, -8.8], [12.3, -6.1], [13, -5.9], [16.3, -5.9],
   [16.6, -7.3], [17.6, -8.1], [19.4, -7.6], [21.8, -7.3], [21.9, -9.6], [22.4, -11], [24, -11.3],
   [24, -13], [22, -13], [22, -16.2], [23.4, -17.6], [20.9, -18], [18.5, -17.4], [13.9, -17.4],
 ];
@@ -186,6 +187,25 @@ export function countryAt(lon, lat) {
     if (parts.some((part) => inside(part, lon, lat))) return id;
   }
   return null;
+}
+
+/** The outlines of a Target Country as a list of polygons (a country of islands has several), or []. */
+export function countryParts(id) {
+  const outline = COUNTRIES[id];
+  if (!outline) return [];
+  return Array.isArray(outline[0][0]) ? outline : [outline];
+}
+
+const MAINLAND = [AFRICA, MADAGASCAR, EURASIA, NORTH_AMERICA, SOUTH_AMERICA, AUSTRALIA];
+
+/** Whether the point is on a continent's mainland (not an island and not the sea). */
+export function mainlandAt(lon, lat) {
+  return MAINLAND.some((p) => inside(p, lon, lat));
+}
+
+/** Whether the point is inside one of the outlines of the Target Country `id`. */
+export function inCountry(id, lon, lat) {
+  return countryParts(id).some((part) => inside(part, lon, lat));
 }
 
 /** What covers the ground at a point: 'ice', 'land' or 'ocean'. Country outlines count as land. */
