@@ -11,6 +11,7 @@ connect-the-villages = ["remote-connectivity", "communications"]
 space-weather-sentinel = ["space-weather", "ionosphere", "radiation"]
 amazon-watch = ["deforestation", "earth-observation"]
 japan-disaster-response = ["disaster-response", "earth-observation"]
+glacier-watch = ["glaciers", "earth-observation"]
 
 # Plain words for each purpose tag, used in the "why this match" line.
 [purpose_words]
@@ -18,6 +19,7 @@ agriculture = "farm monitoring"
 earth-observation = "imaging the ground"
 deforestation = "watching forests for clearing"
 disaster-response = "imaging disaster areas for rescue teams"
+glaciers = "watching glaciers and ice"
 remote-connectivity = "connecting remote places"
 communications = "communications"
 store-and-forward = "store-and-forward messaging"
@@ -104,6 +106,24 @@ url = "https://www.eoportal.org/satellite-missions/alos-2"
 # secondary (eoPortal, ESA-run catalogue): launch 24 May 2014 on H-IIA F24 from Tanegashima, 2,120 kg, SSO 628 km
 # at 97.9 degrees, instruments PALSAR-2 (L-band SAR), CIRC and SPAISE2, operator JAXA; the page lists "Disaster
 # monitoring (secure public safety)" as a primary objective with fast access to damaged areas.
+verified = "secondary"
+
+[[real_missions]]
+name = "SAOCOM"
+operator = "CONAE (Argentina's National Space Activities Commission)"
+year = 2018
+orbit_class = "sso"
+spacecraft_class = "large"
+mass_kg = 1600.0
+size_note = "radar Earth-observation satellite, about 1,600 kg"
+purposes = ["glaciers", "earth-observation"]
+blurb = "SAOCOM-1A, Argentina's L-band radar satellite, was launched on a Falcon 9 in October 2018 into a 620 km sun-synchronous orbit. Its survey of Antarctica studies how the continent's glaciers change, and its radar images the ground day and night through cloud."
+url = "https://www.eoportal.org/satellite-missions/saocom"
+# secondary (eoPortal, ESA-run catalogue): SAOCOM-1A launched 7/8 October 2018 on a Falcon 9 from Vandenberg;
+# "altitude = 619.6 km" sun-synchronous; payload an L-band polarimetric SAR; objectives include "monitoring
+# surveys of Antarctica (study of continental glacier evolution, global change indicators, etc.)". The page gives
+# both ~1600 kg (wet mass of each spacecraft) and 3050 kg for SAOCOM-1B; the lower figure is used. SAOCOM carries
+# a radar, not a camera: it matches by objective and Orbit.
 verified = "secondary"
 
 # ---------------------------------------------------------------- communications for remote places

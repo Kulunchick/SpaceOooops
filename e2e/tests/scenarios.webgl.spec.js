@@ -88,6 +88,25 @@ test('hovering the Japan card turns the globe to its pin and highlights Japan on
   expect(errors).toEqual([]);
 });
 
+test('hovering the Argentina card turns the globe to far-south Patagonia and highlights Argentina only', async ({ page }) => {
+  const errors = collectErrors(page);
+  await openScenarioSelect(page);
+  const canvas = page.locator('canvas.scene-canvas');
+  await page.locator('.scenario-card', { hasText: 'Glacier Watch' }).hover();
+  await expect(canvas).toHaveAttribute('data-highlight', 'argentina');
+  await expect(canvas).toHaveAttribute('data-shot-at', '-50.5,-73');
+  await expect(canvas).toHaveAttribute('data-flying', 'false', { timeout: 15000 });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: 'test-results/scenario-select-argentina.png' });
+  await page.locator('.scenario-card', { hasText: 'Glacier Watch' }).getByRole('button', { name: 'Select' }).click();
+  await expect(page.getByRole('heading', { name: 'Glacier Watch' })).toBeVisible();
+  await expect(canvas).toHaveAttribute('data-highlight', 'argentina');
+  await expect(canvas).toHaveAttribute('data-flying', 'false', { timeout: 15000 });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: 'test-results/brief-argentina.png' });
+  expect(errors).toEqual([]);
+});
+
 test('choosing a Scenario flies the camera and a click skips the flight', async ({ page }) => {
   const errors = collectErrors(page);
   await openScenarioSelect(page);

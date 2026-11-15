@@ -209,3 +209,48 @@ fn a_skip_over_an_event_plays_no_cue_for_it() {
     let after = scene::build(&inputs(&c, &d, &r, day + 20.0));
     assert!(scene::one_shots(&before, &after).is_empty());
 }
+
+// ---- ticket 09: star models
+
+fn model_entry(scene: &str, model: &str) -> String {
+    format!(
+        "[[events]]\nid = \"t-model\"\ngroup = \"lucky\"\ntitle = \"T\"\nlog = \"Something.\"\nscene = \"{scene}\"\n\
+         model = \"{model}\"\neffects = [{{ mechanic = \"power\", strength = 0.01, days = 3 }}]\n"
+    )
+}
+
+#[test]
+fn the_four_star_models_are_accepted_on_a_fly_by_or_a_visitor() {
+    for model in ["ufo", "whale", "dragon", "inspector"] {
+        for scene in ["fly-by", "visitor"] {
+            spaceooops::sim::parse_events(&model_entry(scene, model))
+                .unwrap_or_else(|e| panic!("{model} on {scene}: {e}"));
+        }
+    }
+}
+
+#[test]
+fn an_unknown_model_name_is_rejected_naming_the_event_and_the_known_models() {
+    let err = spaceooops::sim::parse_events(&model_entry("fly-by", "kraken")).expect_err("unknown model").to_string();
+    assert!(err.contains("t-model") && err.contains("kraken") && err.contains("whale"), "{err}");
+}
+
+#[test]
+fn a_model_on_any_other_scene_kind_is_rejected() {
+    for scene in ["hit", "link-interference", "panel-shading", "bonus-glow"] {
+        let err = spaceooops::sim::parse_events(&model_entry(scene, "ufo")).expect_err(scene).to_string();
+        assert!(err.contains("t-model") && err.contains("model"), "{scene}: {err}");
+    }
+}
+
+#[test]
+fn each_star_model_reaches_the_scene_spec_and_an_event_without_one_has_none() {
+    let d = crop_watch_known_good();
+    for model in ["ufo", "whale", "dragon", "inspector"] {
+        let c = catalog_of(&[("visitor", Some(model), "t-star")], 1);
+        let r = run(&c, &d, CROP_WATCH, 7);
+        let day = fired(&r)[0].0;
+        let e = spec_effects(&c, &d, &r, f64::from(day) - 0.5).into_iter().find(is_new).unwrap();
+        assert_eq!(serde_json::to_value(&e).unwrap()["model"], model);
+    }
+}

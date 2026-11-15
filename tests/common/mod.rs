@@ -90,6 +90,14 @@ pub fn japan_disaster_response_known_good() -> Design {
     amazon_watch_known_good()
 }
 
+pub const GLACIER_WATCH: &str = "glacier-watch";
+
+/// Crop Watch's spacecraft again: a 6U CubeSat with a multispectral imager, flown in SSO for the years a glacier
+/// trend needs. Passes cleanly in Argentina.
+pub fn glacier_watch_known_good() -> Design {
+    crop_watch_known_good()
+}
+
 /// A 6U CubeSat with a particle detector and an ionosphere probe in LEO 400 km, deployed from the space
 /// station, sending its heavy Data down over an X-band radio. Passes cleanly.
 pub fn space_weather_sentinel_known_good() -> Design {

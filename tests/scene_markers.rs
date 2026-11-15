@@ -28,6 +28,7 @@ fn country_centre(id: &str) -> ((f64, f64), f64) {
         "angola" => ((-12.5, 17.5), 9.0),
         "brazil" => ((-10.0, -53.0), 20.0),
         "japan" => ((36.0, 138.0), 10.0),
+        "argentina" => ((-38.0, -65.0), 20.0),
         other => panic!("no known centre for Target Country '{other}'"),
     }
 }

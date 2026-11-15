@@ -24,13 +24,14 @@ fn has_violation(r: &LaunchReview, kind: FindingKind) -> bool {
     r.violations.iter().any(|f| f.kind == kind)
 }
 
-fn known_goods() -> [(&'static str, Design); 5] {
+fn known_goods() -> [(&'static str, Design); 6] {
     [
         (CROP_WATCH, crop_watch_known_good()),
         (CONNECT_THE_VILLAGES, connect_the_villages_known_good()),
         (SPACE_WEATHER_SENTINEL, space_weather_sentinel_known_good()),
         (AMAZON_WATCH, amazon_watch_known_good()),
         (JAPAN_DISASTER_RESPONSE, japan_disaster_response_known_good()),
+        (GLACIER_WATCH, glacier_watch_known_good()),
     ]
 }
 
@@ -43,7 +44,7 @@ fn ids<T>(items: &[T], id: impl Fn(&T) -> &str) -> Vec<String> {
 #[test]
 fn every_scenario_has_difficulty_key_constraints_and_a_target_country() {
     let catalog = load_catalog().unwrap();
-    for id in [CROP_WATCH, CONNECT_THE_VILLAGES, SPACE_WEATHER_SENTINEL, AMAZON_WATCH, JAPAN_DISASTER_RESPONSE] {
+    for id in [CROP_WATCH, CONNECT_THE_VILLAGES, SPACE_WEATHER_SENTINEL, AMAZON_WATCH, GLACIER_WATCH, JAPAN_DISASTER_RESPONSE] {
         let s = catalog.scenario(id).unwrap_or_else(|| panic!("{id} is bundled"));
         assert!(!s.difficulty.is_empty() && !s.key_constraints.is_empty() && !s.why_it_matters.is_empty(), "{s:?}");
         assert!(!s.target_country.id.is_empty() && !s.target_country.name.is_empty(), "{s:?}");
@@ -286,6 +287,38 @@ fn japan_the_budget_is_tighter_than_the_cheapest_way_to_a_bigger_launcher() {
     let mut d = japan_disaster_response_known_good();
     d.launch_vehicle = Some("small-launcher".into());
     assert!(has_violation(&review(&d, JAPAN_DISASTER_RESPONSE), FindingKind::OverBudget));
+}
+
+// ---------------------------------------------------------------- Glacier Watch: a trend needs years
+
+#[test]
+fn glacier_watch_is_an_easy_scenario_in_argentina_that_asks_for_years() {
+    let catalog = load_catalog().unwrap();
+    let s = catalog.scenario(GLACIER_WATCH).unwrap();
+    assert_eq!((s.difficulty.as_str(), s.target_country.name.as_str()), ("Easy", "Argentina"));
+    assert!(s.min_lifetime_days >= 2 * 365, "{}", s.min_lifetime_days);
+}
+
+/// The same CubeSat in a 400 km Orbit: drag brings it down long before the trend is seen.
+#[test]
+fn glacier_watch_a_low_orbit_cannot_last_the_years() {
+    let mut d = glacier_watch_known_good();
+    d.orbit = Some("leo-400".into());
+    d.launch_vehicle = Some("station-deploy".into());
+    let r = review(&d, GLACIER_WATCH);
+    assert!(r.can_launch, "{:#?}", r.violations);
+    assert_eq!(success_rate(&d, GLACIER_WATCH), 0.0);
+    let flown = run(&load_catalog().unwrap(), &d, GLACIER_WATCH, 1);
+    assert!(!flown.debrief.stats.lifetime_met);
+}
+
+/// A weak instrument does not make a trend: the Science Value is short even where the Lifetime is not the problem.
+#[test]
+fn glacier_watch_the_thermal_imager_alone_falls_short() {
+    let mut d = glacier_watch_known_good();
+    d.instruments = vec!["thermal-imager".into()];
+    assert!(review(&d, GLACIER_WATCH).can_launch);
+    assert_eq!(success_rate(&d, GLACIER_WATCH), 0.0);
 }
 
 // ---------------------------------------------------------------- the Orbit drives Lifetime, Power and Data
