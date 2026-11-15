@@ -11,11 +11,11 @@ checked against public sources first.
 
 **Blocked by:** 05
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] A known-good radar Design passes Launch Review cleanly and reaches Success on a fixed seed and on the large majority of seeds
-- [ ] The same Design with an S-band radio cannot keep up with the radar's Data and fails
-- [ ] An optical Design falls short of the required Science Value
-- [ ] Japan is outlined, highlighted when its card is hovered or selected, and holds the pin and stations
-- [ ] The Debrief can show ALOS-2 for a matching Design
-- [ ] Illustration in the fallback project; end-to-end checks pass; the sweep passes
+- [x] A known-good radar Design passes Launch Review cleanly and reaches Success on a fixed seed and on the large majority of seeds
+- [x] The same Design with an S-band radio cannot keep up with the radar's Data and fails
+- [x] An optical Design falls short of the required Science Value
+- [x] Japan is outlined, highlighted when its card is hovered or selected, and holds the pin and stations
+- [x] The Debrief can show ALOS-2 for a matching Design
+- [x] Illustration in the fallback project; end-to-end checks pass; the sweep passes

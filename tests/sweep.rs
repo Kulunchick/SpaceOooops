@@ -33,7 +33,7 @@ fn sweep() -> Vec<Flown> {
     let tiers = [Basic, FlightProven];
     let mut out = Vec::new();
     let mut launchable = 0;
-    while launchable < 400 {
+    while launchable < 600 {
         let sc = c.scenarios[l.below(c.scenarios.len())].id.clone();
         let mut instruments: Vec<String> =
             (0..1 + l.below(3)).map(|_| c.instruments[l.below(c.instruments.len())].id.clone()).collect();

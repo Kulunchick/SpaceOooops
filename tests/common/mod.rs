@@ -82,6 +82,14 @@ pub fn amazon_watch_known_good() -> Design {
     }
 }
 
+pub const JAPAN_DISASTER_RESPONSE: &str = "japan-disaster-response";
+
+/// The same radar spacecraft as Amazon Watch (12U CubeSat, X-band radio, SSO rideshare): the radio is the one
+/// thing that cannot be given up, and it fits Japan's tight Budget with little to spare. Passes cleanly in Japan.
+pub fn japan_disaster_response_known_good() -> Design {
+    amazon_watch_known_good()
+}
+
 pub const GLACIER_WATCH: &str = "glacier-watch";
 
 /// Crop Watch's spacecraft again: a 6U CubeSat with a multispectral imager, flown in SSO for the years a glacier

@@ -285,3 +285,64 @@ lon = -64.47
 name = "Tierra del Fuego"
 lat = -54.51
 lon = -67.12
+
+[[scenarios]]
+id = "japan-disaster-response"
+name = "Disaster Response"
+difficulty = "Hard"
+objective = "Give Japan's rescue teams fresh images of the ground after an earthquake or tsunami, in any weather and at night, for the first half year of a disaster-watch service."
+why_it_matters = "Japan sits where several tectonic plates meet, so strong earthquakes and tsunamis are a fact of life. In the first hours and days after one, roads are cut and the sky is often full of cloud or smoke, or dark. Rescue teams need to see which areas are flooded, which slopes have slid and which towns are cut off, and they need it now, not when the weather clears. A radar satellite sees through cloud and night, but its pictures are huge, so the spacecraft needs a strong downlink to send them to the ground quickly, and the money for all of it is tight."
+required_science_value = 120.0
+# Half a year of service: long enough to include a bad season, short enough that the Budget decides the Design.
+min_lifetime_days = 180
+# source: game estimate. Barely more than a radar spacecraft costs: there is no room for a bigger launcher or
+# for the most expensive part in every slot.
+budget_usd = 3_900_000.0
+# Globe marker: the Sendai plain on the Pacific coast of Tohoku, hit by the 2011 earthquake and tsunami.
+marker_lat = 38.3
+marker_lon = 140.7
+# Placeholder art (own work); swap the file or this path when the team supplies images.
+illustration = "assets/images/scenarios/japan-disaster-response.svg"
+key_constraints = [
+    "Rescue teams need images quickly and in any weather: clouds, smoke and night hide the ground from a camera.",
+    "A radar sees through all of that, but it is heavy, power-hungry and its Data is huge: the comms link must send it all down.",
+    "The Budget is tight: there is no room for a bigger launcher or for the most expensive part in every slot.",
+]
+tutorial_hints = [
+    "Start on the Science tab: after a disaster the sky is cloudy or dark, so compare how well each Instrument suits this Scenario.",
+    "The radar's Data is huge: on the Budget & Comms tab pick a radio that can send a whole day of it, and watch the Data gauge.",
+    "The Budget is tight: add up Structure, radar, radio and launch before you pick more expensive parts, and watch the Budget gauge.",
+    "On the Launch & Orbit tab, a sun-synchronous Orbit passes over Japan at the same local time every day, so every pass is lit the same way.",
+]
+# Game-tuned: the radar sending ~1.5 GB a day for half a year earns about 1.5x the requirement; cameras that
+# mostly see cloud and darkness earn a few per cent of it.
+science_value_per_gb = 0.66
+# The country the Scenario serves (id keys the globe outline).
+target_country = { id = "japan", name = "Japan" }
+
+[scenarios.events]
+# source: NOAA SWPC - strong (X-class) flares a few times a year near solar maximum; ~1.5 per year here.
+solar_flare_daily_chance = 0.004
+flare_safe_mode_days = 2
+flare_failure_multiplier = 20.0
+# Two national stations that back each other up: outages about twice a year.
+outage_daily_chance = 0.006
+outage_days = 3
+# New Random Events (data/events.toml) per Run, at least and at most; 0 and 0 switch them off.
+new_events_min = 2
+new_events_max = 3
+
+# Ground stations, main first: JAXA's Tsukuba Space Center and its Okinawa Tracking and Communications Station (backup).
+# source: Tsukuba Space Center, 36 03 56.8 N 140 07 47.3 E = 36.066, 140.130 (Wikipedia, Tsukuba Space Center;
+# secondary); JAXA's centers page lists its address.
+[[scenarios.ground_stations]]
+name = "Tsukuba"
+lat = 36.07
+lon = 140.13
+
+# source: JAXA Okinawa Tracking and Communications Station, Onna village: 26 30 01.7 N 127 54 12.7 E = 26.50, 127.90
+# (Wikidata; JAXA's tracking network overview rounds it to 26 30 N 127 54 E).
+[[scenarios.ground_stations]]
+name = "Okinawa"
+lat = 26.50
+lon = 127.90

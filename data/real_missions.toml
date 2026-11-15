@@ -10,6 +10,7 @@ crop-watch = ["agriculture", "earth-observation"]
 connect-the-villages = ["remote-connectivity", "communications"]
 space-weather-sentinel = ["space-weather", "ionosphere", "radiation"]
 amazon-watch = ["deforestation", "earth-observation"]
+japan-disaster-response = ["disaster-response", "earth-observation"]
 glacier-watch = ["glaciers", "earth-observation"]
 
 # Plain words for each purpose tag, used in the "why this match" line.
@@ -17,6 +18,7 @@ glacier-watch = ["glaciers", "earth-observation"]
 agriculture = "farm monitoring"
 earth-observation = "imaging the ground"
 deforestation = "watching forests for clearing"
+disaster-response = "imaging disaster areas for rescue teams"
 glaciers = "watching glaciers and ice"
 remote-connectivity = "connecting remote places"
 communications = "communications"
@@ -88,6 +90,22 @@ url = "https://www.eoportal.org/satellite-missions/amazonia-1"
 # Imager camera, "the prime objective is to monitor deforestation". The USGS station page
 # https://landsat.usgs.gov/CUB confirms INPE's Cuiabá station tracks it (AMZ1). Amazonia-1 carries a camera, not
 # a radar: it matches by objective and Orbit.
+verified = "secondary"
+
+[[real_missions]]
+name = "ALOS-2 (Daichi-2)"
+operator = "JAXA (Japan Aerospace Exploration Agency)"
+year = 2014
+orbit_class = "sso"
+spacecraft_class = "large"
+mass_kg = 2120.0
+size_note = "radar Earth-observation satellite, about 2,120 kg"
+purposes = ["disaster-response", "earth-observation"]
+blurb = "ALOS-2 (Daichi-2) is a Japanese radar satellite launched on an H-IIA rocket on 24 May 2014 into a 628 km sun-synchronous orbit. Its L-band radar sees through cloud and darkness, and disaster monitoring, with fast access to damaged areas, is one of its main jobs."
+url = "https://www.eoportal.org/satellite-missions/alos-2"
+# secondary (eoPortal, ESA-run catalogue): launch 24 May 2014 on H-IIA F24 from Tanegashima, 2,120 kg, SSO 628 km
+# at 97.9 degrees, instruments PALSAR-2 (L-band SAR), CIRC and SPAISE2, operator JAXA; the page lists "Disaster
+# monitoring (secure public safety)" as a primary objective with fast access to damaged areas.
 verified = "secondary"
 
 [[real_missions]]
